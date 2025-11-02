@@ -12,7 +12,8 @@
     "delete": "Delete",
     "username": "Username",
     "description": "Description",
-    "slug": "Slug"
+    "slug": "Slug",
+    "all": "All"
   },
   "appearance": {
     "title": "Appearance",
@@ -66,7 +67,8 @@
     "environment_variables": "Environment variables",
     "credentials_page": "Credentials",
     "access_tokens": "Access tokens",
-    "usage": "Usage"
+    "usage": "Usage",
+    "anonymous": "Anonymous"
   },
   "dashboard": {
     "projects": "Projects",

@@ -13,7 +13,8 @@
     "delete": "Supprimer",
     "username": "Nom d'utilisateur",
     "description": "Description",
-    "slug": "Slug"
+    "slug": "Slug",
+    "all": "Tous"
   },
   "appearance": {
     "title": "Apparence",
@@ -67,7 +68,8 @@
     "environment_variables": "Variables d'environnement",
     "credentials_page": "Identifiants",
     "access_tokens": "Tokens d'accès",
-    "usage": "Utilisation"
+    "usage": "Utilisation",
+    "anonymous": "Anonyme"
   },
   "dashboard": {
     "projects": "Projets",
@@ -206,5 +208,34 @@
     "duration": "Durée",
     "commit": "Commit",
     "no_builds": "Aucun build trouvé"
+  },
+  "add_project": {
+    "title": "Créer un projet",
+    "back_to_list": "← Retour aux projets",
+    "steps": {
+      "name": "Nom du projet",
+      "github": "Connexion à GitHub",
+      "repo": "Choisir le dépôt",
+      "flutter": "Version de Flutter",
+      "summary": "Récapitulatif"
+    },
+    "fields": {
+      "project_name": "Nom du projet",
+      "repo": "Dépôt",
+      "build_path": "Dossier de build",
+      "flutter_version": "Version de Flutter"
+    },
+    "actions": {
+      "yes_github": "Oui, connecter GitHub",
+      "no_github": "Non",
+      "back": "Retour",
+      "next": "Suivant",
+      "create": "Créer le projet"
+    },
+    "errors": {
+      "name_required": "Le nom du projet est requis",
+      "repo_required": "Veuillez sélectionner un dépôt",
+      "flutter_required": "Veuillez choisir une version de Flutter"
+    }
   }
 }
