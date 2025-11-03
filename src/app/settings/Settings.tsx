@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { getTranslations } from '../../lib/clientTranslations';
 import { usePathname } from 'next/navigation';
 
@@ -20,8 +20,8 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Menu from '../components/Menu';
 
 export default function SettingsPage() {
-  const { data: session } = useSession();
-  
+  const { user } = useAuth();
+
   const plan = 'Free'; // mock plan
   const [githubConnected, setGithubConnected] = React.useState(false);
 
@@ -140,13 +140,13 @@ export default function SettingsPage() {
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography color="text.primary">{t('settings.avatar')}</Typography>
               <Avatar sx={{ width: 40, height: 40 }}>
-                {session?.user?.name?.[0] || 'U'}
+                {user?.username?.[0] || 'U'}
               </Avatar>
             </Stack>
             <Divider />
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography color="text.primary">{t('common.username')}</Typography>
-              <Typography color="text.secondary">{session?.user?.name}</Typography>
+              <Typography color="text.secondary">{user?.username}</Typography>
             </Stack>
             <Divider />
             <Stack direction="row" alignItems="center" justifyContent="space-between">

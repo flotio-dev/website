@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn, useSession } from "next-auth/react";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -28,7 +28,7 @@ const LockClosedIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user, login } = useAuth();
   const [translations, setTranslations] = useState<Record<string, any> | null>(null);
 
   // ... tes hooks de locale et translations ici ...
@@ -47,8 +47,7 @@ export default function RegisterPage() {
     setMessage(null);
 
     try {
-      console.log(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`, {
+      const res = await fetch('/api/proxy/auth/register', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -60,27 +59,11 @@ export default function RegisterPage() {
         return;
       }
 
-      const data = await res.json();
-      const token = data.access_token;
-
-      if (token) {
-        const signInRes = await signIn("credentials", {
-          redirect: false,
-          username: form.username,
-          password: form.password,
-        });
-
-        if (signInRes?.ok) {
-          router.push("/dashboard");
-        } else {
-          router.push("/login");
-        }
-      } else {
-        router.push("/login");
-      }
-    } catch (err) {
-      setMessage("Unexpected error");
-      console.error(err);
+      // After successful registration, log the user in
+      await login(form.username, form.password);
+      router.push("/dashboard");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Registration failed");
     } finally {
       setLoading(false);
     }

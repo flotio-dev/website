@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession, signIn } from "next-auth/react";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -25,15 +25,15 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const { data: session } = useSession();
+  const { user, login } = useAuth();
   const router = useRouter();
 
   // Redirection si déjà connecté
   useEffect(() => {
-    if (session) {
+    if (user) {
       router.replace("/dashboard");
     }
-  }, [session, router]);
+  }, [user, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -43,19 +43,14 @@ export default function LoginPage() {
     setLoading(true);
     setMessage(null);
 
-    const res = await signIn("credentials", {
-      redirect: false,
-      username: form.username,
-      password: form.password,
-    });
-
-    if (res?.error) {
-      setMessage(res.error);
-    } else {
+    try {
+      await login(form.username, form.password);
       router.push("/dashboard");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Login failed");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

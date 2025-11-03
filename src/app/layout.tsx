@@ -4,10 +4,7 @@ import { Roboto } from "next/font/google";
 import "./globals.css";
 
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
-import SessionClientProvider from "./providers/SessionClientProvider";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import type { Session } from "next-auth";
+import { AuthProvider } from "@/lib/hooks/useAuth";
 import ToastContainer from "./components/ToastContainer";
 import { ToastProvider } from "@/lib/hooks/useToast";
 import ThemeModeProvider from "./providers/ThemeModeProvider";
@@ -28,13 +25,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({children}: Readonly<{ children: React.ReactNode }>) {
-  const session = (await getServerSession(authOptions as any)) as Session | null;
-
+export default function RootLayout({children}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={roboto.variable} suppressHydrationWarning>
       <body>
-        <SessionClientProvider session={session}>
+        <AuthProvider>
           <AppRouterCacheProvider options={{ enableCssLayer: true }}>
             <ThemeModeProvider>
               <ToastProvider>
@@ -43,7 +38,7 @@ export default async function RootLayout({children}: Readonly<{ children: React.
               </ToastProvider>
             </ThemeModeProvider>
           </AppRouterCacheProvider>
-        </SessionClientProvider>
+        </AuthProvider>
       </body>
     </html>
   );

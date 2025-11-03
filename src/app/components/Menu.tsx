@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { getTranslations } from '../../lib/clientTranslations';
-import { useSession, signOut } from 'next-auth/react';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { useRouter, usePathname } from 'next/navigation';
 import { Switch } from '@mui/material';
 
@@ -38,11 +38,11 @@ import { useThemeMode } from '@/app/providers/ThemeModeProvider';
  * Profile Block
  ***********************/
 function ProfileBlock({ t }: { t: (k: string) => string }) {
-  const { data: session } = useSession();
+  const { user, logout } = useAuth();
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
-  const name = session?.user?.name ?? '';
-  const email = session?.user?.email ?? '';
+  const name = user?.username ?? '';
+  const email = user?.email ?? '';
 
   return (
     <>
@@ -100,7 +100,7 @@ function ProfileBlock({ t }: { t: (k: string) => string }) {
               fullWidth
               onClick={() => {
                 setOpen(false);
-                signOut();
+                logout();
               }}
             >
               {t('sign_out')}
@@ -147,23 +147,18 @@ function ThemeBlock({ t }: { t: (k: string) => string }) {
  * Main Menu
  ***********************/
 export default function Menu() {
-  const { data: session, status } = useSession();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
   React.useEffect(() => {
-    if (status !== 'loading' && !session) {
+    if (!isLoading && !user) {
       router.push('/login');
     }
 
-    if (status === 'authenticated') {
+    if (user) {
       (async () => {
         try {
-          const bearer =
-            (session as unknown as { accessToken?: string })?.accessToken ??
-            (session as unknown as { user?: { accessToken?: string } })?.user?.accessToken ??
-            (session as unknown as { user?: { token?: string } })?.user?.token ??
-            (session as unknown as { user?: { access_token?: string } })?.user?.access_token ??
-            null;
+          const bearer = user.token ?? null;
 
           if (!bearer) return;
 
@@ -197,7 +192,7 @@ export default function Menu() {
         }
       })();
     }
-  }, [status, session, router]);
+  }, [isLoading, user, router]);
 
   const pathname = usePathname();
   const [translations, setTranslations] = React.useState<Record<string, unknown> | null>(null);
