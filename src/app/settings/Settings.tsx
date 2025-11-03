@@ -21,7 +21,6 @@ import Menu from '../components/Menu';
 
 export default function SettingsPage() {
   const { user } = useAuth();
-
   const plan = 'Free'; // mock plan
   const [githubConnected, setGithubConnected] = React.useState(false);
 
@@ -140,13 +139,13 @@ export default function SettingsPage() {
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography color="text.primary">{t('settings.avatar')}</Typography>
               <Avatar sx={{ width: 40, height: 40 }}>
-                {user?.username?.[0] || 'U'}
+                {user?.preferred_username?.[0]?.toUpperCase() || 'U'}
               </Avatar>
             </Stack>
             <Divider />
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography color="text.primary">{t('common.username')}</Typography>
-              <Typography color="text.secondary">{user?.username}</Typography>
+              <Typography color="text.secondary">{user?.preferred_username}</Typography>
             </Stack>
             <Divider />
             <Stack direction="row" alignItems="center" justifyContent="space-between">

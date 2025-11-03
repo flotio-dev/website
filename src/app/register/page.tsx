@@ -28,7 +28,7 @@ const LockClosedIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { user, login } = useAuth();
+  const { user, register } = useAuth();
   const [translations, setTranslations] = useState<Record<string, any> | null>(null);
 
   // ... tes hooks de locale et translations ici ...
@@ -47,20 +47,7 @@ export default function RegisterPage() {
     setMessage(null);
 
     try {
-      const res = await fetch('/api/proxy/auth/register', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        setMessage(err.message || "Error while registering");
-        return;
-      }
-
-      // After successful registration, log the user in
-      await login(form.username, form.password);
+      await register(form.username, form.email, form.password);
       router.push("/dashboard");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Registration failed");

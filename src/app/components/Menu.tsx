@@ -41,7 +41,7 @@ function ProfileBlock({ t }: { t: (k: string) => string }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
-  const name = user?.username ?? '';
+  const name = user?.preferred_username ?? '';
   const email = user?.email ?? '';
 
   return (

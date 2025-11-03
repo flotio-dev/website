@@ -10,11 +10,20 @@ async function forwardRequest(request: NextRequest, method: string, slug: string
   const headers = new Headers(request.headers);
   headers.delete('host');
   headers.delete('referer');
-  const response = await fetch(url, {
+
+  const fetchOptions: RequestInit = {
     method,
     headers,
-    body: request.body,
-  });
+  };
+
+  // Add body and duplex option for methods that can have a body
+  if (method !== 'GET' && method !== 'HEAD') {
+    fetchOptions.body = request.body;
+    (fetchOptions as any).duplex = 'half';
+  }
+
+  const response = await fetch(url, fetchOptions);
+
   return new NextResponse(response.body, {
     status: response.status,
     statusText: response.statusText,
