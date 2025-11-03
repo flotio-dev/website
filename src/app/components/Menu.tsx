@@ -1,9 +1,8 @@
 'use client';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { getTranslations } from '../../lib/clientTranslations';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useProxy } from '@/lib/hooks/useProxy';
 import { Switch } from '@mui/material';
 
 import {
@@ -26,12 +25,7 @@ import Link from 'next/link';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
 import FolderIcon from '@mui/icons-material/Folder';
-import GroupIcon from '@mui/icons-material/Group';
 import DataObjectIcon from '@mui/icons-material/DataObject';
-import CreditCardIcon from '@mui/icons-material/CreditCard';
-import VpnKeyIcon from '@mui/icons-material/VpnKey';
-import TokenIcon from '@mui/icons-material/Token';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
@@ -39,113 +33,6 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 // Theme provider context
 import { useThemeMode } from '@/app/providers/ThemeModeProvider';
 
-/***********************
- * Organization Block
- ***********************/
-function OrganizationBlock({ t }: { t: (k: string, p?: Record<string, unknown>) => string }) {
-  const { data: session, status } = useSession();
-  const [open, setOpen] = React.useState(false);
-  const anchorRef = React.useRef<HTMLDivElement | null>(null);
-  const [orgs, setOrgs] = React.useState<{ name: string; id: string }[]>([]);
-  const [current, setCurrent] = React.useState<{ name: string; id: string } | null>(null);
-  const router = useRouter();
-  const { data: proxyData, callProxy } = useProxy();
-
-  const callProxyRequests = () => {
-    callProxy({
-      getOrgsByUser: {
-        route: `${process.env.NEXT_PUBLIC_ORGANIZATION_SERVICE_BASE_URL}/users/me/organizations`,
-        method: "GET",
-      },
-    });
-  };
-
-  useEffect(() => {
-    callProxyRequests();
-  }, [status, session]);
-
-  useEffect(() => {
-    if (proxyData?.getOrgsByUser?.success) {
-      const orgsData = proxyData.getOrgsByUser.details.data;
-      setOrgs(Array.isArray(orgsData) ? orgsData : []);
-      const storedId = typeof window !== 'undefined' ? localStorage.getItem('organizationId') : null;
-      const found = orgsData.find((o: { name: string; id: string }) => o.id === storedId);
-      setCurrent(found || orgsData[0] || null);
-    }
-  }, [proxyData]);
-
-  const handleSelectOrg = (org: { name: string; id: string }) => {
-    setOpen(false);
-    setCurrent(org);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('organizationId', org.id);
-    }
-  };
-
-  return (
-    <>
-      {/* <Box
-        ref={anchorRef}
-        onClick={() => setOpen(true)}
-        sx={{
-          p: 1,
-          borderRadius: 1,
-          cursor: 'pointer',
-          border: '1px solid',
-          borderColor: 'divider',
-          transition: 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
-          '&:hover': { backgroundColor: 'action.hover', transform: 'translateY(-2px)', boxShadow: 2 },
-        }}
-      >
-        <Typography variant="subtitle2" color="text.primary">
-          {current?.name || ''}
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          {t('settings.change_org_hint') || 'Click to change / add'}
-        </Typography>
-      </Box> */}
-
-      <Popover
-        open={open}
-        anchorEl={anchorRef.current}
-        onClose={() => setOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-      >
-        <Box sx={{ width: 224, p: 2 }}>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            {t('settings.organizations_title') || 'Organizations'}
-          </Typography>
-          <Stack spacing={1} sx={{ mb: 1 }}>
-            {proxyData?.getOrgsByUser.details.data.map((o: { name: string; id: string }) => (
-              <Button
-                key={o.id}
-                variant={current && o.id === current.id ? 'contained' : 'outlined'}
-                onClick={() => handleSelectOrg(o)}
-                size="small"
-              >
-                {o.name}
-              </Button>
-            ))}
-          </Stack>
-
-          <Button
-            sx={{ mt: 1 }}
-            fullWidth
-            onClick={() => {
-              setOpen(false);
-              router.push('/organization/new-organization');
-            }}
-            size="small"
-            variant="contained"
-          >
-            {t('settings.add_organization') || 'Add organization'}
-          </Button>
-        </Box>
-      </Popover>
-    </>
-  );
-}
 
 /***********************
  * Profile Block
@@ -412,9 +299,6 @@ export default function Menu() {
           Flotio
         </Typography>
       </Stack>
-
-      {/* Organization card */}
-      <OrganizationBlock t={t} />
 
       <Divider className="my-2" />
 
