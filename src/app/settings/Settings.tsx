@@ -18,6 +18,9 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Menu from '../components/Menu';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import { useThemeMode } from '@/app/providers/ThemeModeProvider';
 
 export default function SettingsPage() {
   const { user, token } = useAuth();
@@ -194,14 +197,56 @@ export default function SettingsPage() {
                 setLocale(lang);
               }}
               size="small"
-              sx={{ minWidth: 120 }}
+              sx={{ 
+                minWidth: 120,
+                color: 'primary.main',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'primary.main',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'primary.main',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'primary.main',
+                },
+                '& .MuiSelect-icon': {
+                  color: 'primary.main',
+                },
+              }}
             >
               <MenuItem value="fr">Français</MenuItem>
               <MenuItem value="en">English</MenuItem>
             </Select>
           </Stack>
         </Paper>
+
+        {/* Appearance / Theme */}
+        <Paper
+          variant="outlined"
+          sx={{ p: 3, mt: 3, bgcolor: 'background.paper' }}
+        >
+          <Typography variant="subtitle1" fontWeight={600} mb={2} color="text.primary">
+            {t('settings.appearance') || 'Appearance'}
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <ThemeSelector />
+        </Paper>
       </Box>
     </Box>
+  );
+}
+
+function ThemeSelector() {
+  const { resolvedMode, toggle } = useThemeMode();
+  return (
+    <Stack direction="row" alignItems="center" justifyContent="space-between">
+      <Stack direction="row" spacing={1} alignItems="center">
+        {resolvedMode === 'dark' ? <DarkModeIcon /> : <LightModeIcon />}
+        <Typography color="text.primary">{resolvedMode === 'dark' ? 'Dark' : 'Light'}</Typography>
+      </Stack>
+      <Button variant="outlined" onClick={toggle}>
+        {resolvedMode === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+      </Button>
+    </Stack>
   );
 }

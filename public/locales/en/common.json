@@ -53,6 +53,7 @@
   },
   "menu": {
     "dashboard": "Dashboard",
+    "project": "Project",
     "projects": "Projects",
     "tokens": "Tokens",
     "main": "Main",
@@ -207,14 +208,23 @@
     "role": "Role",
     "organization": "Organization",
     "user": "User",
-    "created_at": "Created at",
+    "owner": "Owner",
+    "created_at": "Created at ",
+    "updated_at": "Updated at ",
     "build_route": "Build route",
+    "build_folder": "Build folder",
+    "flutter_version": "Flutter version",
     "start_build": "Start build",
     "build_settings": "Build settings",
     "provider": "Provider",
     "branch": "Branch",
     "command": "Command",
-    "output_dir": "Output directory"
+    "output_dir": "Output directory",
+    "project_not_found": "Project not found",
+    "back_to_projects": "Go back to projects",
+    "logs": "Build logs",
+    "no_logs": "No logs available yet"
+    
   },
   "build_details": {
     "title": "Build",

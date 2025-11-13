@@ -39,6 +39,8 @@ import LanIcon from '@mui/icons-material/Lan';
 import CloudIcon from '@mui/icons-material/Cloud';
 import Menu from '../../components/Menu';
 import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../../../lib/hooks/useAuth';
+import { useToast } from '../../../lib/hooks/useToast';
 import { getTranslations } from '../../../lib/clientTranslations';
 
 /*******************
@@ -349,6 +351,7 @@ function SettingsTabs({ t }: { t: (key: string) => string }) {
  *******************/
 export default function ProjectPage() {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+  // Redirect logic handled below after we may have fetched project data (so we can map numeric IDs -> slug)
   const [locale, setLocale] = useState(() => getPreferredLocale(pathname));
   const [translations, setTranslations] = useState<Record<string, any> | null>(null);
 
@@ -389,11 +392,118 @@ export default function ProjectPage() {
     return typeof cur === 'string' ? cur : key;
   };
 
+  const [projectData, setProjectData] = useState<any | null>(null);
+  const [isLoadingProject, setIsLoadingProject] = useState(false);
+  const [projectError, setProjectError] = useState<string | null>(null);
+  const { token } = useAuth();
+  const { addToast } = useToast();
+
   const project: Project = useMemo(() => {
     const parts = pathname.split('/');
-    const slug = parts[parts.length - 1] || mockProject.slug;
+    const last = parts[parts.length - 1] || mockProject.slug;
+    // Merge fetched project data (if any) with mock fallback shape
+    if (projectData && projectData.name) {
+      return {
+        name: projectData.name,
+        slug: projectData.slug ?? projectData.name,
+        urlPath: projectData.urlPath ?? `/projects/${projectData.name}`,
+        createdAt: projectData.CreatedAt ?? projectData.createdAt ?? mockProject.createdAt,
+        lastActivityAt: projectData.UpdatedAt ?? mockProject.lastActivityAt,
+        lastActivityDescription: projectData.lastActivityDescription ?? mockProject.lastActivityDescription,
+        ownership: { type: 'user', name: projectData.user?.username ?? projectData.user?.email ?? '—' },
+        buildSettings: {
+          provider: projectData.build_provider ?? mockProject.buildSettings.provider,
+          branch: projectData.build_branch ?? mockProject.buildSettings.branch,
+          buildCommand: projectData.build_command ?? mockProject.buildSettings.buildCommand,
+          outputDir: projectData.build_folder ?? mockProject.buildSettings.outputDir,
+          nodeVersion: projectData.node_version ?? mockProject.buildSettings.nodeVersion,
+        },
+        stats: {
+          total: (projectData.builds && projectData.builds.length) || mockProject.stats.total,
+          success: mockProject.stats.success,
+          failed: mockProject.stats.failed,
+        },
+        recentBuilds: mockProject.recentBuilds,
+      } as Project;
+    }
+
+    const slug = last || mockProject.slug;
     return { ...mockProject, slug, name: mockProject.name };
-  }, [pathname]);
+  }, [pathname, projectData]);
+
+  useEffect(() => {
+    let mounted = true;
+    const parts = pathname.split('/');
+    const idOrSlug = parts[parts.length - 1];
+    // If id is numeric, fetch by id
+    if (!idOrSlug) return;
+
+    const shouldFetchById = /^[0-9]+$/.test(idOrSlug);
+    if (!shouldFetchById) return;
+
+    const fetchProject = async () => {
+      setIsLoadingProject(true);
+      setProjectError(null);
+      try {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`/api/proxy/project/${idOrSlug}`, { headers });
+        const data = await res.json();
+        if (!res.ok) {
+          const msg = data?.error || data?.message || JSON.stringify(data) || 'Failed to fetch project';
+          throw new Error(msg);
+        }
+
+        const p = data?.project ?? data;
+        if (mounted) setProjectData(p);
+      } catch (err: any) {
+        console.error('Failed to fetch project', err);
+        if (mounted) {
+          setProjectError(err?.message || 'Erreur lors du chargement du projet');
+          addToast({ message: err?.message || 'Erreur lors du chargement du projet', type: 'error' });
+        }
+      } finally {
+        if (mounted) setIsLoadingProject(false);
+      }
+    };
+
+    fetchProject();
+
+    return () => {
+      mounted = false;
+    };
+  }, [pathname, token, addToast]);
+
+  // Redirect to overview using slug when possible.
+  // If the URL contains a numeric id, wait for projectData then redirect to /projects/{slug}/overview.
+  // If the URL already contains a slug (non-numeric), append /overview.
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      const p = window.location.pathname.replace(/\/$/, '');
+      if (p.endsWith('/overview')) return; // already on overview
+
+      const parts = p.split('/');
+      const last = parts[parts.length - 1];
+      if (!last) return;
+
+      // Numeric id: wait for fetched projectData, then redirect to slug-based URL.
+      if (/^[0-9]+$/.test(last)) {
+        if (projectData && (projectData.slug || projectData.name)) {
+          const slug = projectData.slug ?? projectData.name;
+          const newPath = `/projects/${slug}/overview`;
+          if (newPath !== p) window.location.replace(newPath);
+        }
+        return;
+      }
+
+      // Non-numeric -> treat as slug, append overview
+      window.location.replace(p + '/overview');
+    } catch (e) {
+      // ignore
+    }
+  }, [projectData, pathname]);
 
   const successRate = useMemo(() => {
     const denom = Math.max(1, project.stats.total);

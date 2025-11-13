@@ -20,6 +20,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Menu from '../../components/Menu';
 import { getTranslations } from '../../../lib/clientTranslations';
+import { useToast } from '../../../lib/hooks/useToast';
+import { useAuth } from '../../../lib/hooks/useAuth';
 
 export default function AddProjectPage() {
   const [activeStep, setActiveStep] = useState(0);
@@ -33,7 +35,10 @@ export default function AddProjectPage() {
     flutterVersion: 'stable',
   });
   const [errors, setErrors] = useState<any>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { addToast } = useToast();
+  const { token } = useAuth();
 
   // Charger locale + traductions
   useEffect(() => {
@@ -88,12 +93,56 @@ export default function AddProjectPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateStep()) return;
 
     if (activeStep === steps.length - 1) {
-      console.log('🚀 Envoi au backend :', newProject);
-      router.push(`/projects/${newProject.name}`);
+      // Final step: create project via backend
+      setIsSubmitting(true);
+      try {
+        const payload = {
+          name: newProject.name,
+          git_repo: newProject.repo || '',
+          build_folder: newProject.buildPath || '',
+          flutter_version: newProject.flutterVersion || '',
+        };
+
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch('/api/proxy/project', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          const msg = data?.error || data?.message || JSON.stringify(data) || 'Failed to create project';
+          throw new Error(msg);
+        }
+
+        const created = data?.project ?? data;
+        addToast({ message: t('add_project.notifications.created') || 'Projet créé', type: 'success' });
+
+        // Redirect to project ID-based overview if available
+        const createdId = created?.ID ?? created?.id ?? created?.ID;
+        if (createdId) {
+          router.push(`/projects/${encodeURIComponent(String(createdId))}/overview`);
+        } else {
+          // fallback to previous behavior using slug/name
+          const redirectSlug = created?.name || created?.slug || newProject.name;
+          router.push(`/projects/${redirectSlug}`);
+        }
+      } catch (err: any) {
+        console.error('Project creation failed', err);
+        addToast({ message: err?.message || t('add_project.errors.create_failed') || 'Erreur lors de la création', type: 'error' });
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       setActiveStep((prev) => prev + 1);
     }
@@ -248,14 +297,16 @@ export default function AddProjectPage() {
           {/* Navigation */}
           {activeStep === 1 ? (
             <Box mt={4} display="flex" justifyContent="flex-start">
-              <Button onClick={handleBack}>{t('add_project.actions.back')}</Button>
+              <Button onClick={handleBack} disabled={isSubmitting}>
+                {t('add_project.actions.back')}
+              </Button>
             </Box>
           ) : (
             <Box mt={4} display="flex" justifyContent="space-between">
-              <Button disabled={activeStep === 0} onClick={handleBack}>
+              <Button disabled={activeStep === 0 || isSubmitting} onClick={handleBack}>
                 {t('add_project.actions.back')}
               </Button>
-              <Button variant="contained" onClick={handleNext}>
+              <Button variant="contained" onClick={handleNext} disabled={isSubmitting}>
                 {activeStep === steps.length - 1
                   ? t('add_project.actions.create')
                   : t('add_project.actions.next')}
