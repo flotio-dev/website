@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Box, Card, CardContent, Grid, Typography, Avatar, Stack, Chip, Divider, Skeleton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, CircularProgress, Switch, FormControlLabel, Select, MenuItem } from '@mui/material';
+import { Box, Paper, Grid, Typography, Avatar, Stack, Chip, Divider, Skeleton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, CircularProgress, Switch, FormControlLabel, Select, MenuItem } from '@mui/material';
 import ProjectSubMenu from '../../../components/ProjectSubMenu';
 import { getTranslations } from '../../../../lib/clientTranslations';
 import { useAuth } from '../../../../lib/hooks/useAuth';
@@ -352,21 +352,19 @@ export default function ProjectOverviewPage() {
         <ProjectSubMenu slug={slugForMenu} />
         <Box className="flex-1 overflow-auto" sx={{ p: { xs: 3, md: 6 }, bgcolor: 'background.default' }}>
           <Box sx={{ maxWidth: 800, mx: 'auto', mt: 6 }}>
-                <Card sx={{ borderRadius: 2, boxShadow: 3, bgcolor: 'background.paper' }}>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="h6" gutterBottom color="error" align="center">
-                      {t('project_page.project_not_found') ?? 'Projet introuvable'}
-                    </Typography>
-                    <Typography color="text.primary" sx={{ mb: 2 }} align="center">
-                      {fetchErrorMessage ?? `Le projet demandé n'a pas été trouvé.`}
-                    </Typography>
-                    <Stack spacing={2} alignItems="center" justifyContent="center">
-                      <Button variant="contained" color="primary" onClick={() => router.push('/projects')}>
-                        {t('project_page.back_to_projects') ?? 'Retour à la liste des projets'}
-                      </Button>
-                    </Stack>
-                  </CardContent>
-                </Card>
+                      <Paper variant="outlined" sx={{ borderRadius: 2, p: 2, bgcolor: 'background.paper', textAlign: 'center' }}>
+                        <Typography variant="h6" gutterBottom color="error" align="center">
+                          {t('project_page.project_not_found') ?? 'Projet introuvable'}
+                        </Typography>
+                        <Typography color="text.primary" sx={{ mb: 2 }} align="center">
+                          {fetchErrorMessage ?? `Le projet demandé n'a pas été trouvé.`}
+                        </Typography>
+                        <Stack spacing={2} alignItems="center" justifyContent="center">
+                          <Button variant="contained" color="primary" onClick={() => router.push('/projects')}>
+                            {t('project_page.back_to_projects') ?? 'Retour à la liste des projets'}
+                          </Button>
+                        </Stack>
+                      </Paper>
           </Box>
         </Box>
       </Box>
@@ -415,75 +413,69 @@ export default function ProjectOverviewPage() {
 
         <Grid container spacing={2}>
           <Box sx={{ width: '100%' }}>
-            <Card sx={{ borderRadius: 2, boxShadow: 3, bgcolor: 'background.paper' }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom color="text.primary">{t('project_page.overview')}</Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Stack spacing={1}>
-                  <Typography color="text.primary"><strong>{t('project_page.name')}: </strong>{project.name}</Typography>
-                  <Typography color="text.primary"><strong>Slug: </strong>{project.slug}</Typography>
-                  <Typography color="text.primary"><strong>{t('project_page.owner')}: </strong>{project.ownership?.name ?? '—'}</Typography>
-                  <Typography color="text.primary"><strong>{t('project_page.created_at')}: </strong>{formatDate(project.createdAt, locale)}</Typography>
-                  <Typography color="text.primary"><strong>{t('project_page.updated_at')}: </strong>{formatDate(project.lastActivityAt, locale)}</Typography>
-                </Stack>
-              </CardContent>
-            </Card>
+            <Paper variant="outlined" sx={{ borderRadius: 2, p: 2, bgcolor: 'background.paper', mb: 4 }}>
+              <Typography variant="h6" gutterBottom color="text.primary">{t('project_page.overview')}</Typography>
+              <Divider sx={{ mb: 2 }} />
+              <Stack spacing={1}>
+                <Typography color="text.primary"><strong>{t('project_page.name')}: </strong>{project.name}</Typography>
+                <Typography color="text.primary"><strong>Slug: </strong>{project.slug}</Typography>
+                <Typography color="text.primary"><strong>{t('project_page.owner')}: </strong>{project.ownership?.name ?? '—'}</Typography>
+                <Typography color="text.primary"><strong>{t('project_page.created_at')}: </strong>{formatDate(project.createdAt, locale)}</Typography>
+                <Typography color="text.primary"><strong>{t('project_page.updated_at')}: </strong>{formatDate(project.lastActivityAt, locale)}</Typography>
+              </Stack>
+            </Paper>
           </Box>
 
           <Box sx={{ width: '100%' }}>
-            <Card sx={{ borderRadius: 2, boxShadow: 3, bgcolor: 'background.paper' }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom color="text.primary">{t('project_page.build_settings')}</Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Stack spacing={1}>
-                  <Typography color="text.primary">
-                    <strong>Git repo: </strong>
-                    {projectData?.git_repository ?? projectData?.git_repo ? (
-                      <Link href={projectData?.git_repository ?? projectData?.git_repo ?? '#'} target="_blank" rel="noopener noreferrer">
-                        {(projectData?.git_repository ?? projectData?.git_repo) as string}
-                      </Link>
-                    ) : (
-                      '—'
-                    )}
-                  </Typography>
-                  <Typography color="text.primary"><strong>{t('project_page.build_folder')}: </strong>{project.buildSettings?.outputDir ?? projectData?.build_folder ?? '—'}</Typography>
-                  <Typography color="text.primary"><strong>{t('project_page.flutter_version')}: </strong>{projectData?.flutter_version ?? '—'}</Typography>
-                </Stack>
-              </CardContent>
-            </Card>
+            <Paper variant="outlined" sx={{ borderRadius: 2, p: 2, bgcolor: 'background.paper', mb: 4 }}>
+              <Typography variant="h6" gutterBottom color="text.primary">{t('project_page.build_settings')}</Typography>
+              <Divider sx={{ mb: 2 }} />
+              <Stack spacing={1}>
+                <Typography color="text.primary">
+                  <strong>Git repo: </strong>
+                  {projectData?.git_repository ?? projectData?.git_repo ? (
+                    <Link href={projectData?.git_repository ?? projectData?.git_repo ?? '#'} target="_blank" rel="noopener noreferrer">
+                      {(projectData?.git_repository ?? projectData?.git_repo) as string}
+                    </Link>
+                  ) : (
+                    '—'
+                  )}
+                </Typography>
+                <Typography color="text.primary"><strong>{t('project_page.build_folder')}: </strong>{project.buildSettings?.outputDir ?? projectData?.build_folder ?? '—'}</Typography>
+                <Typography color="text.primary"><strong>{t('project_page.flutter_version')}: </strong>{projectData?.flutter_version ?? '—'}</Typography>
+              </Stack>
+            </Paper>
           </Box>
         </Grid>
 
         {/* Logs section */}
         <Box sx={{ mt: 2, width: '100%' }}>
-          <Card sx={{ borderRadius: 2, boxShadow: 3, bgcolor: 'background.paper' }}>
-            <CardContent>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h6" color="text.primary">{t('project_page.logs') ?? 'Logs'}</Typography>
-              </Stack>
-              <Divider sx={{ mb: 2 }} />
+          <Paper variant="outlined" sx={{ borderRadius: 2, p: 2, bgcolor: 'background.paper' }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography variant="h6" color="text.primary">{t('project_page.logs') ?? 'Logs'}</Typography>
+            </Stack>
+            <Divider sx={{ mb: 2 }} />
 
-              {logsLoading ? (
-                <Stack spacing={1}>
-                  <Skeleton variant="rectangular" height={24} />
-                  <Skeleton variant="rectangular" height={24} />
-                  <Skeleton variant="rectangular" height={24} />
-                </Stack>
-              ) : logsError ? (
-                <Typography color="error">{logsError}</Typography>
-              ) : !logs || logs.length === 0 ? (
-                <Typography color="text.secondary">{t('project_page.no_logs') ?? 'Aucun log'}</Typography>
-              ) : (
-                <Box sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap', maxHeight: 320, overflow: 'auto', bgcolor: 'background.default', p: 1, borderRadius: 1 }}>
-                  {logs.map((line, i) => (
-                    <Typography key={i} variant="body2" sx={{ fontFamily: 'monospace' }}>
-                      {line}
-                    </Typography>
-                  ))}
-                </Box>
-              )}
-            </CardContent>
-          </Card>
+            {logsLoading ? (
+              <Stack spacing={1}>
+                <Skeleton variant="rectangular" height={24} />
+                <Skeleton variant="rectangular" height={24} />
+                <Skeleton variant="rectangular" height={24} />
+              </Stack>
+            ) : logsError ? (
+              <Typography color="error">{logsError}</Typography>
+            ) : !logs || logs.length === 0 ? (
+              <Typography color="text.secondary">{t('project_page.no_logs') ?? 'Aucun log'}</Typography>
+            ) : (
+              <Box sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap', maxHeight: 320, overflow: 'auto', bgcolor: 'background.default', p: 1, borderRadius: 1 }}>
+                {logs.map((line, i) => (
+                  <Typography key={i} variant="body2" sx={{ fontFamily: 'monospace' }}>
+                    {line}
+                  </Typography>
+                ))}
+              </Box>
+            )}
+          </Paper>
         </Box>
         {/* Edit Project Dialog */}
         <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm">

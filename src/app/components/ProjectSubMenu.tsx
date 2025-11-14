@@ -34,8 +34,8 @@ import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 
 function ProfileBlock({ t, slug }: { t: (k: string) => string; slug?: string }) {
   const { user, logout } = useAuth();
-  const name = user?.preferred_username ?? '';
-  const email = user?.email ?? '';
+  const name = user?.Keycloak.preferred_username ?? '';
+  const email = user?.Keycloak.email ?? '';
   const anchorRef = React.useRef<HTMLButtonElement | null>(null);
   const [open, setOpen] = React.useState(false);
   const router = useRouter();

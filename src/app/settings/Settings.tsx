@@ -20,6 +20,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Menu from '../components/Menu';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LanguageIcon from '@mui/icons-material/Language';
 import { useThemeMode } from '@/app/providers/ThemeModeProvider';
 
 export default function SettingsPage() {
@@ -142,13 +143,13 @@ export default function SettingsPage() {
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography color="text.primary">{t('settings.avatar')}</Typography>
               <Avatar sx={{ width: 40, height: 40 }}>
-                {user?.preferred_username?.[0]?.toUpperCase() || 'U'}
+                {user?.Keycloak.preferred_username?.[0]?.toUpperCase() || 'U'}
               </Avatar>
             </Stack>
             <Divider />
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography color="text.primary">{t('common.username')}</Typography>
-              <Typography color="text.secondary">{user?.preferred_username}</Typography>
+              <Typography color="text.secondary">{user?.Keycloak.preferred_username}</Typography>
             </Stack>
             <Divider />
             <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -174,16 +175,40 @@ export default function SettingsPage() {
                   : t('settings.github_not_connected'),
               })}
             </Typography>
-            <Button variant="outlined">
-              {githubConnected ? t('settings.disconnect') : t('settings.connect')}
-            </Button>
+            {githubConnected ? (
+              <Button variant="outlined">{t('settings.disconnect')}</Button>
+            ) : (
+              <Button
+                component="a"
+                href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP}/installations/new`}
+                target="_blank"
+                variant="contained"
+                color="primary"
+              >
+                {t('settings.connect')}
+              </Button>
+            )}
           </Stack>
 
-          <Divider sx={{ my: 2 }} />
+          
+        </Paper>
 
-          {/* Language selector */}
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography color="text.primary">{t('settings.language')}</Typography>
+        {/* Appearance / Theme */}
+        <Paper
+          variant="outlined"
+          sx={{ p: 3, mt: 3, bgcolor: 'background.paper' }}
+        >
+          <Typography variant="subtitle1" fontWeight={600} mb={2} color="text.primary">
+            {t('settings.appearance') || 'Appearance'}
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+
+          {/* Language selector moved here from Connections */}
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <LanguageIcon fontSize="small" color="action" />
+              <Typography color="text.primary">{t('settings.language')}</Typography>
+            </Stack>
             <Select
               value={locale}
               onChange={(e) => {
@@ -218,34 +243,24 @@ export default function SettingsPage() {
               <MenuItem value="en">English</MenuItem>
             </Select>
           </Stack>
-        </Paper>
 
-        {/* Appearance / Theme */}
-        <Paper
-          variant="outlined"
-          sx={{ p: 3, mt: 3, bgcolor: 'background.paper' }}
-        >
-          <Typography variant="subtitle1" fontWeight={600} mb={2} color="text.primary">
-            {t('settings.appearance') || 'Appearance'}
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          <ThemeSelector />
+          <ThemeSelector t={t} />
         </Paper>
       </Box>
     </Box>
   );
 }
 
-function ThemeSelector() {
+function ThemeSelector({ t }: { t: (key: string, params?: Record<string, any>) => string }) {
   const { resolvedMode, toggle } = useThemeMode();
   return (
     <Stack direction="row" alignItems="center" justifyContent="space-between">
       <Stack direction="row" spacing={1} alignItems="center">
         {resolvedMode === 'dark' ? <DarkModeIcon /> : <LightModeIcon />}
-        <Typography color="text.primary">{resolvedMode === 'dark' ? 'Dark' : 'Light'}</Typography>
+        <Typography color="text.primary">{resolvedMode === 'dark' ? t('settings.dark') : t('settings.light')}</Typography>
       </Stack>
       <Button variant="outlined" onClick={toggle}>
-        {resolvedMode === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+        {resolvedMode === 'dark' ? t('settings.switch_light') : t('settings.switch_dark')}
       </Button>
     </Stack>
   );

@@ -39,8 +39,8 @@ function ProfileBlock({ t }: { t: (k: string) => string }) {
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
   const router = useRouter();
-  const name = user?.preferred_username ?? '';
-  const email = user?.email ?? '';
+  const name = user?.Keycloak?.preferred_username ?? '';
+  const email = user?.Keycloak?.email ?? '';
 
   return (
     <>
@@ -139,7 +139,7 @@ export default function Menu() {
     if (user) {
       (async () => {
         try {
-          const bearer = user.token ?? null;
+          const bearer = user.Keycloak.token ?? null;
 
           if (!bearer) return;
 
@@ -346,7 +346,6 @@ export default function Menu() {
       {/* Footer - theme selector + profile */}
       <Divider className="my-2" />
       <Box>
-        {/* Theme selector moved to account settings */}
         <ProfileBlock t={t} />
       </Box>
     </Box>
