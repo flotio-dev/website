@@ -20,10 +20,10 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Menu from '../components/Menu';
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const plan = 'Free'; // mock plan
   const [githubConnected, setGithubConnected] = React.useState(false);
-
+  console.log(token)
   const pathname = usePathname();
   const [translations, setTranslations] = React.useState<Record<string, any> | null>(null);
 
