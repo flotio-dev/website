@@ -88,9 +88,15 @@
     "steps": {
       "name": "Project name",
       "github": "Connect to GitHub",
+      "checking_github": "Checking GitHub connection",
       "repo": "Choose repository",
       "flutter": "Flutter version",
       "summary": "Summary"
+    },
+    "messages": {
+      "checking_github": "Checking GitHub installation...",
+      "github_connected": "GitHub App is installed",
+      "github_not_connected": "GitHub App is not installed"
     },
     "fields": {
       "project_name": "Project name",
@@ -100,6 +106,7 @@
     },
     "actions": {
       "yes_github": "Yes, connect GitHub",
+      "connect_github": "Connect GitHub",
       "no_github": "No",
       "back": "Back",
       "next": "Next",
