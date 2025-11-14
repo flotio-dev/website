@@ -31,22 +31,42 @@ async function forwardRequest(request: NextRequest, method: string, slug: string
   });
 }
 
-export async function GET(request: NextRequest, { params }: { params: { slug: string[] } }) {
-  return forwardRequest(request, 'GET', params.slug);
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string[] }> }
+) {
+  const { slug } = await params;
+  return forwardRequest(request, 'GET', slug);
 }
 
-export async function POST(request: NextRequest, { params }: { params: { slug: string[] } }) {
-  return forwardRequest(request, 'POST', params.slug);
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string[] }> }
+) {
+  const { slug } = await params;
+  return forwardRequest(request, 'POST', slug);
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { slug: string[] } }) {
-  return forwardRequest(request, 'PUT', params.slug);
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string[] }> }
+) {
+  const { slug } = await params;
+  return forwardRequest(request, 'PUT', slug);
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { slug: string[] } }) {
-  return forwardRequest(request, 'DELETE', params.slug);
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string[] }> }
+) {
+  const { slug } = await params;
+  return forwardRequest(request, 'DELETE', slug);
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { slug: string[] } }) {
-  return forwardRequest(request, 'PATCH', params.slug);
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string[] }> }
+) {
+  const { slug } = await params;
+  return forwardRequest(request, 'PATCH', slug);
 }

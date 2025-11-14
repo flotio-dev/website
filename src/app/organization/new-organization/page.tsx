@@ -7,10 +7,13 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import { getTranslations } from '../../../lib/clientTranslations';
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/hooks/useAuth";
+// import { useSession } from "next-auth/react";
 
 export default function NewOrganization() {
-  const { data: session, status } = useSession();
+  // const { data: session, status } = useSession();
+   const { token } = useAuth();
+  
   const router = useRouter();
   const [orgName, setOrgName] = useState("");
   const [orgDescription, setOrgDescription] = useState("");
@@ -76,7 +79,7 @@ export default function NewOrganization() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${session?.accessToken || ""}`
+          "Authorization": `Bearer ${token || ""}`
         },
         body: JSON.stringify({
           name: orgName,

@@ -24,7 +24,8 @@ import Menu from '../components/Menu';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getTranslations } from '../../lib/clientTranslations';
-import { useSession } from "next-auth/react";
+import { useAuth } from '@/lib/hooks/useAuth';
+// import { useSession } from "next-auth/react";
 
 interface User {
   id: string;
@@ -62,7 +63,9 @@ const mockUsers: User[] = [
 ];
 
 export default function ManageOrganization() {
-  const { data: session, status } = useSession();
+  // const { data: session, status } = useSession();
+   const { token } = useAuth();
+  
   const [translations, setTranslations] = useState<Record<string, any> | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [orgInfo, setOrgInfo] = useState({

@@ -17,11 +17,14 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import CircularProgress from "@mui/material/CircularProgress";
 import { getTranslations } from '../../../lib/clientTranslations';
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/hooks/useAuth";
+// import { useSession } from "next-auth/react";
 
 
 export default function AddMembers() {
-  const { data: session, status } = useSession();
+  // const { data: session, status } = useSession();
+   const { token } = useAuth();
+  
   const router = useRouter();
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
@@ -80,7 +83,7 @@ export default function AddMembers() {
       try {
         const res = await fetch(url, {
           headers: {
-            "Authorization": `Bearer ${session?.accessToken || ""}`
+            "Authorization": `Bearer ${token || ""}`
           }
         });
         if (!res.ok) throw new Error("Erreur API Keycloak");
@@ -94,7 +97,7 @@ export default function AddMembers() {
     };
     fetchUsers();
     return () => { active = false; };
-  }, [userName, session]);
+  }, [userName, token]);
 
   const t = (key: string) => {
     if (!translations) return key;
@@ -128,7 +131,7 @@ export default function AddMembers() {
       const res = await fetch(url, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${session?.accessToken || ""}`
+          "Authorization": `Bearer ${token || ""}`
         },
         body: formData
       });
