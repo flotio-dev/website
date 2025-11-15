@@ -25,6 +25,7 @@ import {
   Breadcrumbs,
   Card,
   CardContent,
+  Skeleton,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -37,11 +38,13 @@ import PeopleIcon from '@mui/icons-material/People';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import LanIcon from '@mui/icons-material/Lan';
 import CloudIcon from '@mui/icons-material/Cloud';
-import Menu from '../../components/Menu';
+import Menu from '../../../components/Menu';
 import { useEffect, useMemo, useState } from 'react';
-import { useAuth } from '../../../lib/hooks/useAuth';
-import { useToast } from '../../../lib/hooks/useToast';
-import { getTranslations } from '../../../lib/clientTranslations';
+import { useAuth } from '../../../../lib/hooks/useAuth';
+import { useToast } from '../../../../lib/hooks/useToast';
+import { getTranslations } from '../../../../lib/clientTranslations';
+import { usePathname, useParams, useRouter } from 'next/navigation';
+import ProjectSubMenu from '../../../components/ProjectSubMenu';
 
 /*
  * Project page (previously in project-detail/page.tsx) — moved here to simplify routing.
@@ -146,15 +149,6 @@ const mockProject: Project = {
   ],
 };
 
-// Locale helpers
-const detectLocale = (p?: string | null) => {
-  if (!p) return 'fr';
-  const parts = p.split('/');
-  const candidate = parts[1];
-  if (candidate === 'en' || candidate === 'fr') return candidate;
-  return 'fr';
-};
-
 const getPreferredLocale = (p?: string | null) => {
   try {
     const stored =
@@ -235,8 +229,8 @@ function SettingsTabs({ t }: { t: (key: string) => string }) {
       {tab === 1 && (
         <Stack spacing={2}>
           <Grid container spacing={2}>
-              <TextField label={t("project_page.key")} placeholder="NEXT_PUBLIC_API_URL" fullWidth />
-              <TextField label={t("project_page.value")} placeholder="https://api.example.com" fullWidth />
+            <TextField label={t("project_page.key")} placeholder="NEXT_PUBLIC_API_URL" fullWidth />
+            <TextField label={t("project_page.value")} placeholder="https://api.example.com" fullWidth />
           </Grid>
           <Stack direction="row" spacing={2}>
             <Button variant="contained">{t("project_page.add_variable")}</Button>
@@ -305,10 +299,10 @@ function SettingsTabs({ t }: { t: (key: string) => string }) {
       {tab === 3 && (
         <Stack spacing={2}>
           <Grid container spacing={2}>
-              <TextField label={t("project_page.invite_member")} placeholder="email@example.com" fullWidth />
-              <Button variant="contained" sx={{ height: '100%' }}>
-                {t("project_page.send_invite")}
-              </Button>
+            <TextField label={t("project_page.invite_member")} placeholder="email@example.com" fullWidth />
+            <Button variant="contained" sx={{ height: '100%' }}>
+              {t("project_page.send_invite")}
+            </Button>
           </Grid>
           <Divider />
           <Typography variant="subtitle2">{t("project_page.project_members")}</Typography>
@@ -352,6 +346,11 @@ export default function ProjectPage() {
   // Redirect logic handled below after we may have fetched project data (so we can map numeric IDs -> slug)
   const [locale, setLocale] = useState(() => getPreferredLocale(pathname));
   const [translations, setTranslations] = useState<Record<string, any> | null>(null);
+  const params = useParams() as { slug?: string } | undefined;
+  const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+  const [fetchErrorMessage, setFetchErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     let mounted = true;
@@ -473,6 +472,10 @@ export default function ProjectPage() {
     };
   }, [pathname, token, addToast]);
 
+  const pathParts = pathname.split('/').filter(Boolean);
+  const candidateSlugFromPath = params?.slug ?? (pathParts[1] ?? pathParts[0]);
+
+
   // Redirect to overview using slug when possible.
   // If the URL contains a numeric id, wait for projectData then redirect to /projects/{slug}/overview.
   // If the URL already contains a slug (non-numeric), append /overview.
@@ -480,7 +483,6 @@ export default function ProjectPage() {
     try {
       if (typeof window === 'undefined') return;
       const p = window.location.pathname.replace(/\/$/, '');
-      if (p.endsWith('/overview')) return; // already on overview
 
       const parts = p.split('/');
       const last = parts[parts.length - 1];
@@ -490,14 +492,9 @@ export default function ProjectPage() {
       if (/^[0-9]+$/.test(last)) {
         if (projectData && (projectData.slug || projectData.name)) {
           const slug = projectData.slug ?? projectData.name;
-          const newPath = `/projects/${slug}/overview`;
-          if (newPath !== p) window.location.replace(newPath);
         }
         return;
       }
-
-      // Non-numeric -> treat as slug, append overview
-      window.location.replace(p + '/overview');
     } catch (e) {
       // ignore
     }
@@ -508,10 +505,55 @@ export default function ProjectPage() {
     return Math.round((project.stats.success / denom) * 100);
   }, [project.stats]);
 
+  // determine a slug for building menu links
+  const slugForMenu = project.id ? String(project.id) : candidateSlugFromPath ?? project.slug ?? 'project';
+  // If loading, show skeletons
+  if (loading) {
+    return (
+      <Box className="flex h-screen">
+        <ProjectSubMenu slug={slugForMenu} />
+        <Box className="flex-1 overflow-auto" sx={{ p: { xs: 3, md: 6 }, bgcolor: 'background.default' }}>
+          <Stack spacing={2}>
+            <Skeleton variant="rectangular" height={48} />
+            <Skeleton variant="rectangular" height={200} />
+            <Skeleton variant="rectangular" height={200} />
+          </Stack>
+        </Box>
+      </Box>
+    );
+  }
+
+  // If not found or fetch error, show a friendly framed message instead of bubbling raw errors
+  if (notFound) {
+    return (
+      <Box className="flex h-screen">
+        <ProjectSubMenu slug={slugForMenu} />
+        <Box className="flex-1 overflow-auto" sx={{ p: { xs: 3, md: 6 }, bgcolor: 'background.default' }}>
+          <Box sx={{ maxWidth: 800, mx: 'auto', mt: 6 }}>
+            <Paper variant="outlined" sx={{ borderRadius: 2, p: 2, bgcolor: 'background.paper', textAlign: 'center' }}>
+              <Typography variant="h6" gutterBottom color="error" align="center">
+                {t('project_page.project_not_found') ?? 'Projet introuvable'}
+              </Typography>
+              <Typography color="text.primary" sx={{ mb: 2 }} align="center">
+                {fetchErrorMessage ?? `Le projet demandé n'a pas été trouvé.`}
+              </Typography>
+              <Stack spacing={2} alignItems="center" justifyContent="center">
+                <Button variant="contained" color="primary" onClick={() => router.push('/projects')}>
+                  {t('project_page.back_to_projects') ?? 'Retour à la liste des projets'}
+                </Button>
+              </Stack>
+            </Paper>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
   return (
     <Box className="flex h-screen">
       {/* Sidebar */}
       <Menu />
+
 
       {/* Main Content */}
       <Box
@@ -575,75 +617,75 @@ export default function ProjectPage() {
 
         {/* Top Stats & Build Settings */}
         <Grid container spacing={2}>
-            <Card sx={{ borderRadius: 2, boxShadow: 2, bgcolor: 'background.paper' }}>
-              <CardContent>
-                <Typography variant="h6" color="text.primary">
-                  {t("project_page.overview")}
-                </Typography>
-                <Grid container spacing={2}>
-                    <Paper className="rounded-xl" sx={{ p: 2 }}>
-                      <Typography variant="overline">{t("project_page.total_builds")}</Typography>
-                      <Typography variant="h5">{project.stats.total}</Typography>
-                    </Paper>
-                    <Paper className="rounded-xl" sx={{ p: 2 }}>
-                      <Typography variant="overline">{t("project_page.success")}</Typography>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <CheckCircleIcon fontSize="small" />
-                        <Typography variant="h5">{project.stats.success}</Typography>
-                        <Chip size="small" color="default" label={`${successRate}%`} />
-                      </Stack>
-                    </Paper>
-                    <Paper className="rounded-xl" sx={{ p: 2 }}>
-                      <Typography variant="overline">{t("project_page.failed")}</Typography>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <CancelIcon fontSize="small" />
-                        <Typography variant="h5">{project.stats.failed}</Typography>
-                      </Stack>
-                    </Paper>
-                </Grid>
+          <Card sx={{ borderRadius: 2, boxShadow: 2, bgcolor: 'background.paper' }}>
+            <CardContent>
+              <Typography variant="h6" color="text.primary">
+                {t("project_page.overview")}
+              </Typography>
+              <Grid container spacing={2}>
+                <Paper className="rounded-xl" sx={{ p: 2 }}>
+                  <Typography variant="overline">{t("project_page.total_builds")}</Typography>
+                  <Typography variant="h5">{project.stats.total}</Typography>
+                </Paper>
+                <Paper className="rounded-xl" sx={{ p: 2 }}>
+                  <Typography variant="overline">{t("project_page.success")}</Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <CheckCircleIcon fontSize="small" />
+                    <Typography variant="h5">{project.stats.success}</Typography>
+                    <Chip size="small" color="default" label={`${successRate}%`} />
+                  </Stack>
+                </Paper>
+                <Paper className="rounded-xl" sx={{ p: 2 }}>
+                  <Typography variant="overline">{t("project_page.failed")}</Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <CancelIcon fontSize="small" />
+                    <Typography variant="h5">{project.stats.failed}</Typography>
+                  </Stack>
+                </Paper>
+              </Grid>
 
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="subtitle2" color="text.secondary">
-                  {t("project_page.last_activity_description")}
-                </Typography>
-                <Typography variant="body1">
-                  {project.lastActivityDescription}
-                </Typography>
-              </CardContent>
-            </Card>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="subtitle2" color="text.secondary">
+                {t("project_page.last_activity_description")}
+              </Typography>
+              <Typography variant="body1">
+                {project.lastActivityDescription}
+              </Typography>
+            </CardContent>
+          </Card>
 
-            <Card sx={{ bgcolor: 'background.paper', borderRadius: 2, boxShadow: 2 }}>
-              <CardContent>
-                <Typography variant="h6" color="text.primary" gutterBottom>
-                  {t("project_page.build_settings")}
-                </Typography>
-                <Stack spacing={1}>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">{t("project_page.provider")}</Typography>
-                    <Typography>{project.buildSettings.provider}</Typography>
-                  </Stack>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">{t("project_page.branch")}</Typography>
-                    <Typography>{project.buildSettings.branch}</Typography>
-                  </Stack>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">{t("project_page.command")}</Typography>
-                    <Typography>{project.buildSettings.buildCommand}</Typography>
-                  </Stack>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">{t("project_page.output_dir")}</Typography>
-                    <Typography>{project.buildSettings.outputDir}</Typography>
-                  </Stack>
-                  {project.buildSettings.nodeVersion && (
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography color="text.secondary">Node</Typography>
-                      <Typography>{project.buildSettings.nodeVersion}</Typography>
-                    </Stack>
-                  )}
+          <Card sx={{ bgcolor: 'background.paper', borderRadius: 2, boxShadow: 2 }}>
+            <CardContent>
+              <Typography variant="h6" color="text.primary" gutterBottom>
+                {t("project_page.build_settings")}
+              </Typography>
+              <Stack spacing={1}>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography color="text.secondary">{t("project_page.provider")}</Typography>
+                  <Typography>{project.buildSettings.provider}</Typography>
                 </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography color="text.secondary">{t("project_page.branch")}</Typography>
+                  <Typography>{project.buildSettings.branch}</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography color="text.secondary">{t("project_page.command")}</Typography>
+                  <Typography>{project.buildSettings.buildCommand}</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography color="text.secondary">{t("project_page.output_dir")}</Typography>
+                  <Typography>{project.buildSettings.outputDir}</Typography>
+                </Stack>
+                {project.buildSettings.nodeVersion && (
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography color="text.secondary">Node</Typography>
+                    <Typography>{project.buildSettings.nodeVersion}</Typography>
+                  </Stack>
+                )}
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
 
         {/* Recent Builds Table */}
         <Box mt={3}>
