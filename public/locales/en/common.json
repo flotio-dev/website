@@ -228,8 +228,23 @@
     "project_not_found": "Project not found",
     "back_to_projects": "Go back to projects",
     "logs": "Build logs",
-    "no_logs": "No logs available yet"
-    
+    "no_logs": "No logs available yet",
+    "download_apk": "Download APK",
+    "platform": "Platform",
+    "env_default": "Default",
+    "env_production": "Production",
+    "env_development": "Development",
+    "env_preview": "Preview",
+    "auto_submit": "Automatically submit to stores after building successfully",
+    "eas_submit_profile": "EAS Submit profile",
+    "build_config": "Build configuration",
+    "base_directory": "Base directory",
+    "platform_all": "All",
+    "platform_android": "Android",
+    "platform_ios": "iOS",
+    "git_ref": "Git ref",
+    "git_ref_help": "Commit hash, branch, or tag",
+    "eas_build_profile": "EAS Build profile"
   },
   "build_details": {
     "title": "Build",
