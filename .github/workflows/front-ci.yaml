@@ -2,9 +2,34 @@ name: Build and Deploy via GitOps
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches:
+      - main
+      - dev
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'middleware.ts'
+      - 'next.config.ts'
+      - 'next-i18next.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
+      - 'Dockerfile'
+      - '.env.example'
+
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'middleware.ts'
+      - 'next.config.ts'
+      - 'next-i18next.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
+      - 'Dockerfile'
+      - '.env.example'
 
 env:
   REGISTRY: ghcr.io
