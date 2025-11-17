@@ -12,73 +12,72 @@ env:
 
 jobs:
 
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
+  # build:
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #     packages: write
 
-    outputs:
-      version: ${{ steps.version.outputs.version }}
+  #   outputs:
+  #     version: ${{ steps.version.outputs.version }}
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0  
 
-      - name: Determine next version
-        id: version
-        if: github.event_name == 'push'
-        run: |
-          latest=$(git tag --sort=-v:refname | head -n 1)
+  #     - name: Determine next version
+  #       id: version
+  #       if: github.event_name == 'push'
+  #       run: |
+  #         latest=$(git tag --sort=-v:refname | head -n 1)
 
-          if [[ -z "$latest" ]]; then
-            latest="0.0"
-          fi
+  #         if [[ -z "$latest" ]]; then
+  #           latest="0.0"
+  #         fi
 
-          major=$(echo $latest | cut -d. -f1)
-          minor=$(echo $latest | cut -d. -f2)
+  #         major=$(echo $latest | cut -d. -f1)
+  #         minor=$(echo $latest | cut -d. -f2)
 
-          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            major=$((major + 1))
-            minor=0
-          else
-            minor=$((minor + 1))
-          fi
+  #         if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+  #           major=$((major + 1))
+  #           minor=0
+  #         else
+  #           minor=$((minor + 1))
+  #         fi
 
-          new="$major.$minor"
+  #         new="$major.$minor"
 
-          echo "version=$new" >> $GITHUB_OUTPUT
+  #         echo "version=$new" >> $GITHUB_OUTPUT
 
-      - name: Create Git tag
-        if: github.event_name == 'push'
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git tag "${{ steps.version.outputs.version }}"
-          git push origin "${{ steps.version.outputs.version }}"
+  #     - name: Create Git tag
+  #       if: github.event_name == 'push'
+  #       run: |
+  #         git config user.name "github-actions"
+  #         git config user.email "actions@github.com"
+  #         git tag "${{ steps.version.outputs.version }}"
+  #         git push origin "${{ steps.version.outputs.version }}"
 
-      - name: Log in to GHCR
-        if: github.event_name == 'push'
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Log in to GHCR
+  #       if: github.event_name == 'push'
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: ${{ env.REGISTRY }}
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push image
-        if: github.event_name == 'push'
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
+  #     - name: Build and push image
+  #       if: github.event_name == 'push'
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         context: .
+  #         push: true
+  #         tags: ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
 
 
   update-gitops:
-    needs: build
-    if: github.event_name == 'push'
+#    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -101,8 +100,8 @@ jobs:
       - name: Update deployment
         run: |
           FILE="manifest/website/deploy-front.yaml"
-          ls .
-          ls manifest
+          ls manifest/manifest
+
           
           sed -i "s|image: .*|image: ghcr.io/${{ github.repository }}:${{ needs.build.outputs.version }}|g" $FILE
 
