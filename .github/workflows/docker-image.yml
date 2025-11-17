@@ -101,6 +101,10 @@ jobs:
       - name: Update deployment
         run: |
           FILE="manifest/website/deploy-front.yaml"
+          ls .
+          ls manifest
+          ls manifest/website
+          
           sed -i "s|image: .*|image: ghcr.io/${{ github.repository }}:${{ needs.build.outputs.version }}|g" $FILE
 
       - name: Commit & push
