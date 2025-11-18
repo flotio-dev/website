@@ -35,7 +35,7 @@ export default function SettingsPage() {
     try {
       const stored = typeof window !== 'undefined' ? localStorage.getItem('lang') : null;
       if (stored === 'en' || stored === 'fr') return stored;
-    } catch {}
+    } catch { }
     if (!p) return 'fr';
     const parts = p.split('/');
     const candidate = parts[1];
@@ -44,6 +44,11 @@ export default function SettingsPage() {
   };
 
   const [locale, setLocale] = React.useState(() => getPreferredLocale(pathname));
+
+  const languages = [
+    { value: 'fr', label: 'Français' },
+    { value: 'en', label: 'English' },
+  ];
 
   React.useEffect(() => {
     let mounted = true;
@@ -190,7 +195,7 @@ export default function SettingsPage() {
             )}
           </Stack>
 
-          
+
         </Paper>
 
         {/* Appearance / Theme */}
@@ -222,7 +227,15 @@ export default function SettingsPage() {
                 setLocale(lang);
               }}
               size="small"
-              sx={{ 
+              renderValue={(value) => {
+                const lang = languages.find(l => l.value === value);
+                return (
+                  <Box component="span" sx={{ color: 'text.primary' }}>
+                    {lang?.label ?? value}
+                  </Box>
+                );
+              }}
+              sx={{
                 minWidth: 120,
                 color: 'primary.main',
                 '& .MuiOutlinedInput-notchedOutline': {
