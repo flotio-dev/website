@@ -245,9 +245,15 @@
     "steps": {
       "name": "Nom du projet",
       "github": "Connexion à GitHub",
+      "checking_github": "Vérification de la connexion GitHub",
       "repo": "Choisir le dépôt",
       "flutter": "Version de Flutter",
       "summary": "Récapitulatif"
+    },
+    "messages": {
+      "checking_github": "Vérification de l'installation GitHub...",
+      "github_connected": "L'application GitHub est installée",
+      "github_not_connected": "L'application GitHub n'est pas installée"
     },
     "fields": {
       "project_name": "Nom du projet",
@@ -257,6 +263,7 @@
     },
     "actions": {
       "yes_github": "Oui, connecter GitHub",
+      "connect_github": "Se connecter à GitHub",
       "no_github": "Non",
       "back": "Retour",
       "next": "Suivant",

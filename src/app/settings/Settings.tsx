@@ -18,6 +18,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Menu from '../components/Menu';
+import { useToast } from '../../lib/hooks/useToast';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LanguageIcon from '@mui/icons-material/Language';
@@ -27,7 +28,7 @@ export default function SettingsPage() {
   const { user, token } = useAuth();
   const plan = 'Free'; // mock plan
   const [githubConnected, setGithubConnected] = React.useState(false);
-  console.log(token)
+  const { addToast } = useToast();
   const pathname = usePathname();
   const [translations, setTranslations] = React.useState<Record<string, any> | null>(null);
 
@@ -67,6 +68,39 @@ export default function SettingsPage() {
       const payload = e.detail;
       setGithubConnected(!!payload.github_access_token);
     });
+    // On mount, check whether the GitHub App is installed for this account via API
+    const checkInstallation = async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!base) {
+          console.debug('NEXT_PUBLIC_API_URL not set, skipping github installation check');
+          return;
+        }
+        const url = `${base.replace(/\/$/, '')}/github/installations`;
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(url, { headers });
+        if (res.status === 404) {
+          setGithubConnected(false);
+          return;
+        }
+        if (!res.ok) {
+          const txt = await res.text().catch(() => null);
+          console.debug('Failed checking github installation:', res.status, txt);
+          addToast({ message: `GitHub installation check failed (${res.status})`, type: 'error' });
+          setGithubConnected(false);
+          return;
+        }
+        // installation exists
+        setGithubConnected(true);
+      } catch (err: any) {
+        console.error('Error checking github installation', err);
+        addToast({ message: err?.message || 'Error checking GitHub installation', type: 'error' });
+        setGithubConnected(false);
+      }
+    };
+
+    checkInstallation();
     window.addEventListener('localeChanged', onLocaleChanged as EventListener);
     const onStorage = () => onLocaleChanged(null);
     window.addEventListener('storage', onStorage);
