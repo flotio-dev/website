@@ -18,12 +18,17 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Menu from '../components/Menu';
+import { useToast } from '../../lib/hooks/useToast';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LanguageIcon from '@mui/icons-material/Language';
+import { useThemeMode } from '@/app/providers/ThemeModeProvider';
 
 export default function SettingsPage() {
   const { user, token } = useAuth();
   const plan = 'Free'; // mock plan
   const [githubConnected, setGithubConnected] = React.useState(false);
-  console.log(token)
+  const { addToast } = useToast();
   const pathname = usePathname();
   const [translations, setTranslations] = React.useState<Record<string, any> | null>(null);
 
@@ -31,7 +36,7 @@ export default function SettingsPage() {
     try {
       const stored = typeof window !== 'undefined' ? localStorage.getItem('lang') : null;
       if (stored === 'en' || stored === 'fr') return stored;
-    } catch {}
+    } catch { }
     if (!p) return 'fr';
     const parts = p.split('/');
     const candidate = parts[1];
@@ -40,6 +45,11 @@ export default function SettingsPage() {
   };
 
   const [locale, setLocale] = React.useState(() => getPreferredLocale(pathname));
+
+  const languages = [
+    { value: 'fr', label: 'Français' },
+    { value: 'en', label: 'English' },
+  ];
 
   React.useEffect(() => {
     let mounted = true;
@@ -58,6 +68,39 @@ export default function SettingsPage() {
       const payload = e.detail;
       setGithubConnected(!!payload.github_access_token);
     });
+    // On mount, check whether the GitHub App is installed for this account via API
+    const checkInstallation = async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!base) {
+          console.debug('NEXT_PUBLIC_API_URL not set, skipping github installation check');
+          return;
+        }
+        const url = `${base.replace(/\/$/, '')}/github/installations`;
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(url, { headers });
+        if (res.status === 404) {
+          setGithubConnected(false);
+          return;
+        }
+        if (!res.ok) {
+          const txt = await res.text().catch(() => null);
+          console.debug('Failed checking github installation:', res.status, txt);
+          addToast({ message: `GitHub installation check failed (${res.status})`, type: 'error' });
+          setGithubConnected(false);
+          return;
+        }
+        // installation exists
+        setGithubConnected(true);
+      } catch (err: any) {
+        console.error('Error checking github installation', err);
+        addToast({ message: err?.message || 'Error checking GitHub installation', type: 'error' });
+        setGithubConnected(false);
+      }
+    };
+
+    checkInstallation();
     window.addEventListener('localeChanged', onLocaleChanged as EventListener);
     const onStorage = () => onLocaleChanged(null);
     window.addEventListener('storage', onStorage);
@@ -139,13 +182,13 @@ export default function SettingsPage() {
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography color="text.primary">{t('settings.avatar')}</Typography>
               <Avatar sx={{ width: 40, height: 40 }}>
-                {user?.preferred_username?.[0]?.toUpperCase() || 'U'}
+                {user?.Keycloak.preferred_username?.[0]?.toUpperCase() || 'U'}
               </Avatar>
             </Stack>
             <Divider />
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography color="text.primary">{t('common.username')}</Typography>
-              <Typography color="text.secondary">{user?.preferred_username}</Typography>
+              <Typography color="text.secondary">{user?.Keycloak.preferred_username}</Typography>
             </Stack>
             <Divider />
             <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -171,16 +214,40 @@ export default function SettingsPage() {
                   : t('settings.github_not_connected'),
               })}
             </Typography>
-            <Button variant="outlined">
-              {githubConnected ? t('settings.disconnect') : t('settings.connect')}
-            </Button>
+            {githubConnected ? (
+              <Button variant="outlined">{t('settings.disconnect')}</Button>
+            ) : (
+              <Button
+                component="a"
+                href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP}/installations/new`}
+                target="_blank"
+                variant="contained"
+                color="primary"
+              >
+                {t('settings.connect')}
+              </Button>
+            )}
           </Stack>
 
-          <Divider sx={{ my: 2 }} />
 
-          {/* Language selector */}
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography color="text.primary">{t('settings.language')}</Typography>
+        </Paper>
+
+        {/* Appearance / Theme */}
+        <Paper
+          variant="outlined"
+          sx={{ p: 3, mt: 3, bgcolor: 'background.paper' }}
+        >
+          <Typography variant="subtitle1" fontWeight={600} mb={2} color="text.primary">
+            {t('settings.appearance') || 'Appearance'}
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+
+          {/* Language selector moved here from Connections */}
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <LanguageIcon fontSize="small" color="action" />
+              <Typography color="text.primary">{t('settings.language')}</Typography>
+            </Stack>
             <Select
               value={locale}
               onChange={(e) => {
@@ -194,14 +261,54 @@ export default function SettingsPage() {
                 setLocale(lang);
               }}
               size="small"
-              sx={{ minWidth: 120 }}
+              renderValue={(value) => {
+                const lang = languages.find(l => l.value === value);
+                return (
+                  <Box component="span" sx={{ color: 'text.primary' }}>
+                    {lang?.label ?? value}
+                  </Box>
+                );
+              }}
+              sx={{
+                minWidth: 120,
+                color: 'primary.main',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'primary.main',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'primary.main',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'primary.main',
+                },
+                '& .MuiSelect-icon': {
+                  color: 'primary.main',
+                },
+              }}
             >
               <MenuItem value="fr">Français</MenuItem>
               <MenuItem value="en">English</MenuItem>
             </Select>
           </Stack>
+
+          <ThemeSelector t={t} />
         </Paper>
       </Box>
     </Box>
+  );
+}
+
+function ThemeSelector({ t }: { t: (key: string, params?: Record<string, any>) => string }) {
+  const { resolvedMode, toggle } = useThemeMode();
+  return (
+    <Stack direction="row" alignItems="center" justifyContent="space-between">
+      <Stack direction="row" spacing={1} alignItems="center">
+        {resolvedMode === 'dark' ? <DarkModeIcon /> : <LightModeIcon />}
+        <Typography color="text.primary">{resolvedMode === 'dark' ? t('settings.dark') : t('settings.light')}</Typography>
+      </Stack>
+      <Button variant="outlined" onClick={toggle}>
+        {resolvedMode === 'dark' ? t('settings.switch_light') : t('settings.switch_dark')}
+      </Button>
+    </Stack>
   );
 }

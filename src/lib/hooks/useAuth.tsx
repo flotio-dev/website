@@ -3,16 +3,18 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 
 interface User {
-  sub: string;
-  name?: string;
-  given_name?: string;
-  family_name?: string;
-  preferred_username: string;
-  email?: string;
-  email_verified?: boolean;
-  // Legacy support
-  username?: string;
-  token?: string;
+  Keycloak: {
+    sub: string;
+    name?: string;
+    given_name?: string;
+    family_name?: string;
+    preferred_username: string;
+    email?: string;
+    email_verified?: boolean;
+    // Legacy support
+    username?: string;
+    token?: string;
+  }
 }
 
 interface AuthContextType {
@@ -120,8 +122,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (res.ok) {
         const userData = await res.json();
         setUser({
-            ...userData,
-            username: userData.preferred_username, // for legacy support
+          ...userData,
+          username: userData.preferred_username, // for legacy support
         });
       } else {
         // Token invalid, try to refresh

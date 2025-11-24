@@ -3,7 +3,6 @@ import React from 'react';
 import { getTranslations } from '../../lib/clientTranslations';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useRouter, usePathname } from 'next/navigation';
-import { Switch } from '@mui/material';
 
 import {
   Box,
@@ -27,11 +26,9 @@ import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
 import FolderIcon from '@mui/icons-material/Folder';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import SettingsIcon from '@mui/icons-material/Settings';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
+// Light/Dark icons removed from menu (theme control moved to settings)
 
-// Theme provider context
-import { useThemeMode } from '@/app/providers/ThemeModeProvider';
+// Theme provider context (theme control moved to settings)
 
 
 /***********************
@@ -41,8 +38,9 @@ function ProfileBlock({ t }: { t: (k: string) => string }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
-  const name = user?.preferred_username ?? '';
-  const email = user?.email ?? '';
+  const router = useRouter();
+  const name = user?.Keycloak?.preferred_username ?? '';
+  const email = user?.Keycloak?.email ?? '';
 
   return (
     <>
@@ -100,10 +98,22 @@ function ProfileBlock({ t }: { t: (k: string) => string }) {
               fullWidth
               onClick={() => {
                 setOpen(false);
+                router.push('/settings');
+              }}
+              sx={{ mb: 1 }}
+            >
+              {t('menu.account_settings') || 'Settings'}
+            </Button>
+
+            <Button
+              variant="outlined"
+              fullWidth
+              onClick={() => {
+                setOpen(false);
                 logout();
               }}
             >
-              {t('sign_out')}
+              {t('login.sign_out')}
             </Button>
           </Stack>
         </Box>
@@ -112,36 +122,7 @@ function ProfileBlock({ t }: { t: (k: string) => string }) {
   );
 }
 
-/***********************
- * Theme Selector Block
- ***********************/
-function ThemeBlock({ t }: { t: (k: string) => string }) {
-  const { resolvedMode, toggle } = useThemeMode();
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        px: 1,
-        py: 0.5,
-      }}
-    >
-      <Stack direction="row" spacing={1} alignItems="center">
-        {resolvedMode === "dark" ? <DarkModeIcon /> : <LightModeIcon />}
-        <Typography variant="subtitle2" color="text.primary">
-          {resolvedMode === "dark" ? t("appearance.dark") : t("appearance.light")}
-        </Typography>
-      </Stack>
-      <Switch
-        checked={resolvedMode === "dark"}
-        onChange={toggle}
-        color="default"
-      />
-    </Box>
-  );
-}
+/* Theme selector moved to account settings */
 
 /***********************
  * Main Menu
@@ -158,7 +139,7 @@ export default function Menu() {
     if (user) {
       (async () => {
         try {
-          const bearer = user.token ?? null;
+          const bearer = user.Keycloak.token ?? null;
 
           if (!bearer) return;
 
@@ -264,27 +245,32 @@ export default function Menu() {
     //     { label: t('menu.access_tokens'), href: '/tokens', icon: <TokenIcon /> },
     //   ],
     // },
-    {
-      title: t('menu.settings'),
-      items: [
-        //{ label: t('menu.notifications'), href: '/notifications', icon: <NotificationsIcon /> },
-        { label: t('menu.account_settings'), href: '/settings', icon: <SettingsIcon /> },
-      ],
-    },
+    // settings moved to profile popover
   ];
 
   const isActive = (href: string) => (href !== '/' ? pathname?.startsWith(href) : pathname === '/');
 
   return (
-    <Box
-      className="w-64 p-4 flex flex-col"
-      sx={{
-        height: "100vh",
-        bgcolor: "background.paper",
-        borderRight: 1,
-        borderColor: "divider",
-      }}
-    >
+    /* Reserve horizontal space in the layout so main content stays shifted,
+       but render an inner fixed box so the menu remains always visible on scroll */
+    <Box sx={{ width: '16rem', flex: '0 0 16rem' }} className="w-64">
+      <Box
+        className="p-4 flex flex-col"
+        sx={{
+          // Use fixed position on medium+ screens so the menu stays visible.
+          // On small screens keep it in-flow (relative) to avoid covering content.
+          position: { xs: 'relative', md: 'fixed' },
+          left: { md: 0 },
+          top: { md: 0 },
+          height: { md: '100vh' },
+          width: '16rem',
+          bgcolor: 'background.paper',
+          borderRight: 1,
+          borderColor: 'divider',
+          overflowY: 'auto',
+          zIndex: (theme) => (theme.zIndex.drawer ?? 1200) + 1,
+        }}
+      >
       {/* Brand */}
       <Stack direction="row" alignItems="center" spacing={1.5} className="mb-1">
         <Box className="h-9 w-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm">
@@ -360,9 +346,9 @@ export default function Menu() {
       {/* Footer - theme selector + profile */}
       <Divider className="my-2" />
       <Box>
-        <ThemeBlock t={t} />
         <ProfileBlock t={t} />
       </Box>
+    </Box>
     </Box>
   );
 }

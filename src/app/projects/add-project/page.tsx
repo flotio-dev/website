@@ -20,6 +20,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Menu from '../../components/Menu';
 import { getTranslations } from '../../../lib/clientTranslations';
+import { useToast } from '../../../lib/hooks/useToast';
+import { useAuth } from '../../../lib/hooks/useAuth';
 
 export default function AddProjectPage() {
   const [activeStep, setActiveStep] = useState(0);
@@ -33,7 +35,13 @@ export default function AddProjectPage() {
     flutterVersion: 'stable',
   });
   const [errors, setErrors] = useState<any>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { addToast } = useToast();
+  const { token } = useAuth();
+  const [installationFound, setInstallationFound] = useState<boolean | null>(null);
+  const [repos, setRepos] = useState<Array<any>>([]);
+  const [reposLoading, setReposLoading] = useState(false);
 
   // Charger locale + traductions
   useEffect(() => {
@@ -52,6 +60,105 @@ export default function AddProjectPage() {
       mounted = false;
     };
   }, []);
+
+  // Check GitHub App installation for this account
+  useEffect(() => {
+    let mounted = true;
+    const checkInstallation = async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!base) {
+          console.debug('NEXT_PUBLIC_API_BASE_URL not set, skipping github installation check');
+          setInstallationFound(false);
+          return;
+        }
+        const url = `${base.replace(/\/$/, '')}/github/installations`;
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(url, { headers });
+        if (!mounted) return;
+        if (res.status === 404) {
+          setInstallationFound(false);
+          setNewProject((p: any) => ({ ...p, githubConnected: false }));
+          return;
+        }
+        if (!res.ok) {
+          console.debug('GitHub installation check failed', res.status);
+          setInstallationFound(false);
+          setNewProject((p: any) => ({ ...p, githubConnected: false }));
+          return;
+        }
+        // success -> installation exists
+        setInstallationFound(true);
+        setNewProject((p: any) => ({ ...p, githubConnected: true }));
+      } catch (err) {
+        console.error('Error checking GitHub installation', err);
+        if (!mounted) return;
+        setInstallationFound(false);
+        setNewProject((p: any) => ({ ...p, githubConnected: false }));
+      }
+    };
+
+    checkInstallation();
+
+    const onGithubToken = () => {
+      // re-check when github token event fires
+      checkInstallation();
+    };
+    window.addEventListener('githubToken', onGithubToken as EventListener);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener('githubToken', onGithubToken as EventListener);
+    };
+  }, [token]);
+
+  // Fetch GitHub repositories when installation is present
+  useEffect(() => {
+    let mounted = true;
+    const fetchRepos = async () => {
+      if (installationFound !== true) return;
+      try {
+        setReposLoading(true);
+        const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!base) {
+          console.debug('NEXT_PUBLIC_API_BASE_URL not set, skipping repos fetch');
+          if (mounted) setRepos([]);
+          return;
+        }
+        const url = `${base.replace(/\/$/, '')}/github/repos`;
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(url, { headers });
+        if (!mounted) return;
+        if (!res.ok) {
+          console.debug('Failed to fetch GitHub repos', res.status);
+          setRepos([]);
+          addToast({ message: t('add_project.errors.fetch_repos') || 'Failed to fetch repositories', type: 'error' });
+          return;
+        }
+        const data = await res.json();
+        if (!Array.isArray(data)) {
+          setRepos([]);
+          return;
+        }
+        setRepos(data);
+      } catch (err) {
+        console.error('Error fetching repos', err);
+        if (!mounted) return;
+        setRepos([]);
+        addToast({ message: t('add_project.errors.fetch_repos') || 'Failed to fetch repositories', type: 'error' });
+      } finally {
+        if (mounted) setReposLoading(false);
+      }
+    };
+
+    fetchRepos();
+
+    return () => {
+      mounted = false;
+    };
+  }, [installationFound, token]);
 
   // helper t()
   const t = (key: string) => {
@@ -88,12 +195,61 @@ export default function AddProjectPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateStep()) return;
 
     if (activeStep === steps.length - 1) {
-      console.log('🚀 Envoi au backend :', newProject);
-      router.push(`/projects/${newProject.name}`);
+      // ensure GitHub connected before creating project
+      if (!newProject.githubConnected) {
+        addToast({ message: t('add_project.errors.github_required') || 'You must connect GitHub to create a project', type: 'error' });
+        return;
+      }
+      // Final step: create project via backend
+      setIsSubmitting(true);
+      try {
+        const payload = {
+          name: newProject.name,
+          git_repo: newProject.repo || '',
+          build_folder: newProject.buildPath || '',
+          flutter_version: newProject.flutterVersion || '',
+        };
+
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch('/api/proxy/project', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          const msg = data?.error || data?.message || JSON.stringify(data) || 'Failed to create project';
+          throw new Error(msg);
+        }
+
+        const created = data?.project ?? data;
+        addToast({ message: t('add_project.notifications.created') || 'Projet créé', type: 'success' });
+
+        // Redirect to project ID-based overview if available
+        const createdId = created?.ID ?? created?.id ?? created?.ID;
+        if (createdId) {
+          router.push(`/projects/${encodeURIComponent(String(createdId))}/overview`);
+        } else {
+          // fallback to previous behavior using slug/name
+          const redirectSlug = created?.name || created?.slug || newProject.name;
+          router.push(`/projects/${redirectSlug}`);
+        }
+      } catch (err: any) {
+        console.error('Project creation failed', err);
+        addToast({ message: err?.message || t('add_project.errors.create_failed') || 'Erreur lors de la création', type: 'error' });
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       setActiveStep((prev) => prev + 1);
     }
@@ -118,26 +274,27 @@ export default function AddProjectPage() {
         return (
           <Stack spacing={2}>
             <Typography>{t('add_project.steps.github')}</Typography>
-            <Stack direction="row" spacing={2}>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  setNewProject({ ...newProject, githubConnected: true });
-                  setActiveStep((prev) => prev + 1);
-                }}
-              >
-                {t('add_project.actions.yes_github')}
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setNewProject({ ...newProject, githubConnected: false });
-                  setActiveStep((prev) => prev + 1);
-                }}
-              >
-                {t('add_project.actions.no_github')}
-              </Button>
-            </Stack>
+            {installationFound === null ? (
+              <Typography color="text.secondary">{t('add_project.messages.checking_github') || 'Checking GitHub connection...'}</Typography>
+            ) : installationFound === true ? (
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Typography color="success.main">{t('add_project.messages.github_connected') || 'GitHub App installed — connected'}</Typography>
+              </Stack>
+            ) : (
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Typography color="text.secondary">{t('add_project.messages.github_not_connected') || 'GitHub App not installed'}</Typography>
+                <Button
+                  component="a"
+                  href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP}/installations/new`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="contained"
+                  color="primary"
+                >
+                  {t('add_project.actions.connect_github') || 'Connect GitHub'}
+                </Button>
+              </Stack>
+            )}
           </Stack>
         );
       case 2:
@@ -149,10 +306,20 @@ export default function AddProjectPage() {
               onChange={(e) => setNewProject({ ...newProject, repo: e.target.value })}
               fullWidth
               error={!!errors.repo}
+              disabled={reposLoading}
             >
               <MenuItem value="">{`-- ${t('add_project.fields.repo')} --`}</MenuItem>
-              <MenuItem value="repo1">repo1</MenuItem>
-              <MenuItem value="repo2">repo2</MenuItem>
+              {reposLoading ? (
+                <MenuItem value="" disabled>{t('add_project.messages.checking_github') || 'Loading...'}</MenuItem>
+              ) : repos.length === 0 ? (
+                <MenuItem value="" disabled>{t('add_project.messages.no_repos') || 'No repositories found'}</MenuItem>
+              ) : (
+                repos.map((r: any) => (
+                  <MenuItem key={r.id ?? r.full_name} value={r.full_name}>
+                    {r.full_name}{r.private ? ' (private)' : ''}
+                  </MenuItem>
+                ))
+              )}
             </Select>
             {errors.repo && <FormHelperText error>{errors.repo}</FormHelperText>}
             <TextField
@@ -246,16 +413,18 @@ export default function AddProjectPage() {
           <Box mt={4}>{renderStep()}</Box>
 
           {/* Navigation */}
-          {activeStep === 1 ? (
+          {(activeStep === 1 && installationFound !== true) ? (
             <Box mt={4} display="flex" justifyContent="flex-start">
-              <Button onClick={handleBack}>{t('add_project.actions.back')}</Button>
+              <Button onClick={handleBack} disabled={isSubmitting}>
+                {t('add_project.actions.back')}
+              </Button>
             </Box>
           ) : (
             <Box mt={4} display="flex" justifyContent="space-between">
-              <Button disabled={activeStep === 0} onClick={handleBack}>
+              <Button disabled={activeStep === 0 || isSubmitting} onClick={handleBack}>
                 {t('add_project.actions.back')}
               </Button>
-              <Button variant="contained" onClick={handleNext}>
+              <Button variant="contained" onClick={handleNext} disabled={isSubmitting}>
                 {activeStep === steps.length - 1
                   ? t('add_project.actions.create')
                   : t('add_project.actions.next')}
