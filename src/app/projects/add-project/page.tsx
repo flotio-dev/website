@@ -138,11 +138,7 @@ export default function AddProjectPage() {
           return;
         }
         const data = await res.json();
-        if (!Array.isArray(data)) {
-          setRepos([]);
-          return;
-        }
-        setRepos(data);
+        setRepos(data.details?.repositories || []);
       } catch (err) {
         console.error('Error fetching repos', err);
         if (!mounted) return;
