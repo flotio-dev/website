@@ -22,7 +22,8 @@ import Menu from '../../components/Menu';
 import { getTranslations } from '../../../lib/clientTranslations';
 import { useToast } from '../../../lib/hooks/useToast';
 import { useAuth } from '../../../lib/hooks/useAuth';
-
+import clientApi from "@/lib/utils";
+import { Root } from '@/lib/types/github.repos';
 export default function AddProjectPage() {
   const [activeStep, setActiveStep] = useState(0);
   const [translations, setTranslations] = useState<Record<string, any> | null>(null);
@@ -126,19 +127,16 @@ export default function AddProjectPage() {
           if (mounted) setRepos([]);
           return;
         }
-        const url = `${base.replace(/\/$/, '')}/github/repos`;
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        const res = await fetch(url, { headers });
-        if (!mounted) return;
-        if (!res.ok) {
-          console.debug('Failed to fetch GitHub repos', res.status);
+        try {
+          const data = await clientApi<Root>("github/repos");
+          if (!mounted) return;
+          setRepos(data.details?.repositories || []);
+        } catch (err) {
+          console.error('Failed to fetch GitHub repos', err);
+          if (!mounted) return;
           setRepos([]);
           addToast({ message: t('add_project.errors.fetch_repos') || 'Failed to fetch repositories', type: 'error' });
-          return;
         }
-        const data = await res.json();
-        setRepos(data.details?.repositories || []);
       } catch (err) {
         console.error('Error fetching repos', err);
         if (!mounted) return;
