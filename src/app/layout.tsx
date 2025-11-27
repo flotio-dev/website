@@ -3,9 +3,9 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { Roboto } from "next/font/google";
 import "./globals.css";
 
-import { LanguageSwitcher } from "./components/LanguageSwitcher";
+import { LanguageSwitcher } from "@/app/components/LanguageSwitcher";
 import { AuthProvider } from "@/lib/hooks/useAuth";
-import ToastContainer from "./components/ToastContainer";
+import ToastContainer from "@/app/components/ToastContainer";
 import { ToastProvider } from "@/lib/hooks/useToast";
 import ThemeModeProvider from "./providers/ThemeModeProvider";
 

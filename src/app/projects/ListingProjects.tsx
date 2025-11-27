@@ -14,24 +14,35 @@ import {
   IconButton,
   Stack,
   Paper,
+  Menu as MUIMenu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteIcon from '@mui/icons-material/Delete';
 import FolderIcon from '@mui/icons-material/Folder';
-import Menu from '../components/Menu';
+import Menu from '@/app/components/Menu';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/lib/hooks/useToast';
+import { useAuth } from '@/lib/hooks/useAuth';
 import Link from 'next/link';
-import { getTranslations } from '../../lib/clientTranslations';
+import { getTranslations } from '@/lib/clientTranslations';
+import clientApi from '@/lib/utils';
 
 interface Project {
+  ID?: number;
   name: string;
-  recentActivity: string;
-  slug: string;
+  git_repo?: string;
+  build_folder?: string;
+  flutter_version?: string;
+  user_id?: number;
+  slug?: string;
+  CreatedAt?: string;
 }
 
-const projects: Project[] = [
-  { name: 'Test Project', recentActivity: '05/05/2025 : 08h21 PM', slug: 'Test' },
-  { name: 'Noname Project', recentActivity: '24/07/2025 : 11h47 AM', slug: 'Noname' },
-];
+const EMPTY: Project[] = [];
 
 export default function ListingProjects() {
   const [translations, setTranslations] = useState<Record<string, any> | null>(null);
@@ -58,6 +69,14 @@ export default function ListingProjects() {
   };
 
   const [locale, setLocale] = typeof window !== 'undefined' ? useState(() => getPreferredLocale(pathname)) : useState('fr');
+  const { addToast } = useToast();
+  const { token } = useAuth();
+  const router = useRouter();
+  const [projects, setProjects] = useState<Project[]>(EMPTY);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuTargetId, setMenuTargetId] = useState<string | number | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -82,6 +101,34 @@ export default function ListingProjects() {
       window.removeEventListener('storage', onStorage);
     };
   }, [locale, pathname]);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchProjects = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await clientApi<any>('project?limit=20');
+        // API might return { projects: [...] } or an array
+        const items: Project[] = data?.projects ?? data ?? [];
+        if (mounted) setProjects(items);
+      } catch (err: any) {
+        console.error('Failed to fetch projects', err);
+        if (mounted) {
+          setError(err?.message || 'Erreur lors du chargement');
+          addToast({ message: err?.message || 'Erreur lors du chargement des projets', type: 'error' });
+        }
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    };
+
+    fetchProjects();
+
+    return () => {
+      mounted = false;
+    };
+  }, [token]);
 
   const t = (key: string) => {
     if (!translations) return key;
@@ -139,62 +186,124 @@ export default function ListingProjects() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {projects.map((project, index) => (
-                <TableRow
-                  key={project.slug}
-                  hover
-                  sx={{
-                    '&:nth-of-type(odd) td, &:nth-of-type(odd) th': {
-                      bgcolor: 'background.paper',
-                    },
-                    '&:nth-of-type(even) td, &:nth-of-type(even) th': {
-                      bgcolor: 'background.default',
-                    },
-                    '&:hover td, &:hover th': {
-                      bgcolor: 'action.hover',
-                    },
-                    transition: 'background-color 120ms ease',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <TableCell>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Avatar sx={{ bgcolor: 'primary.main', color: 'white' }}>
-                        {project.name[0]}
-                      </Avatar>
-                      <Link href={`/projects/project-detail`} passHref>
-                        <Typography
-                          color="text.primary"
-                          sx={{
-                            textDecoration: 'none',
-                            fontWeight: 500,
-                            '&:hover': { textDecoration: 'underline' },
-                          }}
-                        >
-                          {project.name}
-                        </Typography>
-                      </Link>
-                    </Stack>
-                  </TableCell>
+              {projects.map((project, index) => {
+                const idOrSlug = project.ID ?? encodeURIComponent(project.slug ?? project.name);
+                const target = `/projects/${idOrSlug}/overview`;
 
-                  <TableCell>
-                    <Typography color="text.secondary">{project.recentActivity}</Typography>
-                  </TableCell>
+                return (
+                  <TableRow
+                    key={project.slug ?? index}
+                    hover
+                    onClick={() => router.push(target)}
+                    sx={{
+                      '&:nth-of-type(odd) td, &:nth-of-type(odd) th': {
+                        bgcolor: 'background.paper',
+                      },
+                      '&:nth-of-type(even) td, &:nth-of-type(even) th': {
+                        bgcolor: 'background.default',
+                      },
+                      '&:hover td, &:hover th': {
+                        bgcolor: 'action.hover',
+                      },
+                      transition: 'background-color 120ms ease',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <TableCell>
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <Avatar sx={{ bgcolor: 'primary.main', color: 'white' }}>
+                          {project.name[0]}
+                        </Avatar>
+                        <Link href={target} passHref>
+                          <Typography
+                            color="text.primary"
+                            sx={{
+                              textDecoration: 'none',
+                              fontWeight: 500,
+                              '&:hover': { textDecoration: 'underline' },
+                            }}
+                          >
+                            {project.name}
+                          </Typography>
+                        </Link>
+                      </Stack>
+                    </TableCell>
 
-                  <TableCell>
-                    <Typography color="text.secondary">{project.slug}</Typography>
-                  </TableCell>
+                    <TableCell>
+                      <Typography color="text.secondary">{project.CreatedAt ? new Date(project.CreatedAt).toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US') : '-'}</Typography>
+                    </TableCell>
 
-                  <TableCell>
-                    <IconButton>
-                      <MoreVertIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    <TableCell>
+                      <Typography color="text.secondary">{project.slug ?? project.name ?? '-'}</Typography>
+                    </TableCell>
+
+                    <TableCell>
+                      <IconButton
+                        aria-controls={menuAnchorEl ? 'project-row-menu' : undefined}
+                        aria-haspopup="true"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const idOrSlugLocal = project.ID ?? encodeURIComponent(project.slug ?? project.name);
+                          setMenuTargetId(idOrSlugLocal);
+                          setMenuAnchorEl(e.currentTarget as HTMLElement);
+                        }}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
+        {/* Row action menu */}
+        <MUIMenu
+          id="project-row-menu"
+          anchorEl={menuAnchorEl}
+          open={Boolean(menuAnchorEl)}
+          onClose={() => {
+            setMenuAnchorEl(null);
+            setMenuTargetId(null);
+          }}
+          onClick={() => {
+            /* prevent row click propagation */
+            // noop
+          }}
+        >
+          <MenuItem
+            onClick={async (e) => {
+              e.stopPropagation();
+              // confirm
+              const ok = window.confirm('Supprimer ce projet ?');
+              if (!ok) {
+                setMenuAnchorEl(null);
+                setMenuTargetId(null);
+                return;
+              }
+              try {
+                const idToDelete = menuTargetId;
+                if (!idToDelete) throw new Error('No project id');
+                // Use clientApi to perform the DELETE via the proxy and central auth handling
+                await clientApi<any>(`project/${encodeURIComponent(String(idToDelete))}`, { method: 'DELETE' });
+                // remove locally
+                setProjects((prev) => prev.filter((p) => (p.ID ?? encodeURIComponent(p.slug ?? p.name)) !== idToDelete));
+                addToast({ message: 'Projet supprimé', type: 'success' });
+              } catch (err: any) {
+                console.error('Delete project failed', err);
+                addToast({ message: err?.message || 'Erreur lors de la suppression', type: 'error' });
+              } finally {
+                setMenuAnchorEl(null);
+                setMenuTargetId(null);
+              }
+            }}
+          >
+            <ListItemIcon>
+              <DeleteIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Supprimer</ListItemText>
+          </MenuItem>
+        </MUIMenu>
       </Box>
     </Box>
   );

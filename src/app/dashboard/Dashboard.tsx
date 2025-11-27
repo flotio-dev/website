@@ -12,10 +12,11 @@ import {
 import FolderIcon from '@mui/icons-material/Folder';
 import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
 import { useEffect, useState } from 'react';
-import { getTranslations } from '../../lib/clientTranslations';
+import { getTranslations } from '@/lib/clientTranslations';
+import clientApi from '@/lib/utils';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Link from 'next/link';
-import Menu from '../components/Menu';
+import Menu from '@/app/components/Menu';
 
 const projects = [
   { name: 'Test Project', slug: 'Test' },
@@ -35,6 +36,32 @@ const changelog = [
 ];
 
 function ProjectList({ t }: { t: (k: string) => string }) {
+  const [projectsState, setProjectsState] = useState<Array<{ name?: string; slug?: string }>>([]);
+  const [loadingProjects, setLoadingProjects] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      setLoadingProjects(true);
+      try {
+        const data = await clientApi<any>('project?limit=5');
+        const items: Array<any> = data?.projects ?? data ?? [];
+        if (!mounted) return;
+        setProjectsState(items.map((p) => ({ name: p.name ?? p.slug ?? String(p.ID ?? ''), slug: p.slug ?? p.name })));
+      } catch (err) {
+        console.error('Failed to load dashboard projects', err);
+        if (!mounted) return;
+        setProjectsState([]);
+      } finally {
+        if (mounted) setLoadingProjects(false);
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <Paper variant="outlined" sx={{ mb: 4, p: 2 }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
@@ -57,14 +84,20 @@ function ProjectList({ t }: { t: (k: string) => string }) {
         </Button>
       </Stack>
       <Stack>
-        {projects.map((project) => (
-          <Stack direction="row" alignItems="center" spacing={2} key={project.name} mb={1}>
-            <Avatar sx={{ bgcolor: 'primary.main', color: 'white' }}>
-              {project.name[0]}
-            </Avatar>
-            <Typography variant="body1">{project.name}</Typography>
-          </Stack>
-        ))}
+        {loadingProjects ? (
+          <Typography color="text.secondary">{t('dashboard.loading_projects') ?? 'Loading projects...'}</Typography>
+        ) : projectsState.length === 0 ? (
+          <Typography color="text.secondary">{t('dashboard.no_projects') ?? 'No projects yet — create one to get started.'}</Typography>
+        ) : (
+          projectsState.map((project) => (
+            <Stack direction="row" alignItems="center" spacing={2} key={project.slug ?? project.name} mb={1}>
+              <Avatar sx={{ bgcolor: 'primary.main', color: 'white' }}>
+                {(project.name ?? '?')[0]}
+              </Avatar>
+              <Typography variant="body1">{project.name}</Typography>
+            </Stack>
+          ))
+        )}
       </Stack>
     </Paper>
   );
