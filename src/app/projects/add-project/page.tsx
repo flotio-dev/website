@@ -247,6 +247,17 @@ export default function AddProjectPage() {
             fullWidth
             error={!!errors.name}
             helperText={errors.name}
+            sx={{
+              '& input': (theme) => ({
+                color: `${theme.palette.text.primary} !important`,
+              }),
+              '& .MuiInputLabel-root': {
+                color: 'text.secondary',
+              },
+              '& .MuiInputLabel-root.Mui-focused': {
+                color: 'text.primary',
+              },
+            }}
           />
         );
       case 1:
