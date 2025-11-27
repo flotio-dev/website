@@ -18,10 +18,10 @@ import FolderIcon from '@mui/icons-material/Folder';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Menu from '../../components/Menu';
-import { getTranslations } from '../../../lib/clientTranslations';
-import { useToast } from '../../../lib/hooks/useToast';
-import { useAuth } from '../../../lib/hooks/useAuth';
+import Menu from '@/app/components/Menu';
+import { getTranslations } from '@/lib/clientTranslations';
+import { useToast } from '@/lib/hooks/useToast';
+import { useAuth } from '@/lib/hooks/useAuth';
 import clientApi from "@/lib/utils";
 import { Root } from '@/lib/types/github.repos';
 export default function AddProjectPage() {

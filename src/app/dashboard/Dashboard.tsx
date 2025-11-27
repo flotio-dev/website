@@ -12,11 +12,11 @@ import {
 import FolderIcon from '@mui/icons-material/Folder';
 import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
 import { useEffect, useState } from 'react';
-import { getTranslations } from '../../lib/clientTranslations';
+import { getTranslations } from '@/lib/clientTranslations';
 import clientApi from '@/lib/utils';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Link from 'next/link';
-import Menu from '../components/Menu';
+import Menu from '@/app/components/Menu';
 
 const projects = [
   { name: 'Test Project', slug: 'Test' },

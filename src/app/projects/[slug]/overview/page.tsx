@@ -4,10 +4,10 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Box, Paper, Grid, Typography, Avatar, Stack, Chip, Divider, Skeleton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, CircularProgress, Switch, FormControlLabel, Select, MenuItem } from '@mui/material';
-import ProjectSubMenu from '../../../components/ProjectSubMenu';
-import { getTranslations } from '../../../../lib/clientTranslations';
-import { useAuth } from '../../../../lib/hooks/useAuth';
-import { useToast } from '../../../../lib/hooks/useToast';
+import ProjectSubMenu from '@/app/components/ProjectSubMenu';
+import { getTranslations } from '@/lib/clientTranslations';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useToast } from '@/lib/hooks/useToast';
 import clientApi from '@/lib/utils';
 import { Root } from '@/lib/types/github.repos';
 

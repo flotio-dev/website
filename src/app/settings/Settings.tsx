@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from "@/lib/hooks/useAuth";
 import clientApi from '@/lib/utils';
-import { getTranslations } from '../../lib/clientTranslations';
+import { getTranslations } from '@/lib/clientTranslations';
 import { usePathname } from 'next/navigation';
 
 import {

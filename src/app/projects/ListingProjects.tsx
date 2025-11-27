@@ -22,13 +22,13 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FolderIcon from '@mui/icons-material/Folder';
-import Menu from '../components/Menu';
+import Menu from '@/app/components/Menu';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '../../lib/hooks/useToast';
-import { useAuth } from '../../lib/hooks/useAuth';
+import { useToast } from '@/lib/hooks/useToast';
+import { useAuth } from '@/lib/hooks/useAuth';
 import Link from 'next/link';
-import { getTranslations } from '../../lib/clientTranslations';
+import { getTranslations } from '@/lib/clientTranslations';
 import clientApi from '@/lib/utils';
 
 interface Project {
