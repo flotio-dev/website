@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { useAuth } from "@/lib/hooks/useAuth";
+import clientApi from '@/lib/utils';
 import { getTranslations } from '../../lib/clientTranslations';
 import { usePathname } from 'next/navigation';
 
@@ -68,32 +69,19 @@ export default function SettingsPage() {
       const payload = e.detail;
       setGithubConnected(!!payload.github_access_token);
     });
-    // On mount, check whether the GitHub App is installed for this account via API
+    // On mount, check whether the GitHub App is installed for this account via core API (through proxy)
     const checkInstallation = async () => {
       try {
-        const base = process.env.NEXT_PUBLIC_API_BASE_URL;
-        if (!base) {
-          console.debug('NEXT_PUBLIC_API_URL not set, skipping github installation check');
-          return;
-        }
-        const url = `${base.replace(/\/$/, '')}/github/installations`;
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        const res = await fetch(url, { headers });
-        if (res.status === 404) {
-          setGithubConnected(false);
-          return;
-        }
-        if (!res.ok) {
-          const txt = await res.text().catch(() => null);
-          console.debug('Failed checking github installation:', res.status, txt);
-          addToast({ message: `GitHub installation check failed (${res.status})`, type: 'error' });
-          setGithubConnected(false);
-          return;
-        }
-        // installation exists
+        await clientApi<any>('github/installations');
+        // if the request succeeded, installation exists
         setGithubConnected(true);
       } catch (err: any) {
+        const msg = err?.message ?? '';
+        if (msg.includes('404')) {
+          // not installed
+          setGithubConnected(false);
+          return;
+        }
         console.error('Error checking github installation', err);
         addToast({ message: err?.message || 'Error checking GitHub installation', type: 'error' });
         setGithubConnected(false);

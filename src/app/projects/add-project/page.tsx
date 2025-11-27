@@ -67,31 +67,25 @@ export default function AddProjectPage() {
     let mounted = true;
     const checkInstallation = async () => {
       try {
-        const base = process.env.NEXT_PUBLIC_API_BASE_URL;
-        if (!base) {
-          console.debug('NEXT_PUBLIC_API_BASE_URL not set, skipping github installation check');
-          setInstallationFound(false);
-          return;
-        }
-        const url = `${base.replace(/\/$/, '')}/github/installations`;
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        const res = await fetch(url, { headers });
-        if (!mounted) return;
-        if (res.status === 404) {
-          setInstallationFound(false);
-          setNewProject((p: any) => ({ ...p, githubConnected: false }));
-          return;
-        }
-        if (!res.ok) {
-          console.debug('GitHub installation check failed', res.status);
+        try {
+          const data = await clientApi<any>('github/installations');
+          if (!mounted) return;
+          // success -> installation exists
+          setInstallationFound(true);
+          setNewProject((p: any) => ({ ...p, githubConnected: true }));
+        } catch (err: any) {
+          if (!mounted) return;
+          // clientApi throws with message containing status code, e.g. "API request failed with status 404"
+          if (err && typeof err.message === 'string' && err.message.includes('404')) {
+            setInstallationFound(false);
+            setNewProject((p: any) => ({ ...p, githubConnected: false }));
+            return;
+          }
+          console.debug('GitHub installation check failed', err);
           setInstallationFound(false);
           setNewProject((p: any) => ({ ...p, githubConnected: false }));
           return;
         }
-        // success -> installation exists
-        setInstallationFound(true);
-        setNewProject((p: any) => ({ ...p, githubConnected: true }));
       } catch (err) {
         console.error('Error checking GitHub installation', err);
         if (!mounted) return;
@@ -208,23 +202,14 @@ export default function AddProjectPage() {
           flutter_version: newProject.flutterVersion || '',
         };
 
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-        };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-
-        const res = await fetch('/api/proxy/project', {
+        // Use central `clientApi` helper which attaches auth header if available
+        const data = await clientApi<any>('project', {
           method: 'POST',
-          headers,
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(payload),
         });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          const msg = data?.error || data?.message || JSON.stringify(data) || 'Failed to create project';
-          throw new Error(msg);
-        }
 
         const created = data?.project ?? data;
         addToast({ message: t('add_project.notifications.created') || 'Projet créé', type: 'success' });
