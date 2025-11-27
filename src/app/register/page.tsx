@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { getTranslations } from "../../lib/clientTranslations";
+import { getTranslations } from "@/lib/clientTranslations";
 
 // Icônes locales
 const UserIcon = (props: React.SVGProps<SVGSVGElement>) => (

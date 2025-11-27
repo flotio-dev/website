@@ -33,9 +33,9 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddIcon from '@mui/icons-material/Add';
 import DownloadIcon from '@mui/icons-material/Download';
-import Menu from '../components/Menu';
+import Menu from '@/app/components/Menu';
 import { useEffect, useMemo, useState } from 'react';
-import { getTranslations } from '../../lib/clientTranslations';
+import { getTranslations } from '@/lib/clientTranslations';
 
 // ---- Types
 type EnvName = 'development' | 'preview' | 'production';

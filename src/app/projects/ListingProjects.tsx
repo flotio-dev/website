@@ -22,13 +22,14 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FolderIcon from '@mui/icons-material/Folder';
-import Menu from '../components/Menu';
+import Menu from '@/app/components/Menu';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '../../lib/hooks/useToast';
-import { useAuth } from '../../lib/hooks/useAuth';
+import { useToast } from '@/lib/hooks/useToast';
+import { useAuth } from '@/lib/hooks/useAuth';
 import Link from 'next/link';
-import { getTranslations } from '../../lib/clientTranslations';
+import { getTranslations } from '@/lib/clientTranslations';
+import clientApi from '@/lib/utils';
 
 interface Project {
   ID?: number;
@@ -107,16 +108,7 @@ export default function ListingProjects() {
       setIsLoading(true);
       setError(null);
       try {
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-
-        const res = await fetch('/api/proxy/project?limit=20', { headers });
-        const data = await res.json();
-        if (!res.ok) {
-          const msg = data?.error || data?.message || JSON.stringify(data) || 'Failed to fetch projects';
-          throw new Error(msg);
-        }
-
+        const data = await clientApi<any>('project?limit=20');
         // API might return { projects: [...] } or an array
         const items: Project[] = data?.projects ?? data ?? [];
         if (mounted) setProjects(items);
@@ -292,14 +284,8 @@ export default function ListingProjects() {
               try {
                 const idToDelete = menuTargetId;
                 if (!idToDelete) throw new Error('No project id');
-                const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-                if (token) headers['Authorization'] = `Bearer ${token}`;
-                const base = process.env.NEXT_PUBLIC_API_BASE_URL;
-                if (!base) throw new Error('API base URL not configured (NEXT_PUBLIC_API_BASE_URL)');
-                const url = `${base.replace(/\/+$/g, '')}/project/${encodeURIComponent(String(idToDelete))}`;
-                const res = await fetch(url, { method: 'DELETE', headers });
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(data?.message || 'Failed to delete project');
+                // Use clientApi to perform the DELETE via the proxy and central auth handling
+                await clientApi<any>(`project/${encodeURIComponent(String(idToDelete))}`, { method: 'DELETE' });
                 // remove locally
                 setProjects((prev) => prev.filter((p) => (p.ID ?? encodeURIComponent(p.slug ?? p.name)) !== idToDelete));
                 addToast({ message: 'Projet supprimé', type: 'success' });
