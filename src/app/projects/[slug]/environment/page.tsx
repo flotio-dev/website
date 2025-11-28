@@ -1,191 +1,109 @@
-"use client";
+'use client';
 
 import {
   Box,
-  Typography,
-  Stack,
   Paper,
-  Chip,
-  Breadcrumbs,
-  Link as MUILink,
-  Grid,
+  Stack,
+  Typography,
+  Button,
   IconButton,
-  Tooltip,
+  TextField,
+  Select,
+  MenuItem,
+  Chip,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
   TableHead,
+  TableBody,
   TableRow,
-} from "@mui/material";
-import LaunchIcon from "@mui/icons-material/Launch";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ReportProblemIcon from "@mui/icons-material/ReportProblem";
-import CancelIcon from "@mui/icons-material/Cancel";
-import CloudIcon from "@mui/icons-material/Cloud";
-import { useEffect, useState } from "react";
-import { usePathname, useParams } from "next/navigation";
-import { getTranslations } from "../../../../lib/clientTranslations";
-import ProjectSubMenu from "../../../components/ProjectSubMenu";
+  TableCell,
+  Breadcrumbs,
+  TableContainer,
+  Checkbox,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  ListItemText,
+  Link as MUILink,
+} from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import AddIcon from '@mui/icons-material/Add';
+import DownloadIcon from '@mui/icons-material/Download';
+import { useEffect, useMemo, useState } from 'react';
+import { usePathname, useParams } from 'next/navigation';
+import { getTranslations } from '../../../../lib/clientTranslations';
+import ProjectSubMenu from '../../../components/ProjectSubMenu';
 
-/*******************
- * Types & mocks
- *******************/
-type EnvId = "development" | "preview" | "production";
-type EnvStatus = "healthy" | "degraded" | "down";
+// ---- Types
+type EnvName = 'development' | 'preview' | 'production';
+type Visibility = 'plain' | 'secret';
 
-interface Environment {
-  id: EnvId;
-  nameKey: string;      // ex: environment_page.development
-  url: string;
-  branch: string;
-  status: EnvStatus;
-  lastDeployAt: string;
-  lastDeployBy: string;
-}
-
-interface DeployItem {
+interface EnvVar {
   id: string;
-  env: EnvId;
-  status: EnvStatus;
-  commit: string;
-  author: string;
-  at: string;
+  name: string;
+  value: string;
+  envs: EnvName[];
+  visibility: Visibility;
+  updatedAt: string; // ISO string
+}
+interface ProjectShape {
+  name: string;
+  slug: string;
+  urlPath: string;
 }
 
-const mockEnvironments: Environment[] = [
+// ---- Mock data
+const MOCK: EnvVar[] = [
   {
-    id: "development",
-    nameKey: "environment_page.development",
-    url: "https://dev.example.com",
-    branch: "develop",
-    status: "healthy",
-    lastDeployAt: "2025-10-19T21:21:00Z",
-    lastDeployBy: "dev-user",
+    id: '1',
+    name: 'API_KEY',
+    value: 'test',
+    envs: ['development', 'preview', 'production'],
+    visibility: 'plain',
+    updatedAt: '2025-09-04T12:00:00Z',
   },
   {
-    id: "preview",
-    nameKey: "environment_page.preview",
-    url: "https://preview.example.com",
-    branch: "feature/new-ui",
-    status: "degraded",
-    lastDeployAt: "2025-10-18T16:02:00Z",
-    lastDeployBy: "reviewer",
-  },
-  {
-    id: "production",
-    nameKey: "environment_page.production",
-    url: "https://app.example.com",
-    branch: "main",
-    status: "healthy",
-    lastDeployAt: "2025-10-17T09:45:00Z",
-    lastDeployBy: "release-bot",
+    id: '2',
+    name: 'SENTRY_DSN',
+    value: 'https://****@sentry.io/123',
+    envs: ['production'],
+    visibility: 'secret',
+    updatedAt: '2025-09-10T09:21:00Z',
   },
 ];
 
-const mockDeploys: DeployItem[] = [
-  {
-    id: "deploy_101",
-    env: "production",
-    status: "healthy",
-    commit: "26c00b2",
-    author: "release-bot",
-    at: "2025-10-17T09:45:00Z",
-  },
-  {
-    id: "deploy_100",
-    env: "preview",
-    status: "degraded",
-    commit: "8cdd761",
-    author: "reviewer",
-    at: "2025-10-18T16:02:00Z",
-  },
-  {
-    id: "deploy_099",
-    env: "development",
-    status: "healthy",
-    commit: "2169c6e",
-    author: "dev-user",
-    at: "2025-10-19T21:21:00Z",
-  },
-];
-
-/*******************
- * Locale helpers
- *******************/
+// ---- Helpers i18n
 const getPreferredLocale = (p?: string | null) => {
   try {
     const stored =
-      typeof window !== "undefined" ? localStorage.getItem("lang") : null;
-    if (stored === "en" || stored === "fr") return stored;
-  } catch {}
-  if (!p) return "fr";
-  const parts = p.split("/");
+      typeof window !== 'undefined' ? localStorage.getItem('lang') : null;
+    if (stored === 'en' || stored === 'fr') return stored;
+  } catch { }
+  if (!p) return 'fr';
+  const parts = p.split('/');
   const candidate = parts[1];
-  if (candidate === "en" || candidate === "fr") return candidate;
-  return "fr";
+  if (candidate === 'en' || candidate === 'fr') return candidate;
+  return 'fr';
 };
 
-const formatDateTime = (iso: string, locale: string) => {
-  try {
-    const d = new Date(iso);
-    return new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(d);
-  } catch {
-    return iso;
-  }
-};
-
-/*******************
- * Status chip
- *******************/
-function EnvStatusChip({
-  status,
-  t,
-}: {
-  status: EnvStatus;
-  t: (k: string) => string;
-}) {
-  const map: Record<
-    EnvStatus,
-    { icon: React.ReactNode; color: "success" | "warning" | "error"; label: string }
-  > = {
-    healthy: {
-      icon: <CheckCircleIcon fontSize="small" />,
-      color: "success",
-      label: t("environment_page.status_healthy"),
-    },
-    degraded: {
-      icon: <ReportProblemIcon fontSize="small" />,
-      color: "warning",
-      label: t("environment_page.status_degraded"),
-    },
-    down: {
-      icon: <CancelIcon fontSize="small" />,
-      color: "error",
-      label: t("environment_page.status_down"),
-    },
-  };
-
-  const { icon, color, label } = map[status];
-  return <Chip icon={icon as any} label={label} color={color} size="small" />;
-}
-
-/*******************
- * Page
- *******************/
-export default function EnvironmentsPage() {
-  const pathname = usePathname() ?? "/";
+export default function EnvPage() {
+  const pathname = usePathname() ?? '/';
   const params = useParams() as { slug?: string } | undefined;
 
-  const pathParts = pathname.split("/").filter(Boolean);
+  // slug pour le sous-menu projet
+  const pathParts = pathname.split('/').filter(Boolean);
   const candidateSlugFromPath = params?.slug ?? pathParts[1] ?? pathParts[0];
-  const slugForMenu = candidateSlugFromPath ?? "project";
+  const slugForMenu = candidateSlugFromPath ?? 'project';
 
-  const [locale, setLocale] = useState<"fr" | "en">(
-    () => getPreferredLocale(pathname) as "fr" | "en"
+  // i18n
+  const [locale, setLocale] = useState<'fr' | 'en'>(
+    () => getPreferredLocale(pathname) as 'fr' | 'en'
   );
   const [translations, setTranslations] = useState<Record<string, any> | null>(
     null
@@ -193,238 +111,448 @@ export default function EnvironmentsPage() {
 
   useEffect(() => {
     let mounted = true;
-    const load = async (loc: string) => {
-      const json = await getTranslations(loc);
+    (async () => {
+      const json = await getTranslations(locale);
       if (mounted) setTranslations(json);
-    };
-    load(locale);
+    })();
 
     const onLocaleChanged = (e: any) => {
       const newLoc =
         e?.detail ??
-        (typeof window !== "undefined" ? localStorage.getItem("lang") : null);
-      if (newLoc === "en" || newLoc === "fr") setLocale(newLoc);
+        (typeof window !== 'undefined' ? localStorage.getItem('lang') : null);
+      if (newLoc === 'en' || newLoc === 'fr') setLocale(newLoc);
     };
-
-    window.addEventListener("localeChanged", onLocaleChanged as EventListener);
+    window.addEventListener('localeChanged', onLocaleChanged as EventListener);
     const onStorage = () => onLocaleChanged(null);
-    window.addEventListener("storage", onStorage);
+    window.addEventListener('storage', onStorage);
 
     return () => {
       mounted = false;
-      window.removeEventListener(
-        "localeChanged",
-        onLocaleChanged as EventListener
-      );
-      window.removeEventListener("storage", onStorage);
+      window.removeEventListener('localeChanged', onLocaleChanged as EventListener);
+      window.removeEventListener('storage', onStorage);
     };
   }, [locale, pathname]);
 
   const t = (key: string) => {
     if (!translations) return key;
-    const parts = key.split(".");
+    const parts = key.split('.');
     let cur: any = translations;
     for (const p of parts) {
-      if (cur && typeof cur === "object" && p in cur) cur = cur[p];
+      if (cur && typeof cur === 'object' && p in cur) cur = cur[p];
       else return key;
     }
-    return typeof cur === "string" ? cur : key;
+    return typeof cur === 'string' ? cur : key;
   };
+
+  // ---- Local state
+  const [rows, setRows] = useState<EnvVar[]>(MOCK);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [search, setSearch] = useState('');
+  const [envFilter, setEnvFilter] = useState<'all' | EnvName>('all');
+  const [reveal, setReveal] = useState<Record<string, boolean>>({}); // id -> revealed
+  const [projectData, setProjectData] = useState<any | null>(null);
+
+
+  // Dialog (add/edit)
+  const [openDialog, setOpenDialog] = useState(false);
+  const [draft, setDraft] = useState<EnvVar | null>(null);
+
+  const visibleRows = useMemo(() => {
+    return rows.filter((r) => {
+      const matchesSearch =
+        !search ||
+        r.name.toLowerCase().includes(search.toLowerCase()) ||
+        r.value.toLowerCase().includes(search.toLowerCase());
+      const matchesEnv =
+        envFilter === 'all' ? true : r.envs.includes(envFilter);
+      return matchesSearch && matchesEnv;
+    });
+  }, [rows, search, envFilter]);
+
+  const allSelected =
+    visibleRows.length > 0 && selected.length === visibleRows.length;
+  const indeterminate = selected.length > 0 && !allSelected;
+
+  const toggleSelectAll = (checked: boolean) => {
+    setSelected(checked ? visibleRows.map((r) => r.id) : []);
+  };
+  const toggleRow = (id: string) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const envChip = (e: EnvName) => (
+    <Chip
+      key={e}
+      size="small"
+      label={e}
+      sx={{
+        textTransform: 'capitalize',
+      }}
+    />
+  );
+
+  const visibilityLabel = (v: Visibility) =>
+    v === 'plain' ? 'Plain text' : 'Secret';
+
+  const maskValue = (v: string) =>
+    v.length <= 4 ? '••••' : '•'.repeat(Math.min(12, v.length));
+
+  const openAdd = () => {
+    setDraft({
+      id: crypto.randomUUID(),
+      name: '',
+      value: '',
+      envs: [],
+      visibility: 'plain',
+      updatedAt: new Date().toISOString(),
+    });
+    setOpenDialog(true);
+  };
+
+  const openEdit = (row: EnvVar) => {
+    setDraft({ ...row });
+    setOpenDialog(true);
+  };
+
+  const saveDraft = () => {
+    if (!draft) return;
+    setRows((prev) => {
+      const idx = prev.findIndex((r) => r.id === draft.id);
+      if (idx === -1) return [draft, ...prev];
+      const copy = [...prev];
+      copy[idx] = { ...draft, updatedAt: new Date().toISOString() };
+      return copy;
+    });
+    setOpenDialog(false);
+  };
+
+  const exportSelected = () => {
+    const out = rows.filter((r) => selected.includes(r.id));
+    const json = JSON.stringify(out, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'env-variables.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const deleteVariable = () => {
+    if (!draft) return;
+    setRows((prev) => prev.filter((r) => r.id !== draft.id));
+    setOpenDialog(false);
+  };
+
+  const mockProject: ProjectShape = {
+  name: 'Test Project',
+  slug: 'test-project',
+  urlPath: '/build/test-project',
+};
+  // project fusion API + mocks
+  const project: ProjectShape = useMemo(() => {
+    if (projectData && projectData.name) {
+      const pd: any = projectData;
+      return {
+        name: pd.name ?? mockProject.name,
+        slug: pd.slug ?? pd.name ?? mockProject.slug,
+        urlPath: pd.urlPath ?? `/build/${pd.slug ?? pd.name ?? 'project'}`,
+      };
+    }
+    const slug = candidateSlugFromPath ?? mockProject.slug;
+    return { ...mockProject, slug };
+  }, [projectData, candidateSlugFromPath]);
 
   return (
     <Box className="flex h-screen">
       {/* Sidebar projet */}
       <ProjectSubMenu slug={slugForMenu} />
 
-      {/* Main content */}
       <Box
         className="flex-1 overflow-auto"
-        sx={{ p: 6, bgcolor: "background.default" }}
+        sx={{ p: 6, bgcolor: 'background.default' }}
       >
         {/* Header */}
-        <Stack spacing={1} mb={4}>
-          <Breadcrumbs aria-label="breadcrumb">
-            <MUILink underline="hover" color="inherit" href="/projects">
-              {t("project_page.projects")}
-            </MUILink>
-            <MUILink
-              underline="hover"
-              color="inherit"
-              href={`/projects/${slugForMenu}/overview`}
-            >
-              {candidateSlugFromPath ?? "Project"}
-            </MUILink>
-            <Typography color="text.primary">
-              {t("environment_page.title") || "Environments"}
-            </Typography>
-          </Breadcrumbs>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
 
-          <Stack direction="row" spacing={1.5} alignItems="center">
-            <CloudIcon color="primary" />
-            <Typography variant="h5" color="text.primary">
-              {t("environment_page.title") || "Environments"}
+          <Stack spacing={1}>
+            {/* Breadcrumbs identiques à Project Overview */}
+            <Breadcrumbs aria-label="breadcrumb">
+              <MUILink underline="hover" color="inherit" href="/projects">
+                {t('project_page.projects')}
+              </MUILink>
+
+              {/* Nom du projet venant de l'URL */}
+              <Typography color="text.primary">
+                {project.name}
+              </Typography>
+            </Breadcrumbs>
+
+            {/* Titre de la page */}
+            <Typography variant="h5" fontWeight={700} color="text.primary">
+              {t('menu.environment_variables')}
             </Typography>
           </Stack>
-          <Typography variant="body2" color="text.secondary">
-            {t("environment_page.subtitle") ||
-              "Configure and monitor your development, preview, and production environments."}
-          </Typography>
+
+          <Stack direction="row" spacing={1}>
+            <Button
+              startIcon={<DownloadIcon />}
+              variant="outlined"
+              disabled={selected.length === 0}
+              onClick={exportSelected}
+            >
+              {t('access_token.title')}
+            </Button>
+            <Button
+              startIcon={<AddIcon />}
+              variant="contained"
+              onClick={openAdd}
+            >
+              {t('project_page.add_variable')}
+            </Button>
+          </Stack>
         </Stack>
 
-        {/* Environments cards */}
-        <Grid container spacing={2} mb={4}>
-          {mockEnvironments.map((env) => (
-              <Paper
-                sx={{
-                  borderRadius: 2,
-                  boxShadow: 2,
-                  bgcolor: "background.paper",
-                  p: 2,
-                  height: "100%",
-                }}
+
+        {/* Filters */}
+        <Paper sx={{ p: 2, mb: 2, bgcolor: 'background.paper' }}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            alignItems="center"
+          >
+            <FormControl sx={{ minWidth: 160 }} size="small">
+              <InputLabel id="env-filter-label">
+                {t('project_page.environment')}
+              </InputLabel>
+              <Select
+                labelId="env-filter-label"
+                label={t('project_page.environment')}
+                value={envFilter}
+                onChange={(e) => setEnvFilter(e.target.value as any)}
               >
-                <Stack spacing={1.5}>
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Typography variant="h6" color="text.primary">
-                      {t(env.nameKey) || env.id}
-                    </Typography>
-                    <EnvStatusChip status={env.status} t={t} />
-                  </Stack>
+                <MenuItem value="all">{t('common.all')}</MenuItem>
+                <MenuItem value="development">development</MenuItem>
+                <MenuItem value="preview">preview</MenuItem>
+                <MenuItem value="production">production</MenuItem>
+              </Select>
+            </FormControl>
 
-                  <Typography variant="body2" color="text.secondary">
-                    {t("environment_page.branch") || "Branch"}:{" "}
-                    <Typography
-                      component="span"
-                      variant="body2"
-                      color="text.primary"
-                      sx={{ fontFamily: "monospace" }}
-                    >
-                      {env.branch}
-                    </Typography>
-                  </Typography>
+            <TextField
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              size="small"
+              fullWidth
+              placeholder={t('build_list.filter_placeholder')}
+            />
+          </Stack>
+        </Paper>
 
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Typography variant="body2" color="text.secondary">
-                      {t("environment_page.url") || "URL"}:
-                    </Typography>
-                    <MUILink
-                      href={env.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      underline="hover"
-                    >
-                      {env.url}
-                    </MUILink>
-                    <Tooltip title={t("environment_page.open_env") || "Open"}>
-                      <IconButton
-                        size="small"
-                        href={env.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <LaunchIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-
-                  <Typography variant="body2" color="text.secondary">
-                    {t("environment_page.last_deploy") || "Last deploy"}:{" "}
-                    {formatDateTime(env.lastDeployAt, locale)} ·{" "}
-                    {t("environment_page.by") || "by"} {env.lastDeployBy}
-                  </Typography>
-
-                  <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      label={t("environment_page.manage_variables") || "Environment variables"}
-                      component="a"
-                      href={`/projects/${slugForMenu}/env-variables?env=${env.id}`}
-                      clickable
-                    />
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      label={t("environment_page.view_builds") || "View builds"}
-                      component="a"
-                      href={`/projects/${slugForMenu}/builds?env=${env.id}`}
-                      clickable
-                    />
-                  </Stack>
-                </Stack>
-              </Paper>
-          ))}
-        </Grid>
-
-        {/* Deploy history table */}
-        <Paper
-          className="rounded-xl shadow-sm"
-          sx={{ p: 2, bgcolor: "background.paper" }}
-        >
-          <Typography variant="h6" color="text.primary" mb={2}>
-            {t("environment_page.recent_deploys") || "Recent deploys"}
-          </Typography>
-
+        {/* Table */}
+        <Paper className="rounded-xl shadow-sm" sx={{ bgcolor: 'background.paper' }}>
           <TableContainer>
-            <Table size="small">
+            <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>{t("environment_page.deploy_id") || "ID"}</TableCell>
-                  <TableCell>
-                    {t("environment_page.environment") || "Environment"}
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      indeterminate={indeterminate}
+                      checked={allSelected}
+                      onChange={(e) => toggleSelectAll(e.target.checked)}
+                    />
                   </TableCell>
-                  <TableCell>{t("environment_page.status") || "Status"}</TableCell>
-                  <TableCell>{t("environment_page.commit") || "Commit"}</TableCell>
-                  <TableCell>{t("environment_page.author") || "Author"}</TableCell>
-                  <TableCell>{t("environment_page.date") || "Date"}</TableCell>
+                  <TableCell>{t('common.name')}</TableCell>
+                  <TableCell>{t('project_page.environment')}</TableCell>
+                  <TableCell>{t('common.value')}</TableCell>
+                  <TableCell>{t('access_token.status')}</TableCell>
+                  <TableCell align="right">{t('project_page.actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {mockDeploys.map((d) => {
-                  const env = mockEnvironments.find((e) => e.id === d.env);
+                {visibleRows.map((row) => {
+                  const revealed = !!reveal[row.id];
                   return (
                     <TableRow
-                      key={d.id}
+                      key={row.id}
                       hover
                       sx={{
-                        "&:nth-of-type(odd) td": {
-                          bgcolor: "background.paper",
-                        },
-                        "&:nth-of-type(even) td": {
-                          bgcolor: "background.default",
-                        },
-                        "&:hover td": { bgcolor: "action.hover" },
-                        transition: "background-color 120ms ease",
+                        '&:nth-of-type(odd) td': { bgcolor: 'background.paper' },
+                        '&:nth-of-type(even) td': { bgcolor: 'background.default' },
+                        '&:hover td': { bgcolor: 'action.hover' },
+                        transition: 'background-color 120ms ease',
                       }}
                     >
-                      <TableCell>{d.id}</TableCell>
-                      <TableCell>
-                        {env ? t(env.nameKey) || env.id : d.env}
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          checked={selected.includes(row.id)}
+                          onChange={() => toggleRow(row.id)}
+                        />
                       </TableCell>
                       <TableCell>
-                        <EnvStatusChip status={d.status} t={t} />
+                        <Stack spacing={0.2}>
+                          <Typography variant="body2" fontWeight={600}>
+                            {row.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(row.updatedAt).toLocaleDateString()}
+                          </Typography>
+                        </Stack>
                       </TableCell>
                       <TableCell>
-                        <Typography
-                          variant="body2"
-                          sx={{ fontFamily: "monospace" }}
-                        >
-                          {d.commit}
+                        <Stack direction="row" spacing={1} flexWrap="wrap">
+                          {row.envs.map(envChip)}
+                        </Stack>
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          <Typography variant="body2">
+                            {revealed ? row.value : maskValue(row.value)}
+                          </Typography>
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              setReveal((r) => ({ ...r, [row.id]: !revealed }))
+                            }
+                          >
+                            {revealed ? (
+                              <VisibilityOffIcon fontSize="small" />
+                            ) : (
+                              <VisibilityIcon fontSize="small" />
+                            )}
+                          </IconButton>
+                        </Stack>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {visibilityLabel(row.visibility)}
                         </Typography>
                       </TableCell>
-                      <TableCell>{d.author}</TableCell>
-                      <TableCell>{formatDateTime(d.at, locale)}</TableCell>
+                      <TableCell align="right">
+                        <Tooltip title={t('common.edit')}>
+                          <IconButton size="small" onClick={() => openEdit(row)}>
+                            <MoreVertIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
+                {visibleRows.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <Typography color="text.secondary">
+                        {t('build_list.no_builds')}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>
         </Paper>
+
+        {/* Dialog add/edit */}
+        <Dialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            {draft && rows.find((r) => r.id === draft.id)
+              ? t('common.edit')
+              : t('organization.add')}
+          </DialogTitle>
+          <DialogContent dividers>
+            <Stack spacing={2} mt={1}>
+              <TextField
+                label={t('common.name')}
+                value={draft?.name || ''}
+                onChange={(e) =>
+                  setDraft((d) => d && { ...d, name: e.target.value })
+                }
+                fullWidth
+              />
+              <TextField
+                label={t('common.value')}
+                value={draft?.value || ''}
+                onChange={(e) =>
+                  setDraft((d) => d && { ...d, value: e.target.value })
+                }
+                fullWidth
+              />
+              <FormControl>
+                <InputLabel id="envs-label">
+                  {t('project_page.environment')}
+                </InputLabel>
+                <Select
+                  labelId="envs-label"
+                  multiple
+                  input={
+                    <OutlinedInput label={t('project_page.environment')} />
+                  }
+                  value={draft?.envs || []}
+                  renderValue={(selected) => (selected as string[]).join(', ')}
+                  onChange={(e) =>
+                    setDraft(
+                      (d) =>
+                        d && { ...d, envs: e.target.value as EnvName[] }
+                    )
+                  }
+                >
+                  {(['development', 'preview', 'production'] as EnvName[]).map(
+                    (name) => (
+                      <MenuItem key={name} value={name}>
+                        <Checkbox checked={draft?.envs.includes(name) || false} />
+                        <ListItemText primary={name} />
+                      </MenuItem>
+                    )
+                  )}
+                </Select>
+              </FormControl>
+              <FormControl>
+                <InputLabel id="vis-label">Visibility</InputLabel>
+                <Select
+                  labelId="vis-label"
+                  label="Visibility"
+                  value={draft?.visibility || 'plain'}
+                  onChange={(e) =>
+                    setDraft(
+                      (d) =>
+                        d && {
+                          ...d,
+                          visibility: e.target.value as Visibility,
+                        }
+                    )
+                  }
+                >
+                  <MenuItem value="plain">Plain text</MenuItem>
+                  <MenuItem value="secret">Secret</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+          </DialogContent>
+
+          <DialogActions>
+            {/* Bouton supprimer visible uniquement en mode édition */}
+            {draft && rows.find((r) => r.id === draft.id) && (
+              <Button color="error" onClick={deleteVariable}>
+                {t('common.delete')}
+              </Button>
+            )}
+
+            <Box sx={{ flexGrow: 1 }} />
+
+            <Button onClick={() => setOpenDialog(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button variant="contained" onClick={saveDraft}>
+              {t('common.save')}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );
