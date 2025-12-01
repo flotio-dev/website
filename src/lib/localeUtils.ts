@@ -28,6 +28,13 @@ export const setTranslations = (data: Record<string, any>) => {
 
 export const getCurrentTranslations = () => translations;
 
+/**
+ * Translates a given key into the current locale's string using the loaded translations.
+ * If the key is not found or translations are not loaded, returns the key itself.
+ *
+ * @param {string} key - The translation key, using dot notation for nested keys (e.g., "home.title").
+ * @returns {string} The translated string, or the key if not found.
+ */
 export const t = (key: string): string => {
   if (!translations) return key;
 
