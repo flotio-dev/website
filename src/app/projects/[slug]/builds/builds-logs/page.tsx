@@ -118,7 +118,7 @@ export default function BuildDetailsPage() {
       );
       window.removeEventListener("storage", onStorage);
     };
-  }, [locale, pathname]);
+  }, [locale]);
 
 
   const buildId = params?.buildId ?? "build_0073";
