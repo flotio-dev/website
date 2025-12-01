@@ -6,7 +6,8 @@ export const getPreferredLocale = (p?: string | null): Locale => {
     const stored =
       typeof window !== "undefined" ? localStorage.getItem("lang") : null;
     if (stored === "en" || stored === "fr") return stored;
-  } catch {
+  } catch (e) {
+    console.error("Error accessing localStorage for preferred locale:", e);
   }
 
   if (!p) return "fr";
@@ -28,15 +29,26 @@ export const setTranslations = (data: Record<string, any>) => {
 
 export const getCurrentTranslations = () => translations;
 
+/**
+ * Translates a given key into the current locale's string using the loaded translations.
+ * If the key is not found or translations are not loaded, returns the key itself.
+ *
+ * @param {string} key - The translation key, using dot notation for nested keys (e.g., "home.title").
+ * @returns {string} The translated string, or the key if not found.
+ */
 export const t = (key: string): string => {
   if (!translations) return key;
 
   const parts = key.split(".");
-  let cur: any = translations;
+  let cur: unknown = translations;
 
   for (const p of parts) {
-    if (cur && typeof cur === "object" && p in cur) {
-      cur = cur[p];
+    if (
+      cur !== null &&
+      typeof cur === "object" &&
+      p in cur
+    ) {
+      cur = (cur as Record<string, unknown>)[p];
     } else {
       return key;
     }

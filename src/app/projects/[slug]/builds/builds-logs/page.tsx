@@ -99,7 +99,7 @@ export default function BuildDetailsPage() {
     };
     load(locale);
 
-    const onLocaleChanged = (e: any) => {
+    const onLocaleChanged = (e: CustomEvent<string> | null) => {
       const newLoc =
         e?.detail ??
         (typeof window !== "undefined" ? localStorage.getItem("lang") : null);
@@ -118,7 +118,7 @@ export default function BuildDetailsPage() {
       );
       window.removeEventListener("storage", onStorage);
     };
-  }, [locale, pathname]);
+  }, [locale]);
 
 
   const buildId = params?.buildId ?? "build_0073";
