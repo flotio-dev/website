@@ -62,4 +62,3 @@ const baseTheme = (mode: 'light' | 'dark'): ThemeOptions => ({
 
 const theme = createTheme(baseTheme('light'));
 export default theme;
-export const getTheme = (mode: 'light' | 'dark') => createTheme(baseTheme(mode));
