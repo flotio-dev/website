@@ -253,7 +253,9 @@
     "messages": {
       "checking_github": "Vérification de l'installation GitHub...",
       "github_connected": "L'application GitHub est installée",
-      "github_not_connected": "L'application GitHub n'est pas installée"
+      "github_not_connected": "L'application GitHub n'est pas installée",
+      "no_repos": "Aucun dépôt trouvé",
+      "select_repo": "Sélectionnez un dépôt pour continuer"
     },
     "fields": {
       "project_name": "Nom du projet",
