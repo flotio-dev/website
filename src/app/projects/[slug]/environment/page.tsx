@@ -84,7 +84,9 @@ const getPreferredLocale = (p?: string | null) => {
     const stored =
       typeof window !== 'undefined' ? localStorage.getItem('lang') : null;
     if (stored === 'en' || stored === 'fr') return stored;
-  } catch { }
+  } catch {
+    // Intentionally ignore errors accessing localStorage (e.g., in private mode or server-side rendering)  
+  }
   if (!p) return 'fr';
   const parts = p.split('/');
   const candidate = parts[1];
@@ -247,10 +249,10 @@ export default function EnvPage() {
   };
 
   const mockProject: ProjectShape = {
-  name: 'Test Project',
-  slug: 'test-project',
-  urlPath: '/build/test-project',
-};
+    name: 'Test Project',
+    slug: 'test-project',
+    urlPath: '/build/test-project',
+  };
   // project fusion API + mocks
   const project: ProjectShape = useMemo(() => {
     if (projectData && projectData.name) {
@@ -303,7 +305,7 @@ export default function EnvPage() {
               disabled={selected.length === 0}
               onClick={exportSelected}
             >
-              {t('access_token.title')}
+              {t('common.export')}
             </Button>
             <Button
               startIcon={<AddIcon />}
@@ -443,7 +445,7 @@ export default function EnvPage() {
                   <TableRow>
                     <TableCell colSpan={6} align="center">
                       <Typography color="text.secondary">
-                        {t('build_list.no_builds')}
+                        {t('environment_page.no_variables')}
                       </Typography>
                     </TableCell>
                   </TableRow>
