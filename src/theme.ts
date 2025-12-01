@@ -31,7 +31,7 @@ const baseTheme = (mode: 'light' | 'dark'): ThemeOptions => ({
         }),
   },
 
-  // OVERRIDES GLOBALS POUR TEXTFIELD
+  // GLOBAL OVERRIDES FOR TEXTFIELD  
   components: {
     MuiOutlinedInput: {
       styleOverrides: {
@@ -60,8 +60,6 @@ const baseTheme = (mode: 'light' | 'dark'): ThemeOptions => ({
   },
 });
 
-// Par défaut on exporte le thème LIGHT.
-// Le ThemeModeProvider se chargera d’appliquer dark mode ensuite.
 const theme = createTheme(baseTheme('light'));
 export default theme;
 export const getTheme = (mode: 'light' | 'dark') => createTheme(baseTheme(mode));
