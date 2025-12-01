@@ -14,6 +14,18 @@ interface UseLocalizationOptions {
     pathname?: string;
 }
 
+/**
+ * React hook for managing localization and translations.
+ *
+ * @param {UseLocalizationOptions} [options] - Options for localization.
+ * @param {string} [options.pathname] - Optional pathname to determine the preferred locale.
+ * @returns {{ locale: Locale, setLocale: (locale: Locale) => void, translations: Record<string, any> | null, t: (key: string) => string }}
+ *   An object containing:
+ *   - `locale`: The current locale.
+ *   - `setLocale`: Function to update the current locale.
+ *   - `translations`: The current translations object, or null if not loaded.
+ *   - `t`: Function to translate a key using the current translations.
+ */
 export const useLocalization = (options: UseLocalizationOptions = {}) => {
     const { pathname } = options;
 
