@@ -6,7 +6,8 @@ export const getPreferredLocale = (p?: string | null): Locale => {
     const stored =
       typeof window !== "undefined" ? localStorage.getItem("lang") : null;
     if (stored === "en" || stored === "fr") return stored;
-  } catch {
+  } catch (e) {
+    console.error("Error accessing localStorage for preferred locale:", e);
   }
 
   if (!p) return "fr";
