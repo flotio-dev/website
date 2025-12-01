@@ -15,11 +15,11 @@ import {
   Stack,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { getTranslations } from '../../lib/clientTranslations';
+import { getTranslations } from '@/lib/clientTranslations';
 
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
-import Menu from '../components/Menu';
+import Menu from '@/app/components/Menu';
 
 interface Token {
   name: string;

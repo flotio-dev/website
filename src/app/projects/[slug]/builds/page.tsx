@@ -46,10 +46,10 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 
-import ProjectSubMenu from '../../../components/ProjectSubMenu';
-import { getTranslations } from '../../../../lib/clientTranslations';
-import { useAuth } from '../../../../lib/hooks/useAuth';
-import { useToast } from '../../../../lib/hooks/useToast';
+import ProjectSubMenu from '@/app/components/ProjectSubMenu';
+import { getTranslations } from '@/lib/clientTranslations';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useToast } from '@/lib/hooks/useToast';
 
 // ---------- Types & mocks ----------
 

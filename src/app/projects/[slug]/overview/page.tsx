@@ -4,10 +4,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Box, Paper, Grid, Typography, Avatar, Stack, Chip, Divider, Skeleton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, CircularProgress, Switch, FormControlLabel, Select, MenuItem } from '@mui/material';
-import ProjectSubMenu from '../../../components/ProjectSubMenu';
-import { getTranslations } from '../../../../lib/clientTranslations';
-import { useAuth } from '../../../../lib/hooks/useAuth';
-import { useToast } from '../../../../lib/hooks/useToast';
+import ProjectSubMenu from '@/app/components/ProjectSubMenu';
+import { getTranslations } from '@/lib/clientTranslations';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useToast } from '@/lib/hooks/useToast';
+import clientApi from '@/lib/utils';
+import { Root } from '@/lib/types/github.repos';
 
 interface Ownership {
   type: 'organization' | 'user';
@@ -83,6 +85,8 @@ export default function ProjectOverviewPage() {
   const [editGithubConnected, setEditGithubConnected] = useState<boolean | null>(null);
   const [editRepo, setEditRepo] = useState('');
   const [editSaving, setEditSaving] = useState(false);
+  const [repos, setRepos] = useState<Array<any>>([]);
+  const [reposLoading, setReposLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -195,6 +199,34 @@ export default function ProjectOverviewPage() {
     };
   }, [pathname, token, addToast, params]);
 
+  // Fetch GitHub repos when edit dialog opens and GitHub is connected
+  useEffect(() => {
+    let mounted = true;
+    const fetchRepos = async () => {
+      if (!editOpen) return;
+      if (!editGithubConnected) return;
+      try {
+        setReposLoading(true);
+        const data = await clientApi<Root>('github/repos');
+        if (!mounted) return;
+        setRepos(data?.details?.repositories || []);
+      } catch (err: any) {
+        console.error('Failed to fetch GitHub repos', err);
+        if (!mounted) return;
+        setRepos([]);
+        addToast({ message: t('add_project.errors.fetch_repos') || 'Failed to fetch repositories', type: 'error' });
+      } finally {
+        if (mounted) setReposLoading(false);
+      }
+    };
+
+    fetchRepos();
+
+    return () => {
+      mounted = false;
+    };
+  }, [editOpen, editGithubConnected]);
+
   // split path early so we can build sensible defaults without using mock data
   const pathParts = pathname.split('/').filter(Boolean);
   // Prefer the route param or the last path segment as a candidate slug
@@ -297,24 +329,20 @@ export default function ProjectOverviewPage() {
     }
     setEditSaving(true);
     try {
-      const base = process.env.NEXT_PUBLIC_API_BASE_URL;
-      if (!base) throw new Error('API base URL not configured');
-      const url = `${base.replace(/\/$/, '')}/project/${id}`;
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
       const gitRepoToSend = editGithubConnected ? (editRepo || editGitRepo) : editGitRepo;
-      const body = JSON.stringify({
+      const payload = {
         name: editName,
         git_repo: gitRepoToSend,
         build_folder: editBuildFolder,
         flutter_version: editFlutterVersion,
+      };
+
+      const data = await clientApi<any>(`project/${encodeURIComponent(String(id))}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
-      const res = await fetch(url, { method: 'PUT', headers, body });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        const msg = data?.message || `Failed to update project (${res.status})`;
-        throw new Error(msg);
-      }
+
       const p = data?.project ?? data;
       setProjectData(p);
       addToast({ message: 'Project mis à jour', type: 'success' });
@@ -494,8 +522,17 @@ export default function ProjectOverviewPage() {
               {editGithubConnected ? (
                 <Select value={editRepo} onChange={(e) => setEditRepo(String(e.target.value))} fullWidth>
                   <MenuItem value="">{`-- ${t('add_project.fields.repo') || 'Select repo'} --`}</MenuItem>
-                  <MenuItem value="repo1">repo1</MenuItem>
-                  <MenuItem value="repo2">repo2</MenuItem>
+                  {reposLoading ? (
+                    <MenuItem value="" disabled>{t('add_project.messages.checking_github') || 'Loading...'}</MenuItem>
+                  ) : repos.length === 0 ? (
+                    <MenuItem value="" disabled>{t('add_project.messages.no_repos') || 'No repositories found'}</MenuItem>
+                  ) : (
+                    repos.map((r: any) => (
+                      <MenuItem key={r.id ?? r.full_name} value={r.full_name}>
+                        {r.full_name}{r.private ? ' (private)' : ''}
+                      </MenuItem>
+                    ))
+                  )}
                 </Select>
               ) : (
                 <TextField label={t('project_page.git_repo') ?? 'Git repository'} value={editGitRepo} onChange={(e) => setEditGitRepo(e.target.value)} fullWidth />
