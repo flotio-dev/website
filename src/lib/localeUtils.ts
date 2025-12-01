@@ -39,11 +39,15 @@ export const t = (key: string): string => {
   if (!translations) return key;
 
   const parts = key.split(".");
-  let cur: any = translations;
+  let cur: unknown = translations;
 
   for (const p of parts) {
-    if (cur && typeof cur === "object" && p in cur) {
-      cur = cur[p];
+    if (
+      cur !== null &&
+      typeof cur === "object" &&
+      p in cur
+    ) {
+      cur = (cur as Record<string, unknown>)[p];
     } else {
       return key;
     }
