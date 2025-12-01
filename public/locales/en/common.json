@@ -96,7 +96,9 @@
     "messages": {
       "checking_github": "Checking GitHub installation...",
       "github_connected": "GitHub App is installed",
-      "github_not_connected": "GitHub App is not installed"
+      "github_not_connected": "GitHub App is not installed",
+      "no_repos": "No repositories found",
+      "select_repo": "Select a repository to continue"
     },
     "fields": {
       "project_name": "Project name",
@@ -274,5 +276,29 @@
     "duration": "Duration",
     "commit": "Commit",
     "no_builds": "No builds found"
+  },  
+  "environment_page": {
+    "title": "Environments",
+    "subtitle": "Configure and monitor your development, preview and production environments.",
+    "development": "Development",
+    "preview": "Preview",
+    "production": "Production",
+    "status": "Status",
+    "status_healthy": "Healthy",
+    "status_degraded": "Degraded",
+    "status_down": "Down",
+    "branch": "Branch",
+    "url": "URL",
+    "open_env": "Open environment",
+    "last_deploy": "Last deploy",
+    "by": "by",
+    "manage_variables": "Environment variables",
+    "view_builds": "View builds",
+    "recent_deploys": "Recent deploys",
+    "deploy_id": "ID",
+    "environment": "Environment",
+    "commit": "Commit",
+    "author": "Author",
+    "date": "Date"
   }
 }

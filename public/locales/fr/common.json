@@ -253,7 +253,9 @@
     "messages": {
       "checking_github": "Vérification de l'installation GitHub...",
       "github_connected": "L'application GitHub est installée",
-      "github_not_connected": "L'application GitHub n'est pas installée"
+      "github_not_connected": "L'application GitHub n'est pas installée",
+      "no_repos": "Aucun dépôt trouvé",
+      "select_repo": "Sélectionnez un dépôt pour continuer"
     },
     "fields": {
       "project_name": "Nom du projet",
@@ -273,6 +275,30 @@
       "name_required": "Le nom du projet est requis",
       "repo_required": "Veuillez sélectionner un dépôt",
       "flutter_required": "Veuillez choisir une version de Flutter"
+    },
+    "environment_page": {
+      "title": "Environnements",
+      "subtitle": "Configurez et surveillez vos environnements de développement, de prévisualisation et de production.",
+      "development": "Développement",
+      "preview": "Prévisualisation",
+      "production": "Production",
+      "status": "Statut",
+      "status_healthy": "Opérationnel",
+      "status_degraded": "Dégradé",
+      "status_down": "Indisponible",
+      "branch": "Branche",
+      "url": "URL",
+      "open_env": "Ouvrir l'environnement",
+      "last_deploy": "Dernier déploiement",
+      "by": "par",
+      "manage_variables": "Variables d'environnement",
+      "view_builds": "Voir les builds",
+      "recent_deploys": "Déploiements récents",
+      "deploy_id": "ID",
+      "environment": "Environnement",
+      "commit": "Commit",
+      "author": "Auteur",
+      "date": "Date"
     }
   }
 }
