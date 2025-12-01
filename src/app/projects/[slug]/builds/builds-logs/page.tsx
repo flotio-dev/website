@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useParams } from "next/navigation";
 import { getTranslations } from "../../../../../lib/clientTranslations";
 import ProjectSubMenu from "../../../../components/ProjectSubMenu";
+import { setTranslations, getPreferredLocale, t } from "../../../../../lib/localeUtils";
 
 /*******************
  * Types & Mock Data
@@ -45,22 +46,6 @@ const mockSteps: BuildStep[] = [
   },
   { id: "5", name: "Complete job", status: "success", duration: "0s" },
 ];
-
-/*******************
- * Locale helpers
- *******************/
-const getPreferredLocale = (p?: string | null) => {
-  try {
-    const stored =
-      typeof window !== "undefined" ? localStorage.getItem("lang") : null;
-    if (stored === "en" || stored === "fr") return stored;
-  } catch {}
-  if (!p) return "fr";
-  const parts = p.split("/");
-  const candidate = parts[1];
-  if (candidate === "en" || candidate === "fr") return candidate;
-  return "fr";
-};
 
 /*******************
  * Step status chip
@@ -105,9 +90,6 @@ export default function BuildDetailsPage() {
   const [locale, setLocale] = useState<"fr" | "en">(
     () => getPreferredLocale(pathname) as "fr" | "en"
   );
-  const [translations, setTranslations] = useState<Record<string, any> | null>(
-    null
-  );
 
   useEffect(() => {
     let mounted = true;
@@ -138,16 +120,6 @@ export default function BuildDetailsPage() {
     };
   }, [locale, pathname]);
 
-  const t = (key: string) => {
-    if (!translations) return key;
-    const parts = key.split(".");
-    let cur: any = translations;
-    for (const p of parts) {
-      if (cur && typeof cur === "object" && p in cur) cur = cur[p];
-      else return key;
-    }
-    return typeof cur === "string" ? cur : key;
-  };
 
   const buildId = params?.buildId ?? "build_0073";
   const projectName = candidateSlugFromPath ?? "Project";

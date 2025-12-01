@@ -22,10 +22,10 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import SearchIcon from "@mui/icons-material/Search";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { usePathname, useParams } from "next/navigation";
-import { getTranslations } from "../../../../../lib/clientTranslations";
 import ProjectSubMenu from "../../../../components/ProjectSubMenu";
+import { useLocalization } from "../../../../../lib/hooks/useLocalization";
 
 /*******************
  * Types & Mock Data
@@ -73,22 +73,6 @@ const mockBuilds: BuildItem[] = [
     commit: "8cdd761",
   },
 ];
-
-/*******************
- * Locale helpers
- *******************/
-const getPreferredLocale = (p?: string | null) => {
-  try {
-    const stored =
-      typeof window !== "undefined" ? localStorage.getItem("lang") : null;
-    if (stored === "en" || stored === "fr") return stored;
-  } catch {}
-  if (!p) return "fr";
-  const parts = p.split("/");
-  const candidate = parts[1];
-  if (candidate === "en" || candidate === "fr") return candidate;
-  return "fr";
-};
 
 const formatDate = (iso: string, locale: string) => {
   try {
@@ -145,57 +129,11 @@ export default function BuildListPage() {
   const pathParts = pathname.split("/").filter(Boolean);
   const candidateSlugFromPath = params?.slug ?? pathParts[1] ?? pathParts[0];
   const slugForMenu = candidateSlugFromPath ?? "project";
-
-  const [locale, setLocale] = useState<"fr" | "en">(
-    () => getPreferredLocale(pathname) as "fr" | "en"
-  );
-  const [translations, setTranslations] = useState<Record<string, any> | null>(
-    null
-  );
-
-  useEffect(() => {
-    let mounted = true;
-    const load = async (loc: string) => {
-      const json = await getTranslations(loc);
-      if (mounted) setTranslations(json);
-    };
-    load(locale);
-
-    const onLocaleChanged = (e: any) => {
-      const newLoc =
-        e?.detail ??
-        (typeof window !== "undefined" ? localStorage.getItem("lang") : null);
-      if (newLoc === "en" || newLoc === "fr") setLocale(newLoc);
-    };
-
-    window.addEventListener("localeChanged", onLocaleChanged as EventListener);
-    const onStorage = () => onLocaleChanged(null);
-    window.addEventListener("storage", onStorage);
-
-    return () => {
-      mounted = false;
-      window.removeEventListener(
-        "localeChanged",
-        onLocaleChanged as EventListener
-      );
-      window.removeEventListener("storage", onStorage);
-    };
-  }, [locale, pathname]);
-
-  const t = (key: string) => {
-    if (!translations) return key;
-    const parts = key.split(".");
-    let cur: any = translations;
-    for (const p of parts) {
-      if (cur && typeof cur === "object" && p in cur) cur = cur[p];
-      else return key;
-    }
-    return typeof cur === "string" ? cur : key;
-  };
-
   const filteredBuilds = mockBuilds.filter((b) =>
     b.message.toLowerCase().includes(filter.toLowerCase())
   );
+
+  const { locale, t } = useLocalization();
 
   return (
     <Box className="flex h-screen">
