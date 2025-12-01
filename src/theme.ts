@@ -31,7 +31,7 @@ const baseTheme = (mode: 'light' | 'dark'): ThemeOptions => ({
         }),
   },
 
-  // GLOBAL OVERRIDES FOR TEXTFIELD  
+  // GLOBAL OVERRIDES FOR TEXTFIELD
   components: {
     MuiOutlinedInput: {
       styleOverrides: {
