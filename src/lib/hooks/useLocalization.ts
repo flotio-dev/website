@@ -24,7 +24,7 @@ export const useLocalization = (options: UseLocalizationOptions = {}) => {
         return "fr";
     });
 
-    const [translations, setTranslationsState] = useState<Record<string, any> | null>(
+    const [translations, setTranslationsState] = useState<Record<string, unknown> | null>(
         getCurrentTranslations()
     );
 
