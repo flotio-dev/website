@@ -231,7 +231,12 @@ export default function EnvPage() {
       >
         {/* Header */}
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
-          <Typography variant="h5" fontWeight={700} color="text.primary">
+          <Typography
+            variant="h5"
+            fontWeight={700}
+            color="text.primary"
+            data-testid="env-header-title"
+          >
             {t('menu.environment_variables')}
           </Typography>
 
@@ -248,6 +253,7 @@ export default function EnvPage() {
               startIcon={<AddIcon />}
               variant="contained"
               onClick={openAdd}
+              data-testid="env-add-variable-btn"
             >
               {t('project_page.add_variable')}
             </Button>
@@ -374,7 +380,13 @@ export default function EnvPage() {
         </Paper>
 
         {/* Dialog add/edit */}
-        <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+        <Dialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          maxWidth="sm"
+          fullWidth
+          data-testid="env-dialog"
+        >
           <DialogTitle>
             {draft && rows.find((r) => r.id === draft.id)
               ? t('common.edit')
@@ -432,7 +444,7 @@ export default function EnvPage() {
           </DialogContent>
 
           <DialogActions>
-            {/* Bouton supprimer visible uniquement en mode édition */}
+            {/* Delete button only visible in edit mode */}
             {draft && rows.find((r) => r.id === draft.id) && (
               <Button
                 color="error"

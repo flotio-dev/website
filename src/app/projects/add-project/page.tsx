@@ -247,21 +247,22 @@ export default function AddProjectPage() {
             fullWidth
             error={!!errors.name}
             helperText={errors.name}
+            data-testid="add-project-name-input"
           />
         );
       case 1:
         return (
-          <Stack spacing={2}>
+          <Stack spacing={2} data-testid="add-project-github-step">
             <Typography>{t('add_project.steps.github')}</Typography>
             {installationFound === null ? (
-              <Typography color="text.secondary">{t('add_project.messages.checking_github') || 'Checking GitHub connection...'}</Typography>
+              <Typography color="text.secondary" data-testid="github-checking-message">{t('add_project.messages.checking_github') || 'Checking GitHub connection...'}</Typography>
             ) : installationFound === true ? (
-              <Stack direction="row" spacing={2} alignItems="center">
-                <Typography color="success.main">{t('add_project.messages.github_connected') || 'GitHub App installed — connected'}</Typography>
+              <Stack direction="row" spacing={2} alignItems="center" data-testid="github-connected-block">
+                <Typography color="success.main" data-testid="github-connected-message">{t('add_project.messages.github_connected') || 'GitHub App installed — connected'}</Typography>
               </Stack>
             ) : (
-              <Stack direction="row" spacing={2} alignItems="center">
-                <Typography color="text.secondary">{t('add_project.messages.github_not_connected') || 'GitHub App not installed'}</Typography>
+              <Stack direction="row" spacing={2} alignItems="center" data-testid="github-not-connected-block">
+                <Typography color="text.secondary" data-testid="github-not-connected-message">{t('add_project.messages.github_not_connected') || 'GitHub App not installed'}</Typography>
                 <Button
                   component="a"
                   href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP}/installations/new`}
@@ -269,6 +270,7 @@ export default function AddProjectPage() {
                   rel="noopener noreferrer"
                   variant="contained"
                   color="primary"
+                  data-testid="github-connect-button"
                 >
                   {t('add_project.actions.connect_github') || 'Connect GitHub'}
                 </Button>
@@ -278,7 +280,7 @@ export default function AddProjectPage() {
         );
       case 2:
         return (
-          <Stack spacing={2}>
+          <Stack spacing={2} data-testid="add-project-repo-step">
             <Typography>{t('add_project.steps.repo')}</Typography>
             <Select
               value={newProject.repo}
@@ -286,6 +288,7 @@ export default function AddProjectPage() {
               fullWidth
               error={!!errors.repo}
               disabled={reposLoading}
+              data-testid="add-project-repo-select"
             >
               <MenuItem value="">{`-- ${t('add_project.fields.repo')} --`}</MenuItem>
               {reposLoading ? (
@@ -294,7 +297,7 @@ export default function AddProjectPage() {
                 <MenuItem value="" disabled>{t('add_project.messages.no_repos') || 'No repositories found'}</MenuItem>
               ) : (
                 repos.map((r: any) => (
-                  <MenuItem key={r.id ?? r.full_name} value={r.full_name}>
+                  <MenuItem key={r.id ?? r.full_name} value={r.full_name} data-testid="add-project-repo-option">
                     {r.full_name}{r.private ? ' (private)' : ''}
                   </MenuItem>
                 ))
@@ -306,18 +309,20 @@ export default function AddProjectPage() {
               value={newProject.buildPath}
               onChange={(e) => setNewProject({ ...newProject, buildPath: e.target.value })}
               fullWidth
+              data-testid="add-project-build-path-input"
             />
           </Stack>
         );
       case 3:
         return (
-          <Stack spacing={2}>
+          <Stack spacing={2} data-testid="add-project-flutter-step">
             <Typography>{t('add_project.steps.flutter')}</Typography>
             <Select
               value={newProject.flutterVersion}
               onChange={(e) => setNewProject({ ...newProject, flutterVersion: e.target.value })}
               fullWidth
               error={!!errors.flutterVersion}
+              data-testid="add-project-flutter-select"
             >
               <MenuItem value="stable">Stable</MenuItem>
               <MenuItem value="3.24.2">3.24.2</MenuItem>
@@ -330,7 +335,7 @@ export default function AddProjectPage() {
         );
       case 4:
         return (
-          <Stack spacing={2}>
+          <Stack spacing={2} data-testid="add-project-summary-step">
             <Typography variant="h6">{t('add_project.steps.summary')}</Typography>
             <Typography>
               {t('add_project.fields.project_name')} : {newProject.name}
@@ -367,7 +372,7 @@ export default function AddProjectPage() {
         <Box className="flex justify-between items-center mb-6">
           <Stack direction="row" spacing={1.5} alignItems="center">
             <FolderIcon fontSize="large" color="primary" />
-            <Typography variant="h4" className="font-bold" color="text.primary">
+            <Typography variant="h4" className="font-bold" color="text.primary" data-testid="add-project-header-title">
               {t('add_project.title')}
             </Typography>
           </Stack>
@@ -400,10 +405,15 @@ export default function AddProjectPage() {
             </Box>
           ) : (
             <Box mt={4} display="flex" justifyContent="space-between">
-              <Button disabled={activeStep === 0 || isSubmitting} onClick={handleBack}>
+              <Button disabled={activeStep === 0 || isSubmitting} onClick={handleBack} data-testid="add-project-back-btn" >
                 {t('add_project.actions.back')}
               </Button>
-              <Button variant="contained" onClick={handleNext} disabled={isSubmitting}>
+                <Button variant="contained" onClick={handleNext} disabled={isSubmitting}
+                  data-testid={
+                    activeStep === steps.length - 1
+                      ? 'add-project-create-btn'
+                      : 'add-project-next-btn'
+                  }>
                 {activeStep === steps.length - 1
                   ? t('add_project.actions.create')
                   : t('add_project.actions.next')}
