@@ -675,7 +675,7 @@ export default function ProjectOverviewPage() {
               <Typography variant="h6" color="text.primary">
                 {t('project_page.builds')}
               </Typography>
-              <Button size="small" href={`/projects/${project.slug}/builds`}>
+              <Button size="small" href={`/projects/${project.slug}/builds/builds-view-all`}>
                 {t('project_page.view_all')}
               </Button>
             </Stack>
@@ -717,7 +717,7 @@ export default function ProjectOverviewPage() {
                       >
                         <TableCell>
                           <MUILink
-                            href={`/projects/${project.slug}/builds`}
+                            href={`/projects/${project.slug}/builds/builds-logs`}
                             underline="none"
                           >
                             {b.id}
