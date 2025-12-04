@@ -207,7 +207,7 @@
     "env_development": "Développement",
     "env_preview": "Prévisualisation",
     "auto_submit": "Soumettre automatiquement aux stores après un build réussi",
-    "eas_submit_profile": "Profil EAS Submit",
+    "eas_submit_profile": "Profil Submit",
     "build_config": "Configuration du build",
     "base_directory": "Répertoire de base",
     "platform_all": "Toutes",
@@ -215,7 +215,7 @@
     "platform_ios": "iOS",
     "git_ref": "Référence Git",
     "git_ref_help": "Hash de commit, branche ou tag",
-    "eas_build_profile": "Profil EAS Build"
+    "eas_build_profile": "Profil Build"
   },
   "build_details": {
     "title": "Build",

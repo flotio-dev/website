@@ -116,7 +116,7 @@ const mockProject: ProjectShape = {
   buildSettings: {
     provider: 'Custom Runner',
     branch: 'main',
-    buildCommand: 'pnpm build',
+    buildCommand: 'npm run build',
     outputDir: 'out',
     nodeVersion: '20',
   },
@@ -654,7 +654,7 @@ export default function ProjectOverviewPage() {
                 </Stack>
                 {project.buildSettings.nodeVersion && (
                   <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">Node</Typography>
+                    <Typography color="text.secondary">Node Version</Typography>
                     <Typography>{project.buildSettings.nodeVersion}</Typography>
                   </Stack>
                 )}
@@ -779,20 +779,6 @@ export default function ProjectOverviewPage() {
               <Tab value="preview" label={t('project_page.env_preview') ?? 'Preview'} />
             </Tabs>
 
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={autoSubmit}
-                  onChange={(_, checked) => setAutoSubmit(checked)}
-                />
-              }
-              label={
-                t('project_page.auto_submit') ??
-                'Automatically submit to stores after building successfully'
-              }
-              sx={{ mb: 2 }}
-            />
-
             <TextField
               label={t('project_page.eas_submit_profile') ?? 'EAS Submit profile'}
               fullWidth
@@ -826,14 +812,11 @@ export default function ProjectOverviewPage() {
                   onChange={(_, v) => v && setPlatform(v)}
                   size="small"
                 >
-                  <ToggleButton value="all">
+                  {/* <ToggleButton value="all">
                     {t('project_page.platform_all') ?? 'All'}
-                  </ToggleButton>
+                  </ToggleButton> */}
                   <ToggleButton value="android">
                     {t('project_page.platform_android') ?? 'Android'}
-                  </ToggleButton>
-                  <ToggleButton value="ios">
-                    {t('project_page.platform_ios') ?? 'iOS'}
                   </ToggleButton>
                 </ToggleButtonGroup>
               </Box>

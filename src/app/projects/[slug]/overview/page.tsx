@@ -475,36 +475,6 @@ export default function ProjectOverviewPage() {
             </Paper>
           </Box>
         </Grid>
-
-        {/* Logs section */}
-        <Box sx={{ mt: 2, width: '100%' }}>
-          <Paper variant="outlined" sx={{ borderRadius: 2, p: 2, bgcolor: 'background.paper' }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h6" color="text.primary">{t('project_page.logs') ?? 'Logs'}</Typography>
-            </Stack>
-            <Divider sx={{ mb: 2 }} />
-
-            {logsLoading ? (
-              <Stack spacing={1}>
-                <Skeleton variant="rectangular" height={24} />
-                <Skeleton variant="rectangular" height={24} />
-                <Skeleton variant="rectangular" height={24} />
-              </Stack>
-            ) : logsError ? (
-              <Typography color="error">{logsError}</Typography>
-            ) : !logs || logs.length === 0 ? (
-              <Typography color="text.secondary">{t('project_page.no_logs') ?? 'Aucun log'}</Typography>
-            ) : (
-              <Box sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap', maxHeight: 320, overflow: 'auto', bgcolor: 'background.default', p: 1, borderRadius: 1 }}>
-                {logs.map((line, i) => (
-                  <Typography key={i} variant="body2" sx={{ fontFamily: 'monospace' }}>
-                    {line}
-                  </Typography>
-                ))}
-              </Box>
-            )}
-          </Paper>
-        </Box>
         {/* Edit Project Dialog */}
         <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm">
           <DialogTitle>{t('project_page.edit_project') ?? 'Edit project'}</DialogTitle>

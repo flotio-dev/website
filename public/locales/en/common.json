@@ -245,7 +245,7 @@
     "env_development": "Development",
     "env_preview": "Preview",
     "auto_submit": "Automatically submit to stores after building successfully",
-    "eas_submit_profile": "EAS Submit profile",
+    "eas_submit_profile": "Submit profile",
     "build_config": "Build configuration",
     "base_directory": "Base directory",
     "platform_all": "All",
@@ -253,7 +253,7 @@
     "platform_ios": "iOS",
     "git_ref": "Git ref",
     "git_ref_help": "Commit hash, branch, or tag",
-    "eas_build_profile": "EAS Build profile"
+    "eas_build_profile": "Build profile"
   },
   "build_details": {
     "title": "Build",
