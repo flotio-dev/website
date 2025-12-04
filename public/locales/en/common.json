@@ -275,7 +275,9 @@
     "date": "Date",
     "duration": "Duration",
     "commit": "Commit",
-    "no_builds": "No builds found"
+    "no_builds": "No builds found",
+    "view_details": "View details",
+    "view_logs": "View logs"
   },  
   "environment_page": {
     "title": "Environments",

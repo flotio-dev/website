@@ -237,7 +237,8 @@
     "date": "Date",
     "duration": "Durée",
     "commit": "Commit",
-    "no_builds": "Aucun build trouvé"
+    "no_builds": "Aucun build trouvé",
+    "view_logs": "Voir les logs"
   },
   "add_project": {
     "title": "Créer un projet",

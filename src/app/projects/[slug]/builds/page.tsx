@@ -36,6 +36,8 @@ import {
   Tab,
   ToggleButtonGroup,
   ToggleButton,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -51,6 +53,7 @@ import { getTranslations } from '@/lib/clientTranslations';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useToast } from '@/lib/hooks/useToast';
 import clientApi from '@/lib/utils';
+import clientApi from '@/lib/utils';
 
 // ---------- Types & mocks ----------
 
@@ -59,7 +62,8 @@ interface BuildItem {
   startedAt: string;
   finishedAt?: string;
   status: 'success' | 'failed' | 'running';
-  description: string;
+  description?: string;
+  duration?: number | string;
   platform?: string;
 }
 
@@ -82,7 +86,7 @@ interface ProjectShape {
   urlPath: string;
   createdAt: string;
   lastActivityAt: string;
-  lastActivityDescription: string;
+  //lastActivityDescription: string;
   ownership: Ownership;
   buildSettings: BuildSettings;
   stats: {
@@ -106,7 +110,52 @@ const formatDate = (iso?: string, locale = 'fr') => {
   }
 };
 
-
+const mockProject: ProjectShape = {
+  name: 'Test Project',
+  slug: 'test-project',
+  urlPath: '/build/test-project',
+  createdAt: '2025-05-01T09:30:00Z',
+  lastActivityAt: '2025-07-24T09:47:00Z',
+  //lastActivityDescription: 'Build #42 from main deployed to preview.',
+  ownership: { type: 'organization', name: 'Acme Inc.' },
+  buildSettings: {
+    provider: 'Custom Runner',
+    branch: 'main',
+    buildCommand: 'pnpm build',
+    outputDir: 'out',
+    nodeVersion: '20',
+  },
+  stats: {
+    total: 73,
+    success: 66,
+    failed: 5,
+  },
+  recentBuilds: [
+    {
+      id: 'build_0073',
+      startedAt: '2025-07-24T09:30:00Z',
+      finishedAt: '2025-07-24T09:47:00Z',
+      status: 'success',
+      description: 'Commit 9afc1e1 — Optimize images',
+      platform: 'iOS',
+    },
+    {
+      id: 'build_0072',
+      startedAt: '2025-07-23T15:12:00Z',
+      finishedAt: '2025-07-23T15:25:00Z',
+      status: 'failed',
+      description: 'Commit 1b23cde — Fix env var typo',
+      platform: 'Android',
+    },
+    {
+      id: 'build_0071',
+      startedAt: '2025-07-22T11:05:00Z',
+      status: 'running',
+      description: 'Commit 7c3aa91 — Add analytics',
+      platform: 'iOS',
+    },
+  ],
+};
 
 // ---------- Petits composants ----------
 
@@ -175,6 +224,8 @@ export default function ProjectOverviewPage() {
   const { token } = useAuth();
   const { addToast } = useToast();
   const router = useRouter();
+  const [builds, setBuilds] = useState<BuildItem[] | null>(null);
+  const [buildsLoading, setBuildsLoading] = useState(false);
 
   // état du dialog "Start build"
   const [buildDialogOpen, setBuildDialogOpen] = useState(false);
@@ -228,6 +279,17 @@ export default function ProjectOverviewPage() {
       else return key;
     }
     return typeof cur === 'string' ? cur : key;
+  };
+
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
+  const [menuBuildId, setMenuBuildId] = useState<string | null>(null);
+  const openBuildMenu = (e: React.MouseEvent<HTMLElement>, id: string) => {
+    setMenuAnchorEl(e.currentTarget);
+    setMenuBuildId(id);
+  };
+  const closeBuildMenu = () => {
+    setMenuAnchorEl(null);
+    setMenuBuildId(null);
   };
 
   // fetch projet
@@ -377,40 +439,111 @@ export default function ProjectOverviewPage() {
 
   // project fusion API data
   const project: ProjectShape = useMemo(() => {
-    const pd: any = projectData;
-    const slug = pd?.slug ?? pd?.name ?? candidateSlugFromPath ?? '';
+    if (projectData && projectData.name) {
+      const pd: any = projectData;
 
-    // Calculer les stats depuis les builds
-    const total = builds.length;
-    const success = builds.filter((b) => b.status === 'success').length;
-    const failed = builds.filter((b) => b.status === 'failed').length;
+      // derive stats from fetched `builds` when available,
+      // otherwise try projectData.builds, then fall back to mocks
+      const sourceBuilds: BuildItem[] | undefined = builds ?? (Array.isArray(pd.builds) ? pd.builds : undefined);
+      const total = sourceBuilds ? sourceBuilds.length : (mockProject.stats.total ?? 0);
+      const success = sourceBuilds ? sourceBuilds.filter((b) => b.status === 'success').length : (mockProject.stats.success ?? 0);
+      const failed = sourceBuilds ? sourceBuilds.filter((b) => b.status === 'failed').length : (mockProject.stats.failed ?? 0);
 
-    return {
-      name: pd?.name ?? '',
-      slug,
-      urlPath: `/build/${slug}`,
-      createdAt: (pd?.CreatedAt ?? pd?.created_at ?? '') as string,
-      lastActivityAt: (pd?.UpdatedAt ?? pd?.updated_at ?? '') as string,
-      lastActivityDescription: pd?.lastActivityDescription ?? '',
-      ownership: {
-        type: 'user' as const,
-        name: pd?.user?.username ?? pd?.user?.email ?? '',
-      },
-      buildSettings: {
-        provider: pd?.build_provider ?? 'Flutter Build',
-        branch: pd?.build_branch ?? 'main',
-        buildCommand: pd?.build_command ?? 'flutter build',
-        outputDir: pd?.build_folder ?? '.',
-        nodeVersion: pd?.node_version,
-      },
-      stats: {
-        total,
-        success,
-        failed,
-      },
-      recentBuilds: builds.slice(0, 5),
-    };
+      return {
+        name: pd.name ?? mockProject.name,
+        slug: pd.slug ?? pd.name ?? mockProject.slug,
+        urlPath: pd.urlPath ?? `/build/${pd.slug ?? pd.name ?? 'project'}`,
+        createdAt: (pd.CreatedAt ?? pd.createdAt ?? mockProject.createdAt) as string,
+        lastActivityAt: (pd.UpdatedAt ?? pd.lastActivityAt ?? mockProject.lastActivityAt) as string,
+        //lastActivityDescription:
+        //  pd.lastActivityDescription ?? mockProject.lastActivityDescription,
+        ownership: {
+          type: 'user',
+          name: pd.user?.username ?? pd.user?.email ?? mockProject.ownership.name,
+        },
+        buildSettings: {
+          provider: pd.build_provider ?? mockProject.buildSettings.provider,
+          branch: pd.build_branch ?? mockProject.buildSettings.branch,
+          buildCommand: pd.build_command ?? mockProject.buildSettings.buildCommand,
+          outputDir: pd.build_folder ?? mockProject.buildSettings.outputDir,
+          nodeVersion: pd.node_version ?? mockProject.buildSettings.nodeVersion,
+        },
+        stats: {
+          total,
+          success,
+          failed,
+        },
+        recentBuilds: sourceBuilds ? sourceBuilds : mockProject.recentBuilds,
+      };
+    }
+    const slug = candidateSlugFromPath ?? mockProject.slug;
+    return { ...mockProject, slug };
   }, [projectData, candidateSlugFromPath, builds]);
+
+  const displayedBuilds = builds ?? project.recentBuilds;
+  // Sort by startedAt (newest first) and take the 3 most recent builds
+  const displayedBuildsLimited = (() => {
+    const arr = (displayedBuilds ?? []).slice();
+    const getTime = (s?: string) => {
+      const t = Date.parse(s ?? '') || 0;
+      return isNaN(t) ? 0 : t;
+    };
+    arr.sort((a, b) => getTime(b.startedAt) - getTime(a.startedAt));
+    return arr.slice(0, 3);
+  })();
+
+  const formatDuration = (d?: number | string) => {
+    if (d == null || d === '') return '—';
+    const num = typeof d === 'number' ? d : Number(d);
+    if (!isNaN(num) && isFinite(num)) {
+      const seconds = Math.max(0, Math.floor(num));
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      if (mins > 0) return `${mins}m ${secs}s`;
+      return `${secs}s`;
+    }
+    // fallback: show string
+    return String(d);
+  };
+
+  // Fetch builds for this project via core API (through proxy)
+  useEffect(() => {
+    let mounted = true;
+    const id = (projectData && (projectData.ID ?? projectData.id)) ?? null;
+    if (!id) return;
+    const fetchBuilds = async () => {
+      setBuildsLoading(true);
+      try {
+        const res = await clientApi<any>(`project/${encodeURIComponent(String(id))}/builds`);
+        const list = res?.builds ?? res;
+        const mapped: BuildItem[] = Array.isArray(list)
+          ? list.map((b: any) => ({
+              id: String(b.ID ?? b.id ?? ''),
+              startedAt: b.CreatedAt ?? b.createdAt ?? '',
+              finishedAt: b.UpdatedAt ?? b.finishedAt ?? undefined,
+              status: (b.status === 'running' ? 'running' : b.status === 'failed' ? 'failed' : 'success') as BuildItem['status'],
+              description: b.description ?? b.commit_message ?? '',
+              duration: b.duration ?? b.duration_seconds ?? b.duration_sec ?? 0,
+              platform: b.platform ?? '',
+            }))
+          : [];
+        if (mounted) setBuilds(mapped);
+      } catch (err: any) {
+        console.error('Failed to fetch builds', err);
+        if (mounted) {
+          setBuilds([]);
+          addToast({ message: err?.message ?? 'Failed to fetch builds', type: 'error' });
+        }
+      } finally {
+        if (mounted) setBuildsLoading(false);
+      }
+    };
+
+    fetchBuilds();
+    return () => {
+      mounted = false;
+    };
+  }, [projectData, addToast]);
 
   const successRate = useMemo(() => {
     const denom = Math.max(1, project.stats.total);
@@ -608,12 +741,7 @@ export default function ProjectOverviewPage() {
               </Grid>
 
               <Divider sx={{ my: 2 }} />
-              <Typography variant="subtitle2" color="text.secondary">
-                {t('project_page.last_activity_description')}
-              </Typography>
-              <Typography variant="body1">
-                {project.lastActivityDescription}
-              </Typography>
+     
             </CardContent>
           </Card>
           <Card
@@ -677,15 +805,22 @@ export default function ProjectOverviewPage() {
               <Typography variant="h6" color="text.primary">
                 {t('project_page.builds')}
               </Typography>
-              <Button size="small" href={`/projects/${project.slug}/builds/builds-view-all`}>
+              <Button size="small" href={`/projects/${slugForMenu}/builds/builds-view-all`}>
                 {t('project_page.view_all')}
               </Button>
             </Stack>
-            {project.recentBuilds.length === 0 ? (
+            {buildsLoading ? (
+              <Stack spacing={1}>
+                <Skeleton variant="rectangular" height={40} />
+                <Skeleton variant="rectangular" height={40} />
+                <Skeleton variant="rectangular" height={40} />
+              </Stack>
+            ) : displayedBuilds.length === 0 ? (
               <Typography color="text.secondary">
                 {t('project_page.no_builds_yet')}
               </Typography>
             ) : (
+              <>
               <TableContainer>
                 <Table>
                   <TableHead>
@@ -694,7 +829,7 @@ export default function ProjectOverviewPage() {
                       <TableCell>{t('project_page.status')}</TableCell>
                       <TableCell>{t('project_page.start')}</TableCell>
                       <TableCell>{t('project_page.end')}</TableCell>
-                      <TableCell>{t('project_page.description')}</TableCell>
+                      <TableCell>Durée</TableCell>
                       <TableCell>{t('project_page.platform')}</TableCell>
                       <TableCell align="right">
                         {t('project_page.actions')}
@@ -702,9 +837,9 @@ export default function ProjectOverviewPage() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {project.recentBuilds.map((b) => (
+                    {displayedBuildsLimited.map((b, i) => (
                       <TableRow
-                        key={b.id}
+                        key={`${b.id ?? b.startedAt ?? 'build'}-${i}`}
                         hover
                         sx={{
                           '&:nth-of-type(odd) td': {
@@ -719,7 +854,7 @@ export default function ProjectOverviewPage() {
                       >
                         <TableCell>
                           <MUILink
-                            href={`/projects/${slugForMenu}/builds/${b.id}`}
+                            href={`/projects/${slugForMenu}/builds/builds-logs`}
                             underline="none"
                           >
                             {b.id}
@@ -738,10 +873,10 @@ export default function ProjectOverviewPage() {
                             ? formatDate(b.finishedAt, locale)
                             : '—'}
                         </TableCell>
-                        <TableCell>{b.description}</TableCell>
+                        <TableCell>{formatDuration(b.duration)}</TableCell>
                         <TableCell>{b.platform}</TableCell>
                         <TableCell align="right">
-                          <IconButton size="small">
+                          <IconButton size="small" onClick={(e) => openBuildMenu(e, b.id)}>
                             <MoreVertIcon />
                           </IconButton>
                         </TableCell>
@@ -750,6 +885,21 @@ export default function ProjectOverviewPage() {
                   </TableBody>
                 </Table>
               </TableContainer>
+              <Menu
+                anchorEl={menuAnchorEl}
+                open={Boolean(menuAnchorEl)}
+                onClose={closeBuildMenu}
+              >
+                <MenuItem
+                  onClick={() => {
+                    if (menuBuildId) router.push(`/projects/${slugForMenu}/builds/${menuBuildId}/logs`);
+                    closeBuildMenu();
+                  }}
+                >
+                  {t('project_page.view_logs') ?? 'View logs'}
+                </MenuItem>
+              </Menu>
+              </>
             )}
           </Paper>
         </Box>
