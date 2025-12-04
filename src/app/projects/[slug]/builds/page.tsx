@@ -53,6 +53,7 @@ import { getTranslations } from '@/lib/clientTranslations';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useToast } from '@/lib/hooks/useToast';
 import clientApi from '@/lib/utils';
+import clientApi from '@/lib/utils';
 
 // ---------- Types & mocks ----------
 
@@ -231,6 +232,14 @@ export default function ProjectOverviewPage() {
   const [envTab, setEnvTab] = useState<'default' | 'production' | 'development' | 'preview'>('default');
   const [platform, setPlatform] = useState<'all' | 'android' | 'ios'>('all');
   const [autoSubmit, setAutoSubmit] = useState(false);
+  const [buildLoading, setBuildLoading] = useState(false);
+  const [gitBranch, setGitBranch] = useState('main');
+  const [buildMode, setBuildMode] = useState('release');
+  const [flutterChannel, setFlutterChannel] = useState('stable');
+
+  // État pour la liste des builds
+  const [builds, setBuilds] = useState<BuildItem[]>([]);
+  const [buildsLoading, setBuildsLoading] = useState(false);
 
   // locale: valeur déterministe au SSR, puis mise à jour après hydration
   useEffect(() => {
@@ -382,6 +391,44 @@ export default function ProjectOverviewPage() {
     };
   }, [pathname, token, addToast, params]);
 
+  // Fetch builds séparément
+  useEffect(() => {
+    let mounted = true;
+    const projectId = projectData?.ID ?? projectData?.id;
+    if (!projectId) return;
+
+    const fetchBuilds = async () => {
+      setBuildsLoading(true);
+      try {
+        const data = await clientApi<{ builds: any[] }>(`project/${projectId}/builds`);
+        if (!mounted) return;
+
+        const apiBuilds: BuildItem[] = (data?.builds ?? []).map((b: any) => ({
+          id: String(b.id ?? b.ID ?? ''),
+          startedAt: b.created_at ?? b.CreatedAt ?? '',
+          finishedAt: b.updated_at ?? b.UpdatedAt ?? undefined,
+          status: (b.status === 'success' || b.status === 'failed' || b.status === 'running')
+            ? b.status
+            : 'running',
+          description: b.description ?? `Build #${b.id ?? b.ID ?? ''}`,
+          platform: b.platform ?? 'Android',
+        }));
+
+        setBuilds(apiBuilds);
+      } catch (err: any) {
+        console.error('Failed to fetch builds', err);
+        // Ne pas afficher de toast ici car ce n'est pas bloquant
+      } finally {
+        if (mounted) setBuildsLoading(false);
+      }
+    };
+
+    fetchBuilds();
+    return () => {
+      mounted = false;
+    };
+  }, [projectData]);
+
   // slug pour le menu
   const pathParts = pathname.split('/').filter(Boolean);
   const candidateSlugFromPath = params?.slug ?? (pathParts[1] ?? pathParts[0]);
@@ -390,7 +437,7 @@ export default function ProjectOverviewPage() {
       ? String((projectData as any).ID ?? projectData.id)
       : candidateSlugFromPath) ?? 'project';
 
-  // project fusion API + mocks
+  // project fusion API data
   const project: ProjectShape = useMemo(() => {
     if (projectData && projectData.name) {
       const pd: any = projectData;
@@ -948,7 +995,8 @@ export default function ProjectOverviewPage() {
                 helperText={t('project_page.git_ref_help') ?? 'Commit hash, branch, or tag'}
                 fullWidth
                 size="small"
-                defaultValue="main"
+                value={gitBranch}
+                onChange={(e) => setGitBranch(e.target.value)}
               />
 
               <TextField
@@ -961,18 +1009,62 @@ export default function ProjectOverviewPage() {
           </DialogContent>
 
           <DialogActions>
-            <Button onClick={() => setBuildDialogOpen(false)}>
+            <Button onClick={() => setBuildDialogOpen(false)} disabled={buildLoading}>
               {t('project_page.cancel') ?? 'Cancel'}
             </Button>
             <Button
               variant="contained"
               color="primary"
-              onClick={() => {
-                // TODO: lancer la requête de build ici
-                setBuildDialogOpen(false);
+              disabled={buildLoading}
+              onClick={async () => {
+                const projectId = projectData?.ID ?? projectData?.id ?? params?.slug;
+                if (!projectId) {
+                  addToast({ message: 'Project ID not found', type: 'error' });
+                  return;
+                }
+
+                setBuildLoading(true);
+                try {
+                  // Déterminer la plateforme à envoyer
+                  const platformToSend = platform === 'all' ? 'android' : platform;
+                  const buildTarget = platformToSend === 'android' ? 'apk' : platformToSend;
+
+                  const response = await clientApi<{ build: any }>(`project/${projectId}/build`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      platform: platformToSend,
+                      build_mode: buildMode,
+                      build_target: buildTarget,
+                      flutter_channel: flutterChannel,
+                      git_branch: gitBranch,
+                    }),
+                  });
+
+                  addToast({ message: t('project_page.build_started') ?? 'Build started successfully', type: 'success' });
+                  setBuildDialogOpen(false);
+
+                  // Rafraîchir la liste des builds
+                  if (response?.build) {
+                    const newBuild: BuildItem = {
+                      id: String(response.build.id ?? response.build.ID ?? ''),
+                      startedAt: response.build.created_at ?? response.build.CreatedAt ?? new Date().toISOString(),
+                      finishedAt: undefined,
+                      status: response.build.status ?? 'running',
+                      description: `Build #${response.build.id ?? response.build.ID ?? ''}`,
+                      platform: response.build.platform ?? 'Android',
+                    };
+                    setBuilds((prev) => [newBuild, ...prev]);
+                  }
+                } catch (err: any) {
+                  console.error('Failed to start build', err);
+                  addToast({ message: err?.message || t('project_page.build_failed') || 'Failed to start build', type: 'error' });
+                } finally {
+                  setBuildLoading(false);
+                }
               }}
             >
-              {t('project_page.start_build') ?? 'Start build'}
+              {buildLoading ? (t('project_page.starting') ?? 'Starting...') : (t('project_page.start_build') ?? 'Start build')}
             </Button>
           </DialogActions>
         </Dialog>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/hooks/useAuth";
-
+import clientApi from '@/lib/utils';
 
 export default function GithubSetupContent() {
     const searchParams = useSearchParams();
@@ -25,31 +25,20 @@ export default function GithubSetupContent() {
 
         const linkGithub = async () => {
             try {
-                const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/github/post-installation`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${token}`,
-                        },
-                        body: JSON.stringify({ installation_id: Number(installationId) }),
-                    }
-                );
-
-                if (!res.ok) {
-                    const err = await res.json().catch(() => ({}));
-                    setStatus("error");
-                    setMessage(err.message || "Erreur lors de la liaison de votre compte GitHub.");
-                    return;
-                }
+                // Use central clientApi helper which attaches auth and proxies requests
+                await clientApi<any>("github/post-installation", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ installation_id: Number(installationId) }),
+                });
 
                 setStatus("success");
-                setMessage("Installation réussie ! Votre compte GitHub est maintenant lié à Flotio 🎉");
+                setMessage("Installation réussie ! Votre compte GitHub est maintenant lié à Flotio");
                 setTimeout(() => router.push("/dashboard"), 2000);
             } catch (err) {
                 setStatus("error");
-                setMessage("Impossible de contacter le serveur. Réessayez plus tard.");
+                const errorMessage = err instanceof Error ? err.message : "Erreur lors de la liaison de votre compte GitHub.";
+                setMessage(errorMessage || "Impossible de contacter le serveur. Réessayez plus tard.");
             }
         };
 

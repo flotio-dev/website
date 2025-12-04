@@ -24,8 +24,8 @@ interface ProjectShape {
   name: string;
   slug: string;
   id?: number | string;
-  createdAt?: string;
-  lastActivityAt?: string;
+  created_at?: string;
+  updated_at?: string;
   ownership?: Ownership;
   buildSettings?: BuildSettings;
   // optional fields that might exist on the API
@@ -52,7 +52,7 @@ const getPreferredLocale = (p?: string | null) => {
   try {
     const stored = typeof window !== 'undefined' ? localStorage.getItem('lang') : null;
     if (stored === 'en' || stored === 'fr') return stored;
-  } catch {}
+  } catch { }
   if (!p) return 'fr';
   const parts = p.split('/');
   const candidate = parts[1];
@@ -234,14 +234,14 @@ export default function ProjectOverviewPage() {
 
   const project = useMemo<ProjectShape>(() => {
     if (projectData && projectData.name) {
-      // Normalize API shape (API returns CreatedAt / UpdatedAt and nested user)
+      // Normalize API shape (API returns created_at / UpdatedAt and nested user)
       const pd: any = projectData;
       return {
         name: pd.name,
         slug: pd.slug ?? pd.name,
         id: pd.ID ?? pd.id ?? undefined,
-        createdAt: (pd.CreatedAt ?? pd.createdAt) as string | undefined,
-        lastActivityAt: (pd.UpdatedAt ?? pd.lastActivityAt) as string | undefined,
+        created_at: (pd.created_at ?? pd.created_at) as string | undefined,
+        updated_at: (pd.UpdatedAt ?? pd.updated_at) as string | undefined,
         ownership: pd.user ? { type: 'user', name: pd.user.username ?? pd.user.email ?? '' } : undefined,
         buildSettings: { outputDir: pd.build_folder ?? undefined },
         git_repo: pd.git_repo ?? pd.git_repository,
@@ -255,8 +255,8 @@ export default function ProjectOverviewPage() {
       name: '',
       slug: candidateSlugFromPath ?? '',
       id: undefined,
-      createdAt: undefined,
-      lastActivityAt: undefined,
+      created_at: undefined,
+      updated_at: undefined,
       ownership: undefined,
       buildSettings: {},
     } as ProjectShape;
@@ -380,19 +380,19 @@ export default function ProjectOverviewPage() {
         <ProjectSubMenu slug={slugForMenu} />
         <Box className="flex-1 overflow-auto" sx={{ p: { xs: 3, md: 6 }, bgcolor: 'background.default' }}>
           <Box sx={{ maxWidth: 800, mx: 'auto', mt: 6 }}>
-                      <Paper variant="outlined" sx={{ borderRadius: 2, p: 2, bgcolor: 'background.paper', textAlign: 'center' }}>
-                        <Typography variant="h6" gutterBottom color="error" align="center">
-                          {t('project_page.project_not_found') ?? 'Projet introuvable'}
-                        </Typography>
-                        <Typography color="text.primary" sx={{ mb: 2 }} align="center">
-                          {fetchErrorMessage ?? `Le projet demandé n'a pas été trouvé.`}
-                        </Typography>
-                        <Stack spacing={2} alignItems="center" justifyContent="center">
-                          <Button variant="contained" color="primary" onClick={() => router.push('/projects')}>
-                            {t('project_page.back_to_projects') ?? 'Retour à la liste des projets'}
-                          </Button>
-                        </Stack>
-                      </Paper>
+            <Paper variant="outlined" sx={{ borderRadius: 2, p: 2, bgcolor: 'background.paper', textAlign: 'center' }}>
+              <Typography variant="h6" gutterBottom color="error" align="center">
+                {t('project_page.project_not_found') ?? 'Projet introuvable'}
+              </Typography>
+              <Typography color="text.primary" sx={{ mb: 2 }} align="center">
+                {fetchErrorMessage ?? `Le projet demandé n'a pas été trouvé.`}
+              </Typography>
+              <Stack spacing={2} alignItems="center" justifyContent="center">
+                <Button variant="contained" color="primary" onClick={() => router.push('/projects')}>
+                  {t('project_page.back_to_projects') ?? 'Retour à la liste des projets'}
+                </Button>
+              </Stack>
+            </Paper>
           </Box>
         </Box>
       </Box>
@@ -424,14 +424,14 @@ export default function ProjectOverviewPage() {
 
           <Box>
             <Button variant="outlined" onClick={() => {
-                // prepare dialog values
-                setEditName(project.name ?? '');
-                const existingGit = (projectData?.git_repo ?? projectData?.git_repository ?? '') as string;
-                setEditGitRepo(existingGit);
-                setEditRepo(existingGit);
-                setEditGithubConnected(!!existingGit);
-                setEditBuildFolder((projectData?.build_folder ?? project.buildSettings?.outputDir ?? '') as string);
-                setEditFlutterVersion((projectData?.flutter_version ?? project.flutter_version ?? '') as string);
+              // prepare dialog values
+              setEditName(project.name ?? '');
+              const existingGit = (projectData?.git_repo ?? projectData?.git_repository ?? '') as string;
+              setEditGitRepo(existingGit);
+              setEditRepo(existingGit);
+              setEditGithubConnected(!!existingGit);
+              setEditBuildFolder((projectData?.build_folder ?? project.buildSettings?.outputDir ?? '') as string);
+              setEditFlutterVersion((projectData?.flutter_version ?? project.flutter_version ?? '') as string);
               setEditOpen(true);
             }}>
               Edit
@@ -448,8 +448,8 @@ export default function ProjectOverviewPage() {
                 <Typography color="text.primary"><strong>{t('project_page.name')}: </strong>{project.name}</Typography>
                 <Typography color="text.primary"><strong>Slug: </strong>{project.slug}</Typography>
                 <Typography color="text.primary"><strong>{t('project_page.owner')}: </strong>{project.ownership?.name ?? '—'}</Typography>
-                <Typography color="text.primary"><strong>{t('project_page.created_at')}: </strong>{formatDate(project.createdAt, locale)}</Typography>
-                <Typography color="text.primary"><strong>{t('project_page.updated_at')}: </strong>{formatDate(project.lastActivityAt, locale)}</Typography>
+                <Typography color="text.primary"><strong>{t('project_page.created_at')}: </strong>{formatDate(project.created_at, locale)}</Typography>
+                <Typography color="text.primary"><strong>{t('project_page.updated_at')}: </strong>{formatDate(project.updated_at, locale)}</Typography>
               </Stack>
             </Paper>
           </Box>
