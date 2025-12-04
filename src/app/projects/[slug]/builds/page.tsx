@@ -53,7 +53,6 @@ import { getTranslations } from '@/lib/clientTranslations';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useToast } from '@/lib/hooks/useToast';
 import clientApi from '@/lib/utils';
-import clientApi from '@/lib/utils';
 
 // ---------- Types & mocks ----------
 
@@ -224,8 +223,6 @@ export default function ProjectOverviewPage() {
   const { token } = useAuth();
   const { addToast } = useToast();
   const router = useRouter();
-  const [builds, setBuilds] = useState<BuildItem[] | null>(null);
-  const [buildsLoading, setBuildsLoading] = useState(false);
 
   // état du dialog "Start build"
   const [buildDialogOpen, setBuildDialogOpen] = useState(false);
