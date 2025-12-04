@@ -59,13 +59,12 @@ export default function RegisterPage() {
 
   return (
     <div
-      className="flex items-center justify-center min-h-screen bg-purple-100 bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: "url('/tttt.svg')" }}
-    >
+      className="flex items-center justify-center min-h-screen bg-purple-100 bg-cover bg-no-repeat animate-bgMove"
+      style={{ backgroundImage: "url('/bg.jpg')" }}>
       {/* Fenêtre blanche */}
       <div className="flex w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden">
         {/* Colonne gauche violet */}
-        <div className="hidden md:flex w-1/2 bg-gradient-to-br from-purple-600 to-indigo-700 text-white items-center justify-center p-12 relative">
+        <div className="hidden md:flex w-1/2 bg-gradient-to-br from-blue-900 to-indigo-700 text-white items-center justify-center p-12 relative">
           <div className="max-w-md">
             <h1 className="text-4xl font-bold mb-4">Welcome!</h1>
             <p className="text-lg">Create your account and join our platform to access all features.</p>

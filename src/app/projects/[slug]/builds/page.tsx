@@ -52,6 +52,7 @@ import { getTranslations } from '@/lib/clientTranslations';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useToast } from '@/lib/hooks/useToast';
 import clientApi from '@/lib/utils';
+import clientApi from '@/lib/utils';
 
 // ---------- Types ----------
 
@@ -116,7 +117,7 @@ interface ProjectShape {
   urlPath: string;
   createdAt: string;
   lastActivityAt: string;
-  lastActivityDescription: string;
+  //lastActivityDescription: string;
   ownership: Ownership;
   buildSettings: BuildSettings;
   stats: {
@@ -365,6 +366,17 @@ export default function ProjectOverviewPage() {
       else return key;
     }
     return typeof cur === 'string' ? cur : key;
+  };
+
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
+  const [menuBuildId, setMenuBuildId] = useState<string | null>(null);
+  const openBuildMenu = (e: React.MouseEvent<HTMLElement>, id: string) => {
+    setMenuAnchorEl(e.currentTarget);
+    setMenuBuildId(id);
+  };
+  const closeBuildMenu = () => {
+    setMenuAnchorEl(null);
+    setMenuBuildId(null);
   };
 
   // fetch projet
@@ -767,12 +779,7 @@ export default function ProjectOverviewPage() {
               </Grid>
 
               <Divider sx={{ my: 2 }} />
-              <Typography variant="subtitle2" color="text.secondary">
-                {t('project_page.last_activity_description')}
-              </Typography>
-              <Typography variant="body1">
-                {project.lastActivityDescription}
-              </Typography>
+
             </CardContent>
           </Card>
           <Card
@@ -815,7 +822,7 @@ export default function ProjectOverviewPage() {
                 </Stack>
                 {project.buildSettings.nodeVersion && (
                   <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">Node</Typography>
+                    <Typography color="text.secondary">Flutter Version</Typography>
                     <Typography>{project.buildSettings.nodeVersion}</Typography>
                   </Stack>
                 )}
@@ -836,87 +843,109 @@ export default function ProjectOverviewPage() {
               <Typography variant="h6" color="text.primary">
                 {t('project_page.builds')}
               </Typography>
-              <Button size="small" href={`/projects/${project.slug}/builds/builds-view-all`}>
+              <Button size="small" href={`/projects/${slugForMenu}/builds/builds-view-all`}>
                 {t('project_page.view_all')}
               </Button>
             </Stack>
-            {project.recentBuilds.length === 0 ? (
+            {buildsLoading ? (
+              <Stack spacing={1}>
+                <Skeleton variant="rectangular" height={40} />
+                <Skeleton variant="rectangular" height={40} />
+                <Skeleton variant="rectangular" height={40} />
+              </Stack>
+            ) : displayedBuilds.length === 0 ? (
               <Typography color="text.secondary">
                 {t('project_page.no_builds_yet')}
               </Typography>
             ) : (
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>ID</TableCell>
-                      <TableCell>{t('project_page.status')}</TableCell>
-                      <TableCell>{t('project_page.created_at')}</TableCell>
-                      <TableCell>{t('project_page.duration')}</TableCell>
-                      <TableCell>{t('project_page.platform')}</TableCell>
-                      <TableCell align="right">
-                        {t('project_page.actions')}
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {project.recentBuilds.map((b) => (
-                      <TableRow
-                        key={b.id}
-                        hover
-                        sx={{
-                          '&:nth-of-type(odd) td': {
-                            bgcolor: 'background.paper',
-                          },
-                          '&:nth-of-type(even) td': {
-                            bgcolor: 'background.default',
-                          },
-                          '&:hover td': { bgcolor: 'action.hover' },
-                          transition: 'background-color 120ms ease',
-                        }}
-                      >
-                        <TableCell>
-                          <MUILink
-                            href={`/projects/${project.slug}/builds/builds-logs?buildId=${b.id}`}
-                            underline="none"
-                          >
-                            #{b.id}
-                          </MUILink>
-                        </TableCell>
-                        <TableCell>
-                          <StatusChip status={b.status} t={t} />
-                        </TableCell>
-                        <TableCell>
-                          <Typography color="text.secondary">
-                            {formatDate(b.createdAt, locale)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          {b.duration > 0 ? `${Math.round(b.duration / 60)}min` : '—'}
-                        </TableCell>
-                        <TableCell>{b.platform}</TableCell>
+              <>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>ID</TableCell>
+                        <TableCell>{t('project_page.status')}</TableCell>
+                        <TableCell>{t('project_page.created_at')}</TableCell>
+                        <TableCell>{t('project_page.duration')}</TableCell>
+                        <TableCell>{t('project_page.platform')}</TableCell>
                         <TableCell align="right">
-                          <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                            {b.apkUrl && (
-                              <Tooltip title={t('project_page.download_apk') ?? 'Download APK'}>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleDownloadApk(b.id)}
-                                >
-                                  <DownloadIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                            <IconButton size="small">
-                              <MoreVertIcon />
-                            </IconButton>
-                          </Stack>
+                          {t('project_page.actions')}
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {displayedBuildsLimited.map((b, i) => (
+                        <TableRow
+                          key={`${b.id ?? b.startedAt ?? 'build'}-${i}`}
+                          hover
+                          sx={{
+                            '&:nth-of-type(odd) td': {
+                              bgcolor: 'background.paper',
+                            },
+                            '&:nth-of-type(even) td': {
+                              bgcolor: 'background.default',
+                            },
+                            '&:hover td': { bgcolor: 'action.hover' },
+                            transition: 'background-color 120ms ease',
+                          }}
+                        >
+                          <TableCell>
+                            <MUILink
+                              href={`/projects/${project.slug}/builds/builds-logs?buildId=${b.id}`}
+                              underline="none"
+                            >
+                              #{b.id}
+                            </MUILink>
+                          </TableCell>
+                          <TableCell>
+                            <StatusChip status={b.status} t={t} />
+                          </TableCell>
+                          <TableCell>
+                            <Typography color="text.secondary">
+                              {formatDate(b.createdAt, locale)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            {b.duration > 0 ? `${Math.round(b.duration / 60)}min` : '—'}
+                          </TableCell>
+                          <TableCell>{b.platform}</TableCell>
+                          <TableCell align="right">
+                            <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                              {b.apkUrl && (
+                                <Tooltip title={t('project_page.download_apk') ?? 'Download APK'}>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleDownloadApk(b.id)}
+                                  >
+                                    <DownloadIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              <IconButton size="small">
+                                <MoreVertIcon />
+                              </IconButton>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                <Menu
+                  anchorEl={menuAnchorEl}
+                  open={Boolean(menuAnchorEl)}
+                  onClose={closeBuildMenu}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      if (menuBuildId) router.push(`/projects/${slugForMenu}/builds/${menuBuildId}/logs`);
+                      closeBuildMenu();
+                    }}
+                  >
+                    {t('project_page.view_logs') ?? 'View logs'}
+                  </MenuItem>
+                </Menu>
+              </>
             )}
           </Paper>
         </Box>
