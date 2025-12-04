@@ -36,6 +36,7 @@ import {
   Tab,
   ToggleButtonGroup,
   ToggleButton,
+  CircularProgress,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -50,6 +51,7 @@ import ProjectSubMenu from '@/app/components/ProjectSubMenu';
 import { getTranslations } from '@/lib/clientTranslations';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useToast } from '@/lib/hooks/useToast';
+import clientApi from '@/lib/utils';
 
 // ---------- Types & mocks ----------
 
@@ -225,6 +227,52 @@ export default function ProjectOverviewPage() {
   const [envTab, setEnvTab] = useState<'default' | 'production' | 'development' | 'preview'>('default');
   const [platform, setPlatform] = useState<'all' | 'android' | 'ios'>('all');
   const [autoSubmit, setAutoSubmit] = useState(false);
+
+  // état du téléchargement APK
+  const [downloadingApk, setDownloadingApk] = useState(false);
+
+  // Fonction pour télécharger l'APK
+  const handleDownloadApk = async (buildId?: string) => {
+    const projectId = projectData?.id ?? projectData?.ID;
+    if (!projectId) {
+      addToast({ message: t('project_page.no_project_id') ?? 'Project ID not found', type: 'error' });
+      return;
+    }
+
+    // Si pas de buildId fourni, utiliser le dernier build successful
+    const targetBuildId = buildId ?? projectData?.builds?.find((b: any) => b.status === 'success')?.id;
+    if (!targetBuildId) {
+      addToast({ message: t('project_page.no_build_available') ?? 'No build available for download', type: 'error' });
+      return;
+    }
+
+    setDownloadingApk(true);
+    try {
+      interface DownloadResponse {
+        download_url: string;
+        artifact_key: string;
+        expires_in: string;
+      }
+
+      const data = await clientApi<DownloadResponse>(
+        `projects/${projectId}/builds/${targetBuildId}/download`
+      );
+
+      if (!data.download_url) {
+        throw new Error('No download URL in response');
+      }
+
+      // Ouvrir l'URL de téléchargement dans un nouvel onglet
+      window.open(data.download_url, '_blank');
+
+      addToast({ message: t('project_page.download_started') ?? 'Download started', type: 'success' });
+    } catch (err: any) {
+      console.error('Failed to download APK', err);
+      addToast({ message: err?.message ?? t('project_page.download_failed') ?? 'Download failed', type: 'error' });
+    } finally {
+      setDownloadingApk(false);
+    }
+  };
 
   // locale: valeur déterministe au SSR, puis mise à jour après hydration
   useEffect(() => {
@@ -551,9 +599,13 @@ export default function ProjectOverviewPage() {
             <Button
               variant="outlined"
               color="primary"
-              startIcon={<DownloadIcon />}
+              startIcon={downloadingApk ? <CircularProgress size={20} /> : <DownloadIcon />}
+              onClick={() => handleDownloadApk()}
+              disabled={downloadingApk}
             >
-              {t('project_page.download_apk') ?? 'Download APK'}
+              {downloadingApk
+                ? (t('project_page.downloading') ?? 'Downloading...')
+                : (t('project_page.download_apk') ?? 'Download APK')}
             </Button>
           </Stack>
         </Box>
