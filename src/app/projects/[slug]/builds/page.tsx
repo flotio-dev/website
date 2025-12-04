@@ -37,6 +37,8 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   CircularProgress,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -51,7 +53,6 @@ import ProjectSubMenu from '@/app/components/ProjectSubMenu';
 import { getTranslations } from '@/lib/clientTranslations';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useToast } from '@/lib/hooks/useToast';
-import clientApi from '@/lib/utils';
 import clientApi from '@/lib/utils';
 
 // ---------- Types ----------
@@ -235,7 +236,13 @@ export default function ProjectOverviewPage() {
 
   // Fonction pour télécharger l'APK
   const handleDownloadApk = async (buildId?: string) => {
+    console.log('handleDownloadApk called with buildId:', buildId);
+    console.log('projectData:', projectData);
+    console.log('builds:', builds);
+
     const projectId = projectData?.id ?? projectData?.ID;
+    console.log('projectId:', projectId);
+
     if (!projectId) {
       addToast({ message: t('project_page.no_project_id') ?? 'Project ID not found', type: 'error' });
       return;
@@ -243,6 +250,8 @@ export default function ProjectOverviewPage() {
 
     // Si pas de buildId fourni, utiliser le dernier build successful
     const targetBuildId = buildId ?? builds.find((b) => b.status === 'success')?.id;
+    console.log('targetBuildId:', targetBuildId);
+
     if (!targetBuildId) {
       addToast({ message: t('project_page.no_build_available') ?? 'No build available for download', type: 'error' });
       return;
@@ -256,9 +265,11 @@ export default function ProjectOverviewPage() {
         expires_in: string;
       }
 
-      const data = await clientApi<DownloadResponse>(
-        `projects/${projectId}/builds/${targetBuildId}/download`
-      );
+      const url = `project/${projectId}/build/${targetBuildId}/download`;
+      console.log('Calling API:', url);
+
+      const data = await clientApi<DownloadResponse>(url);
+      console.log('API response:', data);
 
       if (!data.download_url) {
         throw new Error('No download URL in response');
@@ -853,7 +864,7 @@ export default function ProjectOverviewPage() {
                 <Skeleton variant="rectangular" height={40} />
                 <Skeleton variant="rectangular" height={40} />
               </Stack>
-            ) : displayedBuilds.length === 0 ? (
+            ) : builds.length === 0 ? (
               <Typography color="text.secondary">
                 {t('project_page.no_builds_yet')}
               </Typography>
@@ -874,9 +885,9 @@ export default function ProjectOverviewPage() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {displayedBuildsLimited.map((b, i) => (
+                      {builds.slice(0, 5).map((b: BuildItem, i: number) => (
                         <TableRow
-                          key={`${b.id ?? b.startedAt ?? 'build'}-${i}`}
+                          key={`${b.id}-${i}`}
                           hover
                           sx={{
                             '&:nth-of-type(odd) td': {
@@ -891,7 +902,7 @@ export default function ProjectOverviewPage() {
                         >
                           <TableCell>
                             <MUILink
-                              href={`/projects/${project.slug}/builds/builds-logs?buildId=${b.id}`}
+                              href={`/projects/${slugForMenu}/builds/${b.id}`}
                               underline="none"
                             >
                               #{b.id}
@@ -911,7 +922,7 @@ export default function ProjectOverviewPage() {
                           <TableCell>{b.platform}</TableCell>
                           <TableCell align="right">
                             <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                              {b.apkUrl && (
+                              {b.status === 'success' && (
                                 <Tooltip title={t('project_page.download_apk') ?? 'Download APK'}>
                                   <IconButton
                                     size="small"
@@ -921,7 +932,7 @@ export default function ProjectOverviewPage() {
                                   </IconButton>
                                 </Tooltip>
                               )}
-                              <IconButton size="small">
+                              <IconButton size="small" onClick={(e) => openBuildMenu(e, b.id)}>
                                 <MoreVertIcon />
                               </IconButton>
                             </Stack>
