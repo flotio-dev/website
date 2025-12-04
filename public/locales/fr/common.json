@@ -215,7 +215,8 @@
     "platform_ios": "iOS",
     "git_ref": "Référence Git",
     "git_ref_help": "Hash de commit, branche ou tag",
-    "eas_build_profile": "Profil EAS Build"
+    "eas_build_profile": "Profil EAS Build",
+    "view_logs": "Voir les logs"
   },
   "build_details": {
     "title": "Build",
@@ -237,7 +238,8 @@
     "date": "Date",
     "duration": "Durée",
     "commit": "Commit",
-    "no_builds": "Aucun build trouvé"
+    "no_builds": "Aucun build trouvé",
+    "view_logs": "Voir les logs"
   },
   "add_project": {
     "title": "Créer un projet",

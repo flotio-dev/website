@@ -253,7 +253,8 @@
     "platform_ios": "iOS",
     "git_ref": "Git ref",
     "git_ref_help": "Commit hash, branch, or tag",
-    "eas_build_profile": "EAS Build profile"
+    "eas_build_profile": "EAS Build profile",
+    "view_logs": "View build logs"
   },
   "build_details": {
     "title": "Build",
@@ -275,7 +276,9 @@
     "date": "Date",
     "duration": "Duration",
     "commit": "Commit",
-    "no_builds": "No builds found"
+    "no_builds": "No builds found",
+    "view_details": "View details",
+    "view_logs": "View logs"
   },  
   "environment_page": {
     "title": "Environments",
