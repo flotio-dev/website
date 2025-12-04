@@ -186,6 +186,10 @@ export default function ProjectOverviewPage() {
   const [buildMode, setBuildMode] = useState('release');
   const [flutterChannel, setFlutterChannel] = useState('stable');
 
+  // État pour la liste des builds
+  const [builds, setBuilds] = useState<BuildItem[]>([]);
+  const [buildsLoading, setBuildsLoading] = useState(false);
+
   // locale: valeur déterministe au SSR, puis mise à jour après hydration
   useEffect(() => {
     let next: 'en' | 'fr' = 'fr';
@@ -325,6 +329,44 @@ export default function ProjectOverviewPage() {
     };
   }, [pathname, token, addToast, params]);
 
+  // Fetch builds séparément
+  useEffect(() => {
+    let mounted = true;
+    const projectId = projectData?.ID ?? projectData?.id;
+    if (!projectId) return;
+
+    const fetchBuilds = async () => {
+      setBuildsLoading(true);
+      try {
+        const data = await clientApi<{ builds: any[] }>(`project/${projectId}/builds`);
+        if (!mounted) return;
+
+        const apiBuilds: BuildItem[] = (data?.builds ?? []).map((b: any) => ({
+          id: String(b.id ?? b.ID ?? ''),
+          startedAt: b.created_at ?? b.CreatedAt ?? '',
+          finishedAt: b.updated_at ?? b.UpdatedAt ?? undefined,
+          status: (b.status === 'success' || b.status === 'failed' || b.status === 'running')
+            ? b.status
+            : 'running',
+          description: b.description ?? `Build #${b.id ?? b.ID ?? ''}`,
+          platform: b.platform ?? 'Android',
+        }));
+
+        setBuilds(apiBuilds);
+      } catch (err: any) {
+        console.error('Failed to fetch builds', err);
+        // Ne pas afficher de toast ici car ce n'est pas bloquant
+      } finally {
+        if (mounted) setBuildsLoading(false);
+      }
+    };
+
+    fetchBuilds();
+    return () => {
+      mounted = false;
+    };
+  }, [projectData]);
+
   // slug pour le menu
   const pathParts = pathname.split('/').filter(Boolean);
   const candidateSlugFromPath = params?.slug ?? (pathParts[1] ?? pathParts[0]);
@@ -338,24 +380,10 @@ export default function ProjectOverviewPage() {
     const pd: any = projectData;
     const slug = pd?.slug ?? pd?.name ?? candidateSlugFromPath ?? '';
 
-    // Convertir les builds de l'API vers le format BuildItem
-    const apiBuilds: BuildItem[] = Array.isArray(pd?.builds)
-      ? pd.builds.map((b: any) => ({
-        id: String(b.id ?? b.ID ?? ''),
-        startedAt: b.created_at ?? b.CreatedAt ?? '',
-        finishedAt: b.updated_at ?? b.UpdatedAt ?? undefined,
-        status: (b.status === 'success' || b.status === 'failed' || b.status === 'running')
-          ? b.status
-          : 'running',
-        description: b.description ?? `Build #${b.id ?? b.ID ?? ''}`,
-        platform: b.platform ?? 'Android',
-      }))
-      : [];
-
     // Calculer les stats depuis les builds
-    const total = apiBuilds.length;
-    const success = apiBuilds.filter((b) => b.status === 'success').length;
-    const failed = apiBuilds.filter((b) => b.status === 'failed').length;
+    const total = builds.length;
+    const success = builds.filter((b) => b.status === 'success').length;
+    const failed = builds.filter((b) => b.status === 'failed').length;
 
     return {
       name: pd?.name ?? '',
@@ -380,9 +408,9 @@ export default function ProjectOverviewPage() {
         success,
         failed,
       },
-      recentBuilds: apiBuilds.slice(0, 5),
+      recentBuilds: builds.slice(0, 5),
     };
-  }, [projectData, candidateSlugFromPath]);
+  }, [projectData, candidateSlugFromPath, builds]);
 
   const successRate = useMemo(() => {
     const denom = Math.max(1, project.stats.total);
@@ -691,7 +719,7 @@ export default function ProjectOverviewPage() {
                       >
                         <TableCell>
                           <MUILink
-                            href={`/projects/${project.slug}/builds/builds-logs`}
+                            href={`/projects/${slugForMenu}/builds/${b.id}`}
                             underline="none"
                           >
                             {b.id}
@@ -851,7 +879,7 @@ export default function ProjectOverviewPage() {
                   const platformToSend = platform === 'all' ? 'android' : platform;
                   const buildTarget = platformToSend === 'android' ? 'apk' : platformToSend;
 
-                  const response = await clientApi<{ build: any }>(`projects/${projectId}/build`, {
+                  const response = await clientApi<{ build: any }>(`project/${projectId}/build`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -866,13 +894,17 @@ export default function ProjectOverviewPage() {
                   addToast({ message: t('project_page.build_started') ?? 'Build started successfully', type: 'success' });
                   setBuildDialogOpen(false);
 
-                  // Optionnellement, rafraîchir les données du projet pour afficher le nouveau build
+                  // Rafraîchir la liste des builds
                   if (response?.build) {
-                    // Mettre à jour la liste des builds si nécessaire
-                    setProjectData((prev: any) => ({
-                      ...prev,
-                      builds: [response.build, ...(prev?.builds || [])],
-                    }));
+                    const newBuild: BuildItem = {
+                      id: String(response.build.id ?? response.build.ID ?? ''),
+                      startedAt: response.build.created_at ?? response.build.CreatedAt ?? new Date().toISOString(),
+                      finishedAt: undefined,
+                      status: response.build.status ?? 'running',
+                      description: `Build #${response.build.id ?? response.build.ID ?? ''}`,
+                      platform: response.build.platform ?? 'Android',
+                    };
+                    setBuilds((prev) => [newBuild, ...prev]);
                   }
                 } catch (err: any) {
                   console.error('Failed to start build', err);
