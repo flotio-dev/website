@@ -18,7 +18,9 @@ on:
       - '.env.example'
 
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+      - dev
     paths:
       - 'src/**'
       - 'public/**'
