@@ -53,7 +53,7 @@ import ProjectSubMenu from '@/app/components/ProjectSubMenu';
 import { getTranslations } from '@/lib/clientTranslations';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useToast } from '@/lib/hooks/useToast';
-import clientApi from '@/lib/utils';
+import clientApi, { clientApiRaw } from '@/lib/utils';
 
 // ---------- Types ----------
 
@@ -414,25 +414,8 @@ export default function ProjectOverviewPage() {
       setNotFound(false);
       setFetchErrorMessage(null);
       try {
-        const base = process.env.NEXT_PUBLIC_API_BASE_URL;
-        if (!base) {
-          const msg = 'API base URL not configured (NEXT_PUBLIC_API_BASE_URL)';
-          console.error(msg);
-          if (mounted) {
-            setFetchErrorMessage(msg);
-            setNotFound(true);
-            addToast({ message: msg, type: 'error' });
-          }
-          setLoading(false);
-          return;
-        }
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-        };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        const url = `${base.replace(/\/$/, '')}/project/${idOrSlug}`;
-        console.log('Fetching project from', url);
-        const res = await fetch(url, { headers, signal: controller.signal });
+        console.log('Fetching project', idOrSlug);
+        const res = await clientApiRaw(`project/${idOrSlug}`, { signal: controller.signal });
         const data = await res.json().catch(() => null);
 
         if (res.status === 404) {
