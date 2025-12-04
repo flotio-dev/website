@@ -26,10 +26,10 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useState, useEffect } from "react";
 import { usePathname, useParams, useRouter } from "next/navigation";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import ProjectSubMenu from "../../../../components/ProjectSubMenu";
-import { useLocalization } from "../../../../../lib/hooks/useLocalization";
-import clientApi from '../../../../../lib/utils';
-import { useToast } from '../../../../../lib/hooks/useToast';
+import ProjectSubMenu from "@/app/components/ProjectSubMenu";
+import { useLocalization } from "@/lib/hooks/useLocalization";
+import clientApi from '@/lib/utils';
+import { useToast } from '@/lib/hooks/useToast';
 
 /*******************
  * Types & Mock Data
@@ -47,44 +47,6 @@ interface BuildItem {
   platform?: string;
 }
 
-const mockBuilds: BuildItem[] = [
-  {
-    id: "build_54",
-    status: "success",
-    description: "feat: Update video provider configurations",
-    branch: "main",
-    author: "delikescance",
-    startedAt: "2025-10-19T21:21:00Z",
-    finishedAt: "2025-10-19T21:23:00Z",
-    duration: "2m 0s",
-    commit: "26c00b2",
-    platform: 'android',
-  },
-  {
-    id: "build_53",
-    status: "success",
-    description: "feat: add sitemap generation and anime API",
-    branch: "main",
-    author: "delikescance",
-    startedAt: "2025-10-17T20:09:00Z",
-    finishedAt: "2025-10-17T20:11:31Z",
-    duration: "2m 31s",
-    commit: "2169c6e",
-    platform: 'ios',
-  },
-  {
-    id: "build_52",
-    status: "failed",
-    description: "feat: Add metadata parsing and caching",
-    branch: "main",
-    author: "delikescance",
-    startedAt: "2025-10-16T23:56:00Z",
-    finishedAt: "2025-10-16T23:58:06Z",
-    duration: "2m 6s",
-    commit: "8cdd761",
-    platform: 'android',
-  },
-];
 
   const formatDate = (iso: string | undefined, locale: string) => {
   try {
@@ -220,7 +182,7 @@ export default function BuildListPage() {
     return () => { mounted = false; };
   }, [idOrSlug, addToast]);
 
-  const filteredBuilds = (builds ?? mockBuilds).filter((b) =>
+  const filteredBuilds = (builds ?? []).filter((b) =>
     (b.description ?? '').toLowerCase().includes(filter.toLowerCase())
   );
 
