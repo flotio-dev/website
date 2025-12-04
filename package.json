@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:e2e": "node ./tests/e2e/run-tests.mjs"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
@@ -35,6 +36,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
+    "puppeteer": "^24.32.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -24,7 +24,8 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED 1
-
+ENV NEXT_PUBLIC_GITHUB_APP flotio-app-prod
+ENV NEXT_PUBLIC_API_BASE_URL http://api-svc:8080
 RUN npm run build
 
 # Production image, copy all the files and run next
