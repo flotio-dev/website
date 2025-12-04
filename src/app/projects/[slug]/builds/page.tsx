@@ -654,7 +654,7 @@ export default function ProjectOverviewPage() {
                 </Stack>
                 {project.buildSettings.nodeVersion && (
                   <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">Node Version</Typography>
+                    <Typography color="text.secondary">Flutter Version</Typography>
                     <Typography>{project.buildSettings.nodeVersion}</Typography>
                   </Stack>
                 )}
