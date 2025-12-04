@@ -36,6 +36,7 @@ import {
   Tab,
   ToggleButtonGroup,
   ToggleButton,
+  CircularProgress,
   Menu,
   MenuItem,
 } from '@mui/material';
@@ -54,16 +55,48 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { useToast } from '@/lib/hooks/useToast';
 import clientApi from '@/lib/utils';
 
-// ---------- Types & mocks ----------
+// ---------- Types ----------
+
+// Type correspondant à la réponse API /projects/{id}/builds
+interface ApiBuild {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  project_id: number;
+  status: string;
+  platform: string;
+  container_id: string;
+  duration: number;
+  apk_url: string;
+}
+
+interface BuildsResponse {
+  builds: ApiBuild[];
+}
+
+// Type pour la requête de création de build POST /project/{id}/build
+interface BuildRequest {
+  platform?: string;
+  build_mode?: string;
+  build_target?: string;
+  flutter_channel?: string;
+  git_branch?: string;
+  git_username?: string;
+  git_token?: string;
+}
+
+interface BuildResponse {
+  build: ApiBuild;
+}
 
 interface BuildItem {
   id: string;
-  startedAt: string;
-  finishedAt?: string;
-  status: 'success' | 'failed' | 'running';
-  description?: string;
-  duration?: number | string;
-  platform?: string;
+  createdAt: string;
+  updatedAt: string;
+  status: 'success' | 'failed' | 'running' | 'pending';
+  platform: string;
+  duration: number;
+  apkUrl: string;
 }
 
 interface BuildSettings {
@@ -109,53 +142,6 @@ const formatDate = (iso?: string, locale = 'fr') => {
   }
 };
 
-const mockProject: ProjectShape = {
-  name: 'Test Project',
-  slug: 'test-project',
-  urlPath: '/build/test-project',
-  createdAt: '2025-05-01T09:30:00Z',
-  lastActivityAt: '2025-07-24T09:47:00Z',
-  //lastActivityDescription: 'Build #42 from main deployed to preview.',
-  ownership: { type: 'organization', name: 'Acme Inc.' },
-  buildSettings: {
-    provider: 'Custom Runner',
-    branch: 'main',
-    buildCommand: 'pnpm build',
-    outputDir: 'out',
-    nodeVersion: '20',
-  },
-  stats: {
-    total: 73,
-    success: 66,
-    failed: 5,
-  },
-  recentBuilds: [
-    {
-      id: 'build_0073',
-      startedAt: '2025-07-24T09:30:00Z',
-      finishedAt: '2025-07-24T09:47:00Z',
-      status: 'success',
-      description: 'Commit 9afc1e1 — Optimize images',
-      platform: 'iOS',
-    },
-    {
-      id: 'build_0072',
-      startedAt: '2025-07-23T15:12:00Z',
-      finishedAt: '2025-07-23T15:25:00Z',
-      status: 'failed',
-      description: 'Commit 1b23cde — Fix env var typo',
-      platform: 'Android',
-    },
-    {
-      id: 'build_0071',
-      startedAt: '2025-07-22T11:05:00Z',
-      status: 'running',
-      description: 'Commit 7c3aa91 — Add analytics',
-      platform: 'iOS',
-    },
-  ],
-};
-
 // ---------- Petits composants ----------
 
 function StatusChip({
@@ -167,7 +153,7 @@ function StatusChip({
 }) {
   const map: Record<
     BuildItem['status'],
-    { label: string; icon: React.ReactNode; color: 'success' | 'error' | 'default' }
+    { label: string; icon: React.ReactNode; color: 'success' | 'error' | 'default' | 'warning' }
   > = {
     success: {
       label: t('project_page.success'),
@@ -184,14 +170,20 @@ function StatusChip({
       icon: <ScheduleIcon fontSize="small" />,
       color: 'default',
     },
+    pending: {
+      label: t('project_page.pending') ?? 'Pending',
+      icon: <ScheduleIcon fontSize="small" />,
+      color: 'warning',
+    },
   };
-  const { label, icon, color } = map[status];
+  const config = map[status] ?? map.pending;
+  const { label, icon, color } = config;
   return (
     <Chip
       icon={icon as any}
       label={label}
       color={color}
-      variant={status === 'running' ? 'outlined' : 'filled'}
+      variant={status === 'running' || status === 'pending' ? 'outlined' : 'filled'}
       size="small"
     />
   );
@@ -213,6 +205,8 @@ export default function ProjectOverviewPage() {
   const [locale, setLocale] = useState<'en' | 'fr'>('fr');
   const [translations, setTranslations] = useState<Record<string, any> | null>(null);
   const [projectData, setProjectData] = useState<any | null>(null);
+  const [builds, setBuilds] = useState<BuildItem[]>([]);
+  const [buildsLoading, setBuildsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [fetchErrorMessage, setFetchErrorMessage] = useState<string | null>(null);
@@ -229,14 +223,121 @@ export default function ProjectOverviewPage() {
   const [envTab, setEnvTab] = useState<'default' | 'production' | 'development' | 'preview'>('default');
   const [platform, setPlatform] = useState<'all' | 'android' | 'ios'>('all');
   const [autoSubmit, setAutoSubmit] = useState(false);
-  const [buildLoading, setBuildLoading] = useState(false);
-  const [gitBranch, setGitBranch] = useState('main');
-  const [buildMode, setBuildMode] = useState('release');
-  const [flutterChannel, setFlutterChannel] = useState('stable');
+  const [startingBuild, setStartingBuild] = useState(false);
 
-  // État pour la liste des builds
-  const [builds, setBuilds] = useState<BuildItem[]>([]);
-  const [buildsLoading, setBuildsLoading] = useState(false);
+  // états du formulaire de build
+  const [buildMode, setBuildMode] = useState<'release' | 'debug'>('release');
+  const [buildTarget, setBuildTarget] = useState<'apk' | 'aab'>('apk');
+  const [flutterChannel, setFlutterChannel] = useState<'stable' | 'beta' | 'master'>('stable');
+  const [gitBranch, setGitBranch] = useState('main');
+
+  // état du téléchargement APK
+  const [downloadingApk, setDownloadingApk] = useState(false);
+
+  // Fonction pour télécharger l'APK
+  const handleDownloadApk = async (buildId?: string) => {
+    console.log('handleDownloadApk called with buildId:', buildId);
+    console.log('projectData:', projectData);
+    console.log('builds:', builds);
+
+    const projectId = projectData?.id ?? projectData?.ID;
+    console.log('projectId:', projectId);
+
+    if (!projectId) {
+      addToast({ message: t('project_page.no_project_id') ?? 'Project ID not found', type: 'error' });
+      return;
+    }
+
+    // Si pas de buildId fourni, utiliser le dernier build successful
+    const targetBuildId = buildId ?? builds.find((b) => b.status === 'success')?.id;
+    console.log('targetBuildId:', targetBuildId);
+
+    if (!targetBuildId) {
+      addToast({ message: t('project_page.no_build_available') ?? 'No build available for download', type: 'error' });
+      return;
+    }
+
+    setDownloadingApk(true);
+    try {
+      interface DownloadResponse {
+        download_url: string;
+        artifact_key: string;
+        expires_in: string;
+      }
+
+      const url = `project/${projectId}/build/${targetBuildId}/download`;
+      console.log('Calling API:', url);
+
+      const data = await clientApi<DownloadResponse>(url);
+      console.log('API response:', data);
+
+      if (!data.download_url) {
+        throw new Error('No download URL in response');
+      }
+
+      // Ouvrir l'URL de téléchargement dans un nouvel onglet
+      window.open(data.download_url, '_blank');
+
+      addToast({ message: t('project_page.download_started') ?? 'Download started', type: 'success' });
+    } catch (err: any) {
+      console.error('Failed to download APK', err);
+      addToast({ message: err?.message ?? t('project_page.download_failed') ?? 'Download failed', type: 'error' });
+    } finally {
+      setDownloadingApk(false);
+    }
+  };
+
+  // Fonction pour lancer un build
+  const handleStartBuild = async () => {
+    const projectId = projectData?.id ?? projectData?.ID;
+    if (!projectId) {
+      addToast({ message: t('project_page.no_project_id') ?? 'Project ID not found', type: 'error' });
+      return;
+    }
+
+    setStartingBuild(true);
+    try {
+      const platforms = platform === 'all' ? ['android', 'ios'] : [platform];
+
+      for (const p of platforms) {
+        const requestBody: BuildRequest = {
+          platform: p,
+          build_mode: buildMode,
+          build_target: buildTarget,
+          flutter_channel: flutterChannel,
+          git_branch: gitBranch,
+        };
+
+        const data = await clientApi<BuildResponse>(`project/${projectId}/build`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (data.build) {
+          // Ajouter le nouveau build à la liste
+          const newBuild: BuildItem = {
+            id: String(data.build.id),
+            createdAt: data.build.created_at,
+            updatedAt: data.build.updated_at,
+            status: data.build.status as BuildItem['status'],
+            platform: data.build.platform,
+            duration: data.build.duration,
+            apkUrl: data.build.apk_url,
+          };
+          setBuilds((prev) => [newBuild, ...prev]);
+        }
+      }
+
+      addToast({ message: t('project_page.build_started') ?? 'Build started successfully', type: 'success' });
+      setBuildDialogOpen(false);
+    } catch (err: any) {
+      console.error('Failed to start build', err);
+      addToast({ message: err?.message ?? t('project_page.build_start_failed') ?? 'Failed to start build', type: 'error' });
+    } finally {
+      setStartingBuild(false);
+    }
+  };
 
   // locale: valeur déterministe au SSR, puis mise à jour après hydration
   useEffect(() => {
@@ -388,33 +489,33 @@ export default function ProjectOverviewPage() {
     };
   }, [pathname, token, addToast, params]);
 
-  // Fetch builds séparément
+  // Fetch builds depuis l'API /projects/{id}/builds
   useEffect(() => {
-    let mounted = true;
-    const projectId = projectData?.ID ?? projectData?.id;
+    const projectId = projectData?.id ?? projectData?.ID;
     if (!projectId) return;
+
+    let mounted = true;
 
     const fetchBuilds = async () => {
       setBuildsLoading(true);
       try {
-        const data = await clientApi<{ builds: any[] }>(`project/${projectId}/builds`);
-        if (!mounted) return;
+        const data = await clientApi<BuildsResponse>(`project/${projectId}/builds`);
 
-        const apiBuilds: BuildItem[] = (data?.builds ?? []).map((b: any) => ({
-          id: String(b.id ?? b.ID ?? ''),
-          startedAt: b.created_at ?? b.CreatedAt ?? '',
-          finishedAt: b.updated_at ?? b.UpdatedAt ?? undefined,
-          status: (b.status === 'success' || b.status === 'failed' || b.status === 'running')
-            ? b.status
-            : 'running',
-          description: b.description ?? `Build #${b.id ?? b.ID ?? ''}`,
-          platform: b.platform ?? 'Android',
-        }));
-
-        setBuilds(apiBuilds);
+        if (mounted && data.builds) {
+          const mappedBuilds: BuildItem[] = data.builds.map((b) => ({
+            id: String(b.id),
+            createdAt: b.created_at,
+            updatedAt: b.updated_at,
+            status: b.status as BuildItem['status'],
+            platform: b.platform,
+            duration: b.duration,
+            apkUrl: b.apk_url,
+          }));
+          setBuilds(mappedBuilds);
+        }
       } catch (err: any) {
         console.error('Failed to fetch builds', err);
-        // Ne pas afficher de toast ici car ce n'est pas bloquant
+        // Ne pas afficher de toast pour les builds, on affiche juste une liste vide
       } finally {
         if (mounted) setBuildsLoading(false);
       }
@@ -434,118 +535,46 @@ export default function ProjectOverviewPage() {
       ? String((projectData as any).ID ?? projectData.id)
       : candidateSlugFromPath) ?? 'project';
 
-  // project fusion API data
-  const project: ProjectShape = useMemo(() => {
-    if (projectData && projectData.name) {
-      const pd: any = projectData;
+  // project depuis l'API
+  const project: ProjectShape | null = useMemo(() => {
+    if (!projectData || !projectData.name) return null;
 
-      // derive stats from fetched `builds` when available,
-      // otherwise try projectData.builds, then fall back to mocks
-      const sourceBuilds: BuildItem[] | undefined = builds ?? (Array.isArray(pd.builds) ? pd.builds : undefined);
-      const total = sourceBuilds ? sourceBuilds.length : (mockProject.stats.total ?? 0);
-      const success = sourceBuilds ? sourceBuilds.filter((b) => b.status === 'success').length : (mockProject.stats.success ?? 0);
-      const failed = sourceBuilds ? sourceBuilds.filter((b) => b.status === 'failed').length : (mockProject.stats.failed ?? 0);
+    const pd: any = projectData;
+    const successCount = builds.filter((b) => b.status === 'success').length;
+    const failedCount = builds.filter((b) => b.status === 'failed').length;
 
-      return {
-        name: pd.name ?? mockProject.name,
-        slug: pd.slug ?? pd.name ?? mockProject.slug,
-        urlPath: pd.urlPath ?? `/build/${pd.slug ?? pd.name ?? 'project'}`,
-        createdAt: (pd.CreatedAt ?? pd.createdAt ?? mockProject.createdAt) as string,
-        lastActivityAt: (pd.UpdatedAt ?? pd.lastActivityAt ?? mockProject.lastActivityAt) as string,
-        //lastActivityDescription:
-        //  pd.lastActivityDescription ?? mockProject.lastActivityDescription,
-        ownership: {
-          type: 'user',
-          name: pd.user?.username ?? pd.user?.email ?? mockProject.ownership.name,
-        },
-        buildSettings: {
-          provider: pd.build_provider ?? mockProject.buildSettings.provider,
-          branch: pd.build_branch ?? mockProject.buildSettings.branch,
-          buildCommand: pd.build_command ?? mockProject.buildSettings.buildCommand,
-          outputDir: pd.build_folder ?? mockProject.buildSettings.outputDir,
-          nodeVersion: pd.node_version ?? mockProject.buildSettings.nodeVersion,
-        },
-        stats: {
-          total,
-          success,
-          failed,
-        },
-        recentBuilds: sourceBuilds ? sourceBuilds : mockProject.recentBuilds,
-      };
-    }
-    const slug = candidateSlugFromPath ?? mockProject.slug;
-    return { ...mockProject, slug };
+    return {
+      name: pd.name,
+      slug: pd.slug ?? pd.name ?? candidateSlugFromPath ?? '',
+      urlPath: pd.urlPath ?? `/build/${pd.slug ?? pd.name ?? 'project'}`,
+      createdAt: (pd.CreatedAt ?? pd.createdAt ?? '') as string,
+      lastActivityAt: (pd.UpdatedAt ?? pd.lastActivityAt ?? '') as string,
+      lastActivityDescription: pd.lastActivityDescription ?? '',
+      ownership: {
+        type: 'user' as const,
+        name: pd.user?.username ?? pd.user?.email ?? '',
+      },
+      buildSettings: {
+        provider: pd.build_provider ?? '',
+        branch: pd.build_branch ?? 'main',
+        buildCommand: pd.build_command ?? '',
+        outputDir: pd.build_folder ?? '',
+        nodeVersion: pd.node_version,
+      },
+      stats: {
+        total: builds.length,
+        success: successCount,
+        failed: failedCount,
+      },
+      recentBuilds: builds.slice(0, 5),
+    };
   }, [projectData, candidateSlugFromPath, builds]);
 
-  const displayedBuilds = builds ?? project.recentBuilds;
-  // Sort by startedAt (newest first) and take the 3 most recent builds
-  const displayedBuildsLimited = (() => {
-    const arr = (displayedBuilds ?? []).slice();
-    const getTime = (s?: string) => {
-      const t = Date.parse(s ?? '') || 0;
-      return isNaN(t) ? 0 : t;
-    };
-    arr.sort((a, b) => getTime(b.startedAt) - getTime(a.startedAt));
-    return arr.slice(0, 3);
-  })();
-
-  const formatDuration = (d?: number | string) => {
-    if (d == null || d === '') return '—';
-    const num = typeof d === 'number' ? d : Number(d);
-    if (!isNaN(num) && isFinite(num)) {
-      const seconds = Math.max(0, Math.floor(num));
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      if (mins > 0) return `${mins}m ${secs}s`;
-      return `${secs}s`;
-    }
-    // fallback: show string
-    return String(d);
-  };
-
-  // Fetch builds for this project via core API (through proxy)
-  useEffect(() => {
-    let mounted = true;
-    const id = (projectData && (projectData.ID ?? projectData.id)) ?? null;
-    if (!id) return;
-    const fetchBuilds = async () => {
-      setBuildsLoading(true);
-      try {
-        const res = await clientApi<any>(`project/${encodeURIComponent(String(id))}/builds`);
-        const list = res?.builds ?? res;
-        const mapped: BuildItem[] = Array.isArray(list)
-          ? list.map((b: any) => ({
-              id: String(b.ID ?? b.id ?? ''),
-              startedAt: b.CreatedAt ?? b.createdAt ?? '',
-              finishedAt: b.UpdatedAt ?? b.finishedAt ?? undefined,
-              status: (b.status === 'running' ? 'running' : b.status === 'failed' ? 'failed' : 'success') as BuildItem['status'],
-              description: b.description ?? b.commit_message ?? '',
-              duration: b.duration ?? b.duration_seconds ?? b.duration_sec ?? 0,
-              platform: b.platform ?? '',
-            }))
-          : [];
-        if (mounted) setBuilds(mapped);
-      } catch (err: any) {
-        console.error('Failed to fetch builds', err);
-        if (mounted) {
-          setBuilds([]);
-          addToast({ message: err?.message ?? 'Failed to fetch builds', type: 'error' });
-        }
-      } finally {
-        if (mounted) setBuildsLoading(false);
-      }
-    };
-
-    fetchBuilds();
-    return () => {
-      mounted = false;
-    };
-  }, [projectData, addToast]);
-
   const successRate = useMemo(() => {
+    if (!project) return 0;
     const denom = Math.max(1, project.stats.total);
     return Math.round((project.stats.success / denom) * 100);
-  }, [project.stats]);
+  }, [project]);
 
   // ---------- états loading / notFound ----------
 
@@ -617,7 +646,26 @@ export default function ProjectOverviewPage() {
     );
   }
 
-  // ---------- UI principale (sans "Edit project") ----------
+  // Si pas de données projet après chargement
+  if (!project) {
+    return (
+      <Box className="flex h-screen">
+        <ProjectSubMenu slug={slugForMenu} />
+        <Box
+          className="flex-1 overflow-auto"
+          sx={{ p: { xs: 3, md: 6 }, bgcolor: 'background.default' }}
+        >
+          <Stack spacing={2}>
+            <Skeleton variant="rectangular" height={48} />
+            <Skeleton variant="rectangular" height={200} />
+            <Skeleton variant="rectangular" height={200} />
+          </Stack>
+        </Box>
+      </Box>
+    );
+  }
+
+  // ---------- UI principale ----------
 
   return (
     <Box className="flex h-screen">
@@ -683,9 +731,13 @@ export default function ProjectOverviewPage() {
             <Button
               variant="outlined"
               color="primary"
-              startIcon={<DownloadIcon />}
+              startIcon={downloadingApk ? <CircularProgress size={20} /> : <DownloadIcon />}
+              onClick={() => handleDownloadApk()}
+              disabled={downloadingApk}
             >
-              {t('project_page.download_apk') ?? 'Download APK'}
+              {downloadingApk
+                ? (t('project_page.downloading') ?? 'Downloading...')
+                : (t('project_page.download_apk') ?? 'Download APK')}
             </Button>
           </Stack>
         </Box>
@@ -738,7 +790,7 @@ export default function ProjectOverviewPage() {
               </Grid>
 
               <Divider sx={{ my: 2 }} />
-     
+
             </CardContent>
           </Card>
           <Card
@@ -812,90 +864,98 @@ export default function ProjectOverviewPage() {
                 <Skeleton variant="rectangular" height={40} />
                 <Skeleton variant="rectangular" height={40} />
               </Stack>
-            ) : displayedBuilds.length === 0 ? (
+            ) : builds.length === 0 ? (
               <Typography color="text.secondary">
                 {t('project_page.no_builds_yet')}
               </Typography>
             ) : (
               <>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>ID</TableCell>
-                      <TableCell>{t('project_page.status')}</TableCell>
-                      <TableCell>{t('project_page.start')}</TableCell>
-                      <TableCell>{t('project_page.end')}</TableCell>
-                      <TableCell>Durée</TableCell>
-                      <TableCell>{t('project_page.platform')}</TableCell>
-                      <TableCell align="right">
-                        {t('project_page.actions')}
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {displayedBuildsLimited.map((b, i) => (
-                      <TableRow
-                        key={`${b.id ?? b.startedAt ?? 'build'}-${i}`}
-                        hover
-                        sx={{
-                          '&:nth-of-type(odd) td': {
-                            bgcolor: 'background.paper',
-                          },
-                          '&:nth-of-type(even) td': {
-                            bgcolor: 'background.default',
-                          },
-                          '&:hover td': { bgcolor: 'action.hover' },
-                          transition: 'background-color 120ms ease',
-                        }}
-                      >
-                        <TableCell>
-                          <MUILink
-                            href={`/projects/${slugForMenu}/builds/builds-logs`}
-                            underline="none"
-                          >
-                            {b.id}
-                          </MUILink>
-                        </TableCell>
-                        <TableCell>
-                          <StatusChip status={b.status} t={t} />
-                        </TableCell>
-                        <TableCell>
-                          <Typography color="text.secondary">
-                            {formatDate(b.startedAt, locale)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          {b.finishedAt
-                            ? formatDate(b.finishedAt, locale)
-                            : '—'}
-                        </TableCell>
-                        <TableCell>{formatDuration(b.duration)}</TableCell>
-                        <TableCell>{b.platform}</TableCell>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>ID</TableCell>
+                        <TableCell>{t('project_page.status')}</TableCell>
+                        <TableCell>{t('project_page.created_at')}</TableCell>
+                        <TableCell>{t('project_page.duration')}</TableCell>
+                        <TableCell>{t('project_page.platform')}</TableCell>
                         <TableCell align="right">
-                          <IconButton size="small" onClick={(e) => openBuildMenu(e, b.id)}>
-                            <MoreVertIcon />
-                          </IconButton>
+                          {t('project_page.actions')}
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <Menu
-                anchorEl={menuAnchorEl}
-                open={Boolean(menuAnchorEl)}
-                onClose={closeBuildMenu}
-              >
-                <MenuItem
-                  onClick={() => {
-                    if (menuBuildId) router.push(`/projects/${slugForMenu}/builds/${menuBuildId}/logs`);
-                    closeBuildMenu();
-                  }}
+                    </TableHead>
+                    <TableBody>
+                      {builds.slice(0, 5).map((b: BuildItem, i: number) => (
+                        <TableRow
+                          key={`${b.id}-${i}`}
+                          hover
+                          sx={{
+                            '&:nth-of-type(odd) td': {
+                              bgcolor: 'background.paper',
+                            },
+                            '&:nth-of-type(even) td': {
+                              bgcolor: 'background.default',
+                            },
+                            '&:hover td': { bgcolor: 'action.hover' },
+                            transition: 'background-color 120ms ease',
+                          }}
+                        >
+                          <TableCell>
+                            <MUILink
+                              href={`/projects/${slugForMenu}/builds/${b.id}`}
+                              underline="none"
+                            >
+                              #{b.id}
+                            </MUILink>
+                          </TableCell>
+                          <TableCell>
+                            <StatusChip status={b.status} t={t} />
+                          </TableCell>
+                          <TableCell>
+                            <Typography color="text.secondary">
+                              {formatDate(b.createdAt, locale)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            {b.duration > 0 ? `${Math.round(b.duration / 60)}min` : '—'}
+                          </TableCell>
+                          <TableCell>{b.platform}</TableCell>
+                          <TableCell align="right">
+                            <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                              {b.status === 'success' && (
+                                <Tooltip title={t('project_page.download_apk') ?? 'Download APK'}>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleDownloadApk(b.id)}
+                                  >
+                                    <DownloadIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              <IconButton size="small" onClick={(e) => openBuildMenu(e, b.id)}>
+                                <MoreVertIcon />
+                              </IconButton>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                <Menu
+                  anchorEl={menuAnchorEl}
+                  open={Boolean(menuAnchorEl)}
+                  onClose={closeBuildMenu}
                 >
-                  {t('project_page.view_logs') ?? 'View logs'}
-                </MenuItem>
-              </Menu>
+                  <MenuItem
+                    onClick={() => {
+                      if (menuBuildId) router.push(`/projects/${slugForMenu}/builds/${menuBuildId}/logs`);
+                      closeBuildMenu();
+                    }}
+                  >
+                    {t('project_page.view_logs') ?? 'View logs'}
+                  </MenuItem>
+                </Menu>
               </>
             )}
           </Paper>
@@ -904,147 +964,127 @@ export default function ProjectOverviewPage() {
         {/* Start build dialog */}
         <Dialog
           open={buildDialogOpen}
-          onClose={() => setBuildDialogOpen(false)}
+          onClose={() => !startingBuild && setBuildDialogOpen(false)}
           fullWidth
           maxWidth="md"
         >
           <DialogTitle>{t('project_page.start_build') ?? 'Start build'}</DialogTitle>
 
           <DialogContent dividers>
-            {/* Environment */}
+            {/* Platform selection */}
             <Typography variant="subtitle1" sx={{ mb: 1 }}>
-              {t('project_page.environment') ?? 'Environment'}
+              {t('project_page.platform') ?? 'Platform'}
             </Typography>
-
-            <Tabs
-              value={envTab}
-              onChange={(_, v) => setEnvTab(v)}
-              sx={{ mb: 2 }}
-              variant="fullWidth"
-            >
-              <Tab value="default" label={t('project_page.env_default') ?? 'Default'} />
-              <Tab value="production" label={t('project_page.env_production') ?? 'Production'} />
-              <Tab value="development" label={t('project_page.env_development') ?? 'Development'} />
-              <Tab value="preview" label={t('project_page.env_preview') ?? 'Preview'} />
-            </Tabs>
-
-            <TextField
-              label={t('project_page.eas_submit_profile') ?? 'EAS Submit profile'}
-              fullWidth
+            <ToggleButtonGroup
+              exclusive
+              value={platform}
+              onChange={(_, v) => v && setPlatform(v)}
               size="small"
-              margin="dense"
-              defaultValue="production"
-            />
+              sx={{ mb: 3 }}
+            >
+              <ToggleButton value="all">
+                {t('project_page.platform_all') ?? 'All'}
+              </ToggleButton>
+              <ToggleButton value="android">
+                {t('project_page.platform_android') ?? 'Android'}
+              </ToggleButton>
+              <ToggleButton value="ios">
+                {t('project_page.platform_ios') ?? 'iOS'}
+              </ToggleButton>
+            </ToggleButtonGroup>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 2 }} />
 
-            {/* Repo & build settings */}
+            {/* Build mode */}
             <Typography variant="subtitle1" sx={{ mb: 1 }}>
-              {t('project_page.build_config') ?? 'Build configuration'}
+              {t('project_page.build_mode') ?? 'Build mode'}
             </Typography>
+            <ToggleButtonGroup
+              exclusive
+              value={buildMode}
+              onChange={(_, v) => v && setBuildMode(v)}
+              size="small"
+              sx={{ mb: 3 }}
+            >
+              <ToggleButton value="release">Release</ToggleButton>
+              <ToggleButton value="debug">Debug</ToggleButton>
+            </ToggleButtonGroup>
 
-            <Stack spacing={2}>
-              <TextField
-                label={t('project_page.base_directory') ?? 'Base directory'}
-                fullWidth
-                size="small"
-                defaultValue="/"
-              />
-
-              <Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                  {t('project_page.platform') ?? 'Platform'}
+            {/* Build target (Android only) */}
+            {(platform === 'android' || platform === 'all') && (
+              <>
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  {t('project_page.build_target') ?? 'Build target'}
                 </Typography>
                 <ToggleButtonGroup
                   exclusive
-                  value={platform}
-                  onChange={(_, v) => v && setPlatform(v)}
+                  value={buildTarget}
+                  onChange={(_, v) => v && setBuildTarget(v)}
                   size="small"
+                  sx={{ mb: 3 }}
                 >
-                  {/* <ToggleButton value="all">
-                    {t('project_page.platform_all') ?? 'All'}
-                  </ToggleButton> */}
-                  <ToggleButton value="android">
-                    {t('project_page.platform_android') ?? 'Android'}
-                  </ToggleButton>
+                  <ToggleButton value="apk">APK</ToggleButton>
+                  <ToggleButton value="aab">AAB (App Bundle)</ToggleButton>
                 </ToggleButtonGroup>
-              </Box>
+              </>
+            )}
 
-              <TextField
-                label={t('project_page.git_ref') ?? 'Git ref'}
-                helperText={t('project_page.git_ref_help') ?? 'Commit hash, branch, or tag'}
-                fullWidth
-                size="small"
-                value={gitBranch}
-                onChange={(e) => setGitBranch(e.target.value)}
-              />
+            {/* Flutter channel */}
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              {t('project_page.flutter_channel') ?? 'Flutter channel'}
+            </Typography>
+            <ToggleButtonGroup
+              exclusive
+              value={flutterChannel}
+              onChange={(_, v) => v && setFlutterChannel(v)}
+              size="small"
+              sx={{ mb: 3 }}
+            >
+              <ToggleButton value="stable">Stable</ToggleButton>
+              <ToggleButton value="beta">Beta</ToggleButton>
+              <ToggleButton value="master">Master</ToggleButton>
+            </ToggleButtonGroup>
 
-              <TextField
-                label={t('project_page.eas_build_profile') ?? 'EAS Build profile'}
-                fullWidth
-                size="small"
-                defaultValue="production"
-              />
-            </Stack>
+            <Divider sx={{ my: 2 }} />
+
+            {/* Git branch */}
+            <TextField
+              label={t('project_page.git_branch') ?? 'Git branch'}
+              fullWidth
+              size="small"
+              value={gitBranch}
+              onChange={(e) => setGitBranch(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={autoSubmit}
+                  onChange={(_, checked) => setAutoSubmit(checked)}
+                />
+              }
+              label={
+                t('project_page.auto_submit') ??
+                'Automatically submit to stores after building successfully'
+              }
+            />
           </DialogContent>
 
           <DialogActions>
-            <Button onClick={() => setBuildDialogOpen(false)} disabled={buildLoading}>
+            <Button onClick={() => setBuildDialogOpen(false)} disabled={startingBuild}>
               {t('project_page.cancel') ?? 'Cancel'}
             </Button>
             <Button
               variant="contained"
               color="primary"
-              disabled={buildLoading}
-              onClick={async () => {
-                const projectId = projectData?.ID ?? projectData?.id ?? params?.slug;
-                if (!projectId) {
-                  addToast({ message: 'Project ID not found', type: 'error' });
-                  return;
-                }
-
-                setBuildLoading(true);
-                try {
-                  // Déterminer la plateforme à envoyer
-                  const platformToSend = platform === 'all' ? 'android' : platform;
-                  const buildTarget = platformToSend === 'android' ? 'apk' : platformToSend;
-
-                  const response = await clientApi<{ build: any }>(`project/${projectId}/build`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      platform: platformToSend,
-                      build_mode: buildMode,
-                      build_target: buildTarget,
-                      flutter_channel: flutterChannel,
-                      git_branch: gitBranch,
-                    }),
-                  });
-
-                  addToast({ message: t('project_page.build_started') ?? 'Build started successfully', type: 'success' });
-                  setBuildDialogOpen(false);
-
-                  // Rafraîchir la liste des builds
-                  if (response?.build) {
-                    const newBuild: BuildItem = {
-                      id: String(response.build.id ?? response.build.ID ?? ''),
-                      startedAt: response.build.created_at ?? response.build.CreatedAt ?? new Date().toISOString(),
-                      finishedAt: undefined,
-                      status: response.build.status ?? 'running',
-                      description: `Build #${response.build.id ?? response.build.ID ?? ''}`,
-                      platform: response.build.platform ?? 'Android',
-                    };
-                    setBuilds((prev) => [newBuild, ...prev]);
-                  }
-                } catch (err: any) {
-                  console.error('Failed to start build', err);
-                  addToast({ message: err?.message || t('project_page.build_failed') || 'Failed to start build', type: 'error' });
-                } finally {
-                  setBuildLoading(false);
-                }
-              }}
+              onClick={handleStartBuild}
+              disabled={startingBuild}
+              startIcon={startingBuild ? <CircularProgress size={20} /> : <PlayArrowIcon />}
             >
-              {buildLoading ? (t('project_page.starting') ?? 'Starting...') : (t('project_page.start_build') ?? 'Start build')}
+              {startingBuild
+                ? (t('project_page.starting_build') ?? 'Starting...')
+                : (t('project_page.start_build') ?? 'Start build')}
             </Button>
           </DialogActions>
         </Dialog>
