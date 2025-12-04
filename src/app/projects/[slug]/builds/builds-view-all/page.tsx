@@ -18,14 +18,18 @@ import {
   Link as MUILink,
   InputAdornment,
 } from "@mui/material";
+import { IconButton, Menu, MenuItem } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import SearchIcon from "@mui/icons-material/Search";
-import { useState } from "react";
-import { usePathname, useParams } from "next/navigation";
-import ProjectSubMenu from "../../../../components/ProjectSubMenu";
-import { useLocalization } from "../../../../../lib/hooks/useLocalization";
+import { useState, useEffect } from "react";
+import { usePathname, useParams, useRouter } from "next/navigation";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import ProjectSubMenu from "@/app/components/ProjectSubMenu";
+import { useLocalization } from "@/lib/hooks/useLocalization";
+import clientApi from '@/lib/utils';
+import { useToast } from '@/lib/hooks/useToast';
 
 /*******************
  * Types & Mock Data
@@ -33,50 +37,20 @@ import { useLocalization } from "../../../../../lib/hooks/useLocalization";
 interface BuildItem {
   id: string;
   status: "success" | "failed" | "running";
-  message: string;
+  description: string;
   branch: string;
   author: string;
-  date: string;
-  duration: string;
+  startedAt: string; // début
+  finishedAt?: string; // fin
+  duration: string | number;
   commit: string;
+  platform?: string;
 }
 
-const mockBuilds: BuildItem[] = [
-  {
-    id: "build_54",
-    status: "success",
-    message: "feat: Update video provider configurations",
-    branch: "main",
-    author: "delikescance",
-    date: "2025-10-19T21:21:00Z",
-    duration: "2m 0s",
-    commit: "26c00b2",
-  },
-  {
-    id: "build_53",
-    status: "success",
-    message: "feat: add sitemap generation and anime API",
-    branch: "main",
-    author: "delikescance",
-    date: "2025-10-17T20:09:00Z",
-    duration: "2m 31s",
-    commit: "2169c6e",
-  },
-  {
-    id: "build_52",
-    status: "failed",
-    message: "feat: Add metadata parsing and caching",
-    branch: "main",
-    author: "delikescance",
-    date: "2025-10-16T23:56:00Z",
-    duration: "2m 6s",
-    commit: "8cdd761",
-  },
-];
 
-const formatDate = (iso: string, locale: string) => {
+  const formatDate = (iso: string | undefined, locale: string) => {
   try {
-    const d = new Date(iso);
+      const d = new Date(iso ?? '');
     return new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
       dateStyle: "medium",
       timeStyle: "short",
@@ -84,6 +58,19 @@ const formatDate = (iso: string, locale: string) => {
   } catch {
     return iso;
   }
+};
+
+const formatDuration = (d?: string | number) => {
+  if (d == null || d === '') return '—';
+  const num = typeof d === 'number' ? d : Number(String(d).replace(/[^0-9.-]/g, ''));
+  if (!isNaN(num) && isFinite(num)) {
+    const seconds = Math.max(0, Math.floor(num));
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (mins > 0) return `${mins}m ${secs}s`;
+    return `${secs}s`;
+  }
+  return String(d);
 };
 
 /*******************
@@ -124,13 +111,79 @@ export default function BuildListPage() {
   const [filter, setFilter] = useState("");
   const pathname = usePathname() ?? "/";
   const params = useParams() as { slug?: string } | undefined;
+  const { addToast } = useToast();
+
+  const router = useRouter();
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
+  const [menuBuildId, setMenuBuildId] = useState<string | null>(null);
+  const openBuildMenu = (e: React.MouseEvent<HTMLElement>, id: string) => {
+    setMenuAnchorEl(e.currentTarget);
+    setMenuBuildId(id);
+  };
+  const closeBuildMenu = () => {
+    setMenuAnchorEl(null);
+    setMenuBuildId(null);
+  };
+
+  const [builds, setBuilds] = useState<BuildItem[] | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // slug pour le sous-menu projet
   const pathParts = pathname.split("/").filter(Boolean);
   const candidateSlugFromPath = params?.slug ?? pathParts[1] ?? pathParts[0];
   const slugForMenu = candidateSlugFromPath ?? "project";
-  const filteredBuilds = mockBuilds.filter((b) =>
-    b.message.toLowerCase().includes(filter.toLowerCase())
+  // compute candidate id/slug from path (same as other pages)
+  const idOrSlug = candidateSlugFromPath;
+
+  useEffect(() => {
+    let mounted = true;
+    if (!idOrSlug) return;
+    const fetchBuilds = async () => {
+      setLoading(true);
+      try {
+        const res = await clientApi<any>(`project/${encodeURIComponent(String(idOrSlug))}/builds`);
+
+        const list = res?.builds ?? res ?? [];
+        const mapped: BuildItem[] = Array.isArray(list)
+          ? list.map((b: any) => ({
+              id: String(b.ID ?? b.id ?? ''),
+              status: b.status === 'running' ? 'running' : (b.status === 'failed' ? 'failed' : 'success'),
+              description: b.description ?? b.message ?? b.commit_message ?? '',
+              branch: b.branch ?? b.build_branch ?? '',
+              author: b.project?.user?.username ?? b.user?.username ?? b.author ?? '',
+              startedAt: b.CreatedAt ?? b.startedAt ?? b.createdAt ?? b.date ?? '',
+              finishedAt: b.UpdatedAt ?? b.finishedAt ?? undefined,
+              duration: b.duration ?? b.duration_seconds ?? b.duration_sec ?? b.duration_text ?? b.duration_str ?? 0,
+              commit: b.commit ?? b.short_commit ?? '',
+              platform: b.platform ?? b.target ?? '',
+            }))
+          : [];
+
+        // sort newest first by startedAt
+        mapped.sort((a, b) => {
+          const ta = Date.parse(a.startedAt) || 0;
+          const tb = Date.parse(b.startedAt) || 0;
+          return tb - ta;
+        });
+
+        if (mounted) setBuilds(mapped);
+      } catch (err: any) {
+        console.error('Failed to fetch builds', err);
+        if (mounted) {
+          setBuilds([]);
+          addToast({ message: err?.message ?? 'Failed to fetch builds', type: 'error' });
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetchBuilds();
+    return () => { mounted = false; };
+  }, [idOrSlug, addToast]);
+
+  const filteredBuilds = (builds ?? []).filter((b) =>
+    (b.description ?? '').toLowerCase().includes(filter.toLowerCase())
   );
 
   const { locale, t } = useLocalization();
@@ -191,29 +244,30 @@ export default function BuildListPage() {
         >
           <TableContainer>
             <Table>
-              <TableHead>
+                  <TableHead>
                 <TableRow>
-                  <TableCell>{t("build_list.status")}</TableCell>
-                  <TableCell>{t("build_list.commit")}</TableCell>
-                  <TableCell>{t("build_list.branch")}</TableCell>
-                  <TableCell>{t("build_list.author")}</TableCell>
-                  <TableCell>{t("build_list.date")}</TableCell>
-                  <TableCell>{t("build_list.duration")}</TableCell>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Statut</TableCell>
+                  <TableCell>Début</TableCell>
+                  <TableCell>Fin</TableCell>
+                  <TableCell>Durée</TableCell>
+                  <TableCell>Plateforme</TableCell>
+                  <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {filteredBuilds.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} align="center">
+                    <TableCell colSpan={7} align="center">
                       <Typography color="text.secondary">
                         {t("build_list.no_builds")}
                       </Typography>
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredBuilds.map((b) => (
+                  filteredBuilds.map((b, i) => (
                     <TableRow
-                      key={b.id}
+                      key={`${b.id ?? b.startedAt ?? 'build'}-${i}`}
                       hover
                       sx={{
                         "&:nth-of-type(odd) td": {
@@ -227,40 +281,45 @@ export default function BuildListPage() {
                       }}
                     >
                       <TableCell>
-                        <StatusChip status={b.status} t={t} />
-                      </TableCell>
-                      <TableCell>
                         <MUILink
                           underline="hover"
                           href={`/projects/${slugForMenu}/builds/builds-logs`}
                         >
-                          {b.message}
+                          {b.id}
                         </MUILink>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          display="block"
-                        >
-                          {b.commit}
-                        </Typography>
                       </TableCell>
-                      <TableCell>{b.branch}</TableCell>
                       <TableCell>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Avatar sx={{ width: 24, height: 24 }}>
-                            {b.author[0].toUpperCase()}
-                          </Avatar>
-                          <Typography variant="body2">{b.author}</Typography>
-                        </Stack>
+                        <StatusChip status={b.status} t={t} />
                       </TableCell>
-                      <TableCell>{formatDate(b.date, locale)}</TableCell>
-                      <TableCell>{b.duration}</TableCell>
+                      <TableCell>{formatDate(b.startedAt, locale)}</TableCell>
+                      <TableCell>{b.finishedAt ? formatDate(b.finishedAt, locale) : '—'}</TableCell>
+                      <TableCell>{formatDuration(b.duration)}</TableCell>
+                      <TableCell>{b.platform ?? '—'}</TableCell>
+                      <TableCell>
+                        <IconButton size="small" onClick={(e) => openBuildMenu(e, b.id)}>
+                          <MoreVertIcon />
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
               </TableBody>
             </Table>
           </TableContainer>
+            <Menu
+              anchorEl={menuAnchorEl}
+              open={Boolean(menuAnchorEl)}
+              onClose={closeBuildMenu}
+            >
+              <MenuItem
+                onClick={() => {
+                  if (menuBuildId) router.push(`/projects/${slugForMenu}/builds/${menuBuildId}/logs`);
+                  closeBuildMenu();
+                }}
+              >
+                {t('build_list.view_logs') ?? 'Voir les logs'}
+              </MenuItem>
+            </Menu>
         </Paper>
       </Box>
     </Box>

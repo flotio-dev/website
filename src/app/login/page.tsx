@@ -54,8 +54,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-purple-100 bg-cover bg-center bg-no-repeat"
-         style={{ backgroundImage: "url('/tttt.svg')" }}>
+    <div
+      className="flex items-center justify-center min-h-screen bg-purple-100 bg-cover bg-no-repeat animate-bgMove"
+      style={{ backgroundImage: "url('/bg.jpg')" }}>
       <div className="flex w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden">
         {/* Colonne gauche */}
         <div className="flex w-full md:w-1/2 items-center justify-center bg-gray-50">
@@ -100,7 +101,7 @@ export default function LoginPage() {
             <button
               onClick={handleLogin}
               disabled={loading}
-              className="w-full mt-6 py-2 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition"
+              className="w-full mt-6 py-2 px-4 bg-indigo-700 text-white font-semibold rounded-lg hover:bg-indigo-700 transition"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
@@ -117,7 +118,7 @@ export default function LoginPage() {
         </div>
 
         {/* Colonne droite */}
-        <div className="hidden md:flex w-1/2 bg-gradient-to-br from-purple-600 to-indigo-700 text-white items-center justify-center p-12 relative">
+        <div className="hidden md:flex w-1/2 bg-gradient-to-br from-blue-900 to-indigo-700 text-white items-center justify-center p-12 relative">
           <div className="max-w-md text-center">
             <h1 className="text-4xl font-bold mb-4">Welcome back!</h1>
             <p className="text-lg">

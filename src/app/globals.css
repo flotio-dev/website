@@ -41,3 +41,12 @@ select,
 .MuiFilledInput-root .MuiFilledInput-input {
   color: #000000 !important;
 }
+
+@keyframes bgMove {
+  0% { background-position: center; }
+  100% { background-position: center 20%; }
+}
+
+.animate-bgMove {
+  animation: bgMove 10s ease-in-out infinite alternate;
+}
