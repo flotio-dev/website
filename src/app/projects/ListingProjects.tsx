@@ -32,7 +32,7 @@ import { getTranslations } from '@/lib/clientTranslations';
 import clientApi from '@/lib/utils';
 
 interface Project {
-  ID?: number;
+  id?: number;
   name: string;
   git_repo?: string;
   build_folder?: string;
@@ -187,7 +187,7 @@ export default function ListingProjects() {
             </TableHead>
             <TableBody>
               {projects.map((project, index) => {
-                const idOrSlug = project.ID ?? encodeURIComponent(project.slug ?? project.name);
+                const idOrSlug = project.id ?? encodeURIComponent(project.slug ?? project.name);
                 const target = `/projects/${idOrSlug}/overview`;
 
                 return (
@@ -243,7 +243,7 @@ export default function ListingProjects() {
                         aria-haspopup="true"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const idOrSlugLocal = project.ID ?? encodeURIComponent(project.slug ?? project.name);
+                          const idOrSlugLocal = project.id ?? encodeURIComponent(project.slug ?? project.name);
                           setMenuTargetId(idOrSlugLocal);
                           setMenuAnchorEl(e.currentTarget as HTMLElement);
                         }}
@@ -287,7 +287,7 @@ export default function ListingProjects() {
                 // Use clientApi to perform the DELETE via the proxy and central auth handling
                 await clientApi<any>(`project/${encodeURIComponent(String(idToDelete))}`, { method: 'DELETE' });
                 // remove locally
-                setProjects((prev) => prev.filter((p) => (p.ID ?? encodeURIComponent(p.slug ?? p.name)) !== idToDelete));
+                setProjects((prev) => prev.filter((p) => (p.id ?? encodeURIComponent(p.slug ?? p.name)) !== idToDelete));
                 addToast({ message: 'Projet supprimé', type: 'success' });
               } catch (err: any) {
                 console.error('Delete project failed', err);
