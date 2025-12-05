@@ -12,7 +12,6 @@ import {
 import FolderIcon from '@mui/icons-material/Folder';
 import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/lib/hooks/useAuth';
 import { getTranslations } from '@/lib/clientTranslations';
 import clientApi from '@/lib/utils';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
