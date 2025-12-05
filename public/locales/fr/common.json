@@ -79,7 +79,13 @@
     "recent_activity": "Activité récente",
     "changelog": "Journal des modifications",
     "loading_projects": "Chargement des projets...",
-    "no_projects": "Aucun projet trouvé. Commencez par en créer un !"
+    "no_projects": "Aucun projet trouvé. Commencez par en créer un !",
+    "changelog_update": "Mise à jour",
+    "changelog_update_desc": "Affichage du temps de build en temps réel dans la liste des builds.",
+    "changelog_improvement": "Amélioration",
+    "changelog_improvement_desc": "Amélioration des traductions et corrections mineures.",
+    "changelog_bugfix": "Correction de bug",
+    "changelog_bugfix_desc": "Gestion applications multi-utilisateurs corrigée."
   },
   "listing_projects": {
     "projects": "Projets",

@@ -25,9 +25,9 @@ const activities = [
 ];
 
 const changelog = [
-  { label: 'Update', desc: "GitHub integration: improved synchronization of installations." },
-  { label: 'Improvement', desc: "Dashboard performance optimization and minor fixes." },
-  { label: 'Bug Fix', desc: "Fixed an issue affecting the display of build logs." },
+  { type: 'update', labelKey: 'dashboard.changelog_update', descKey: 'dashboard.changelog_update_desc' },
+  { type: 'improvement', labelKey: 'dashboard.changelog_improvement', descKey: 'dashboard.changelog_improvement_desc' },
+  { type: 'bugfix', labelKey: 'dashboard.changelog_bugfix', descKey: 'dashboard.changelog_bugfix_desc' },
 ];
 
 
@@ -161,12 +161,12 @@ function Changelog({ t }: { t: (k: string) => string }) {
         {changelog.map((change, idx) => (
           <Stack direction="row" alignItems="center" spacing={2} key={idx} mb={1}>
             <Chip
-              label={change.label}
-              color={change.label === 'Bug Fix' ? 'error' : 'info'}
+              label={t(change.labelKey)}
+              color={change.type === 'bugfix' ? 'error' : 'info'}
               variant="outlined"
               sx={{ fontWeight: 'bold' }}
             />
-            <Typography variant="body2">{change.desc}</Typography>
+            <Typography variant="body2">{t(change.descKey)}</Typography>
           </Stack>
         ))}
       </Stack>
