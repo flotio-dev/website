@@ -6,7 +6,9 @@ async function forwardRequest(request: NextRequest, method: string, slug: string
     return NextResponse.json({ error: 'API base URL not configured' }, { status: 500 });
   }
   const path = slug.join('/');
-  const url = `${baseUrl}/${path}`;
+  const url = new URL(`${baseUrl}/${path}`);
+  url.search = request.nextUrl.search;
+
   const headers = new Headers(request.headers);
   headers.delete('host');
   headers.delete('referer');
@@ -22,7 +24,7 @@ async function forwardRequest(request: NextRequest, method: string, slug: string
     (fetchOptions as any).duplex = 'half';
   }
 
-  const response = await fetch(url, fetchOptions);
+  const response = await fetch(url.toString(), fetchOptions);
 
   return new NextResponse(response.body, {
     status: response.status,
