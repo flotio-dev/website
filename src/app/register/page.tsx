@@ -26,6 +26,20 @@ const LockClosedIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+// Fonction de validation du mot de passe
+const validatePassword = (password: string) => {
+  const requirements = {
+    minLength: password.length >= 8,
+    hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
+    hasNumber: /\d/.test(password),
+    hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  };
+
+  const isValid = Object.values(requirements).every(Boolean);
+  return { requirements, isValid };
+};
+
 export default function RegisterPage() {
   const router = useRouter();
   const { user, register } = useAuth();
@@ -37,12 +51,23 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [passwordValidation, setPasswordValidation] = useState<any>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+
+    if (name === "password") {
+      setPasswordValidation(validatePassword(value));
+    }
   };
 
   const handleRegister = async () => {
+    if (!passwordValidation?.isValid) {
+      setMessage("Password does not meet security requirements");
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
 
@@ -55,7 +80,6 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
-
 
   return (
     <div
@@ -125,12 +149,36 @@ export default function RegisterPage() {
                   {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
+
+              {/* Password Requirements */}
+              {form.password && (
+                <div className="mt-4 p-3 bg-gray-100 rounded-lg">
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Password Requirements:</p>
+                  <ul className="space-y-1 text-xs">
+                    <li className={passwordValidation?.requirements.minLength ? "text-green-600" : "text-red-600"}>
+                      ✓ At least 8 characters
+                    </li>
+                    <li className={passwordValidation?.requirements.hasUppercase ? "text-green-600" : "text-red-600"}>
+                      ✓ At least one uppercase letter (A-Z)
+                    </li>
+                    <li className={passwordValidation?.requirements.hasLowercase ? "text-green-600" : "text-red-600"}>
+                      ✓ At least one lowercase letter (a-z)
+                    </li>
+                    <li className={passwordValidation?.requirements.hasNumber ? "text-green-600" : "text-red-600"}>
+                      ✓ At least one number (0-9)
+                    </li>
+                    <li className={passwordValidation?.requirements.hasSpecialChar ? "text-green-600" : "text-red-600"}>
+                      ✓ At least one special character (!@#$%^&*)
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             <button
               onClick={handleRegister}
-              disabled={loading}
-              className="w-full mt-6 py-2 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition"
+              disabled={loading || !passwordValidation?.isValid}
+              className="w-full mt-6 py-2 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {loading ? "Creating..." : "Sign Up"}
             </button>
