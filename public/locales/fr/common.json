@@ -230,7 +230,13 @@
     "build_finished": "Build terminé",
     "cancelled": "Annulé",
     "start_building": "Démarrer le build",
-    "starting_build": "Démarrage du build..."
+    "starting_build": "Démarrage du build...",
+    "delete_build": "Supprimer le build",
+    "delete_build_confirm": "Êtes-vous sûr de vouloir supprimer ce build ? Cette action est irréversible.",
+    "delete": "Supprimer",
+    "build_deleted": "Build supprimé",
+    "no_build_available": "Aucun build disponible",
+    "download_started": "Le téléchargement va commencer bientôt..."
   },
   "build_details": {
     "title": "Build",

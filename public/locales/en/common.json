@@ -272,7 +272,13 @@
     "build_finished": "Build finished",
     "cancelled": "Cancelled ",
     "start_building": "Start building",
-    "starting_build": "Starting build..."
+    "starting_build": "Starting build...",
+    "delete_build": "Delete build",
+    "delete_build_confirm": "Are you sure you want to delete this build? This action is irreversible.",
+    "delete": "Delete",
+    "build_deleted": "Build deleted successfully",
+    "no_build_available": "No build available",
+    "download_started": "Download started"
   },
   "build_details": {
     "title": "Build",
