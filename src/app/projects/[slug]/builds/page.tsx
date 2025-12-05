@@ -910,7 +910,7 @@ export default function ProjectOverviewPage() {
                             </Typography>
                           </TableCell>
                           <TableCell>
-                            {b.duration > 0 ? `${Math.round(b.duration / 60)}min` : '—'}
+                            {b.duration > 0 ? `${Math.floor(b.duration / 60)}m ${b.duration % 60}s` : '—'}
                           </TableCell>
                           <TableCell>{b.platform}</TableCell>
                           <TableCell align="right">

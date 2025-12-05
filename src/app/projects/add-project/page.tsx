@@ -32,7 +32,7 @@ export default function AddProjectPage() {
     name: '',
     githubConnected: undefined,
     repo: '',
-    buildPath: '/',
+    buildPath: '',
     flutterVersion: 'stable',
   });
   const [errors, setErrors] = useState<any>({});
@@ -325,8 +325,8 @@ export default function AddProjectPage() {
               data-testid="add-project-flutter-select"
             >
               <MenuItem value="stable">Stable</MenuItem>
-              <MenuItem value="3.24.2">3.24.2</MenuItem>
-              <MenuItem value="3.22.0">3.22.0</MenuItem>
+              <MenuItem value="beta">Beta</MenuItem>
+              <MenuItem value="master">Master</MenuItem>
             </Select>
             {errors.flutterVersion && (
               <FormHelperText error>{errors.flutterVersion}</FormHelperText>
