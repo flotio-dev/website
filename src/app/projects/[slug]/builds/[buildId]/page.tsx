@@ -45,6 +45,7 @@ interface SyncResponse {
     status: string;
     pod_status?: string;
     has_more: boolean;
+    elapsed_time?: number;
 }
 
 /*******************
@@ -154,6 +155,7 @@ export default function BuildLogsPage() {
     const [loading, setLoading] = useState(true);
     const [isPolling, setIsPolling] = useState(false);
     const [pollingError, setPollingError] = useState<string | null>(null);
+    const [elapsedTime, setElapsedTime] = useState<number | null>(null);
 
     const logsContainerRef = useRef<HTMLDivElement | null>(null);
     const pollingAbortRef = useRef<AbortController | null>(null);
@@ -287,6 +289,11 @@ export default function BuildLogsPage() {
                         ...prev,
                         status: response.status as BuildInfo["status"]
                     } : prev);
+                }
+
+                // Update elapsed time from response
+                if (response?.elapsed_time != null) {
+                    setElapsedTime(response.elapsed_time);
                 }
 
                 // Continue polling if build is still running
@@ -437,9 +444,9 @@ export default function BuildLogsPage() {
                             <Typography variant="body2" color="text.secondary">
                                 {t("build_details.started_at") || "Started"}: {formatDate(buildInfo.created_at, locale)}
                             </Typography>
-                            {buildInfo.duration && (
+                            {(elapsedTime != null || (buildInfo.duration != null && buildInfo.duration > 0)) && (
                                 <Typography variant="body2" color="text.secondary">
-                                    {t("build_details.duration") || "Duration"}: {buildInfo.duration}s
+                                    {t("build_details.duration") || "Duration"}: {Math.floor((elapsedTime ?? buildInfo.duration ?? 0) / 60)}m {(elapsedTime ?? buildInfo.duration ?? 0) % 60}s
                                 </Typography>
                             )}
                         </Stack>
