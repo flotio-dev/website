@@ -92,7 +92,7 @@ function BuildStatusChip({
 }) {
     const map: Record<
         BuildInfo["status"],
-        { icon: React.ReactNode; label: string; color: "success" | "error" | "warning" | "default" }
+        { icon: React.ReactNode; label: string; color: "success" | "error" | "warning" | "default" | "primary"}
     > = {
         success: {
             icon: <CheckCircleIcon fontSize="small" />,
@@ -107,7 +107,7 @@ function BuildStatusChip({
         running: {
             icon: <ScheduleIcon fontSize="small" />,
             label: t("build_details.running") || "Running",
-            color: "warning",
+            color: "primary",
         },
         pending: {
             icon: <ScheduleIcon fontSize="small" />,

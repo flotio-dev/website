@@ -320,7 +320,7 @@ export default function ProjectOverviewPage() {
 
       const p = data?.project ?? data;
       setProjectData(p);
-      addToast({ message: 'Project mis à jour', type: 'success' });
+      addToast({ message: t('add_project.notifications.updated') ?? 'Project mis à jour', type: 'success' });
       setEditOpen(false);
     } catch (err: any) {
       console.error('Failed to save project', err);
@@ -422,7 +422,6 @@ export default function ProjectOverviewPage() {
               <Stack spacing={1}>
                 <Typography color="text.primary"><strong>{t('project_page.name')}: </strong>{project.name}</Typography>
                 <Typography color="text.primary"><strong>Slug: </strong>{project.slug}</Typography>
-                <Typography color="text.primary"><strong>{t('project_page.owner')}: </strong>{project.ownership?.name ?? '—'}</Typography>
                 <Typography color="text.primary"><strong>{t('project_page.created_at')}: </strong>{formatDate(project.created_at, locale)}</Typography>
                 <Typography color="text.primary"><strong>{t('project_page.updated_at')}: </strong>{formatDate(project.updated_at, locale)}</Typography>
               </Stack>
