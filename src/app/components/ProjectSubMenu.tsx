@@ -177,7 +177,7 @@ export default function ProjectSubMenu({ slug }: { slug: string }) {
       items: [
         { label: t('project_page.overview') || 'Overview', href: `/projects/${slug}/overview`, icon: <InfoIcon /> },
         { label: t('project_page.builds') || 'Builds', href: `/projects/${slug}/builds`, icon: <BuildIcon /> },
-        { label: t('project_page.environment') || 'Variables Env', href: `/projects/${slug}/environment`, icon: <DataObjectIcon /> },
+        //{ label: t('project_page.environment') || 'Variables Env', href: `/projects/${slug}/environment`, icon: <DataObjectIcon /> },
         { label: t('project_page.settings') || 'Parametres', href: `/projects/${slug}/settings`, icon: <SettingsIcon /> },
       ],
     },

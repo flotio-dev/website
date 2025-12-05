@@ -12,16 +12,12 @@ import {
 import FolderIcon from '@mui/icons-material/Folder';
 import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { getTranslations } from '@/lib/clientTranslations';
 import clientApi from '@/lib/utils';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Link from 'next/link';
 import Menu from '@/app/components/Menu';
-
-const projects = [
-  { name: 'Test Project', slug: 'Test' },
-  { name: 'Noname Project', slug: 'Noname' },
-];
 
 const activities = [
   { date: '24/07/2025 : 11h47 AM', desc: 'New build created for project Noname Project.' },
@@ -30,14 +26,16 @@ const activities = [
 ];
 
 const changelog = [
-  { label: 'Update', desc: 'Enhancements implemented and an issue resolved.' },
-  { label: 'Update', desc: 'Version 3.2 — Two updates delivered, one bug fixed.' },
-  { label: 'Bug Fix', desc: 'Fixed: small issue affecting performance.' },
+  { label: 'Update', desc: "GitHub integration: improved synchronization of installations." },
+  { label: 'Improvement', desc: "Dashboard performance optimization and minor fixes." },
+  { label: 'Bug Fix', desc: "Fixed an issue affecting the display of build logs." },
 ];
+
 
 function ProjectList({ t }: { t: (k: string) => string }) {
   const [projectsState, setProjectsState] = useState<Array<{ name?: string; slug?: string }>>([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
+  const [githubConnected, setGithubConnected] = useState<boolean | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -57,8 +55,39 @@ function ProjectList({ t }: { t: (k: string) => string }) {
       }
     };
     load();
+    // Check GitHub App installation for this account
+    const checkInstallation = async () => {
+      try {
+        try {
+          const data = await clientApi<any>('github/installations');
+          if (!mounted) return;
+          setGithubConnected(true);
+        } catch (err: any) {
+          if (!mounted) return;
+          if (err && typeof err.message === 'string' && err.message.includes('404')) {
+            setGithubConnected(false);
+            return;
+          }
+          console.debug('GitHub installation check failed', err);
+          setGithubConnected(false);
+          return;
+        }
+      } catch (err) {
+        console.error('Error checking GitHub installation', err);
+        if (!mounted) return;
+        setGithubConnected(false);
+      }
+    };
+
+    checkInstallation();
+
+    const onGithubToken = () => {
+      checkInstallation();
+    };
+    window.addEventListener('githubToken', onGithubToken as EventListener);
     return () => {
       mounted = false;
+      window.removeEventListener('githubToken', onGithubToken as EventListener);
     };
   }, []);
 
@@ -73,15 +102,17 @@ function ProjectList({ t }: { t: (k: string) => string }) {
             {t('dashboard.all_projects')}
           </Button>
         </Link>
-        <Button
-          component="a"
-          href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP}/installations/new`}
-          target="_blank"
-          variant="contained"
-          color="primary"
-        >
-          Install GitHub App
-        </Button>
+        {githubConnected !== true && (
+          <Button
+            component="a"
+            href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP}/installations/new`}
+            target="_blank"
+            variant="contained"
+            color="primary"
+          >
+            Install GitHub App
+          </Button>
+        )}
       </Stack>
       <Stack>
         {loadingProjects ? (
@@ -217,7 +248,7 @@ export default function DashboardPage() {
             </Typography>
           </Stack>
           <ProjectList t={t} />
-          <RecentActivity t={t} />
+          {/*<RecentActivity t={t} />*/}
           <Changelog t={t} />
         </Stack>
       </Box>

@@ -456,12 +456,6 @@ export default function ProjectOverviewPage() {
           <DialogContent>
             <Stack spacing={2} sx={{ mt: 1 }}>
               <TextField label={t('add_project.fields.project_name') ?? 'Name'} value={editName} onChange={(e) => setEditName(e.target.value)} fullWidth />
-
-              <FormControlLabel
-                control={<Switch checked={!!editGithubConnected} onChange={(_, v) => setEditGithubConnected(v)} />}
-                label={t('add_project.steps.github') ?? 'GitHub connected?'}
-              />
-
               {/* Choisir le dépôt */}
               <Typography variant="subtitle2" sx={{ mt: 1 }}>{t('add_project.steps.repo') ?? 'Choisir le dépôt'}</Typography>
               {editGithubConnected ? (
