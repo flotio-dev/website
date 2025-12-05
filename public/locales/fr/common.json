@@ -199,7 +199,7 @@
     "provider": "Provider",
     "branch": "Branche",
     "command": "Commande",
-    "output_dir": "Dossier de sortie",
+    "output_dir": "Dossier de build",
     "project_not_found": "Projet non trouvé",
     "back_to_projects": "Retour aux projets",
     "logs": "Logs des builds",

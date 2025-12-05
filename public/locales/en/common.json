@@ -241,7 +241,7 @@
     "provider": "Provider",
     "branch": "Branch",
     "command": "Command",
-    "output_dir": "Output directory",
+    "output_dir": "Build directory",
     "project_not_found": "Project not found",
     "back_to_projects": "Go back to projects",
     "logs": "Build logs",
