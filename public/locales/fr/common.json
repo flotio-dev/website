@@ -78,7 +78,13 @@
     "recent_activity": "Activité récente",
     "changelog": "Journal des modifications",
     "loading_projects": "Chargement des projets...",
-    "no_projects": "Aucun projet trouvé. Commencez par en créer un !"
+    "no_projects": "Aucun projet trouvé. Commencez par en créer un !",
+    "changelog_update": "Mise à jour",
+    "changelog_update_desc": "Intégration GitHub : amélioration de la synchronisation des installations.",
+    "changelog_improvement": "Amélioration",
+    "changelog_improvement_desc": "Optimisation des performances du tableau de bord et corrections mineures.",
+    "changelog_bugfix": "Correction de bug",
+    "changelog_bugfix_desc": "Correction d'un problème affectant l'affichage des logs de build."
   },
   "listing_projects": {
     "projects": "Projets",

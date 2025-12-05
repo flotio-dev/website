@@ -77,7 +77,13 @@
     "recent_activity": "Recent activity",
     "changelog": "Changelog",
     "loading_projects": "Loading projects...",
-    "no_projects": "No projects found. Start by creating one!"
+    "no_projects": "No projects found. Start by creating one!",
+    "changelog_update": "Update",
+    "changelog_update_desc": "GitHub Integration: Improved installation synchronization.",
+    "changelog_improvement": "Improvement",
+    "changelog_improvement_desc": "Dashboard performance optimizations and minor fixes.",
+    "changelog_bugfix": "Bugfix",
+    "changelog_bugfix_desc": "Fixed an issue affecting build log display."
   },
   "listing_projects": {
     "projects": "Projects",
