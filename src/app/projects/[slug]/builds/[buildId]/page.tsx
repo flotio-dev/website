@@ -213,6 +213,22 @@ export default function BuildLogsPage() {
         const fetchBuildInfo = async () => {
             setLoading(true);
             try {
+                // Fetch build info from API
+                const buildData = await clientApi<{ build: BuildInfo }>(
+                    `project/${projectId}/build/${buildId}`
+                );
+                if (buildData?.build) {
+                    setBuildInfo({
+                        id: buildData.build.id,
+                        status: buildData.build.status as BuildInfo["status"],
+                        platform: buildData.build.platform,
+                        created_at: buildData.build.created_at,
+                        updated_at: buildData.build.updated_at,
+                        duration: buildData.build.duration,
+                        apk_url: buildData.build.apk_url,
+                    });
+                }
+
                 // Fetch build logs (initial)
                 const logsData = await clientApi<{ logs: string[] }>(
                     `project/${projectId}/build/${buildId}/logs`
@@ -220,16 +236,6 @@ export default function BuildLogsPage() {
                 const initialLogs = logsData?.logs ?? [];
                 setLogs(initialLogs);
                 lastLineRef.current = initialLogs.length;
-
-                // We don't have a specific endpoint for build info, but we can get it from the project
-                // For now, we'll use the build ID to display basic info
-                setBuildInfo({
-                    id: parseInt(buildId, 10),
-                    status: "running", // Will be updated via polling
-                    platform: "android",
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString(),
-                });
             } catch (err: any) {
                 console.error("Failed to fetch build info", err);
                 addToast({
