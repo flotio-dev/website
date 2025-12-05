@@ -39,6 +39,14 @@ interface BuildInfo {
     apk_url?: string;
 }
 
+interface SyncResponse {
+    logs: string[];
+    last_line: number;
+    status: string;
+    pod_status?: string;
+    has_more: boolean;
+}
+
 /*******************
  * Helper functions
  *******************/
@@ -65,6 +73,11 @@ const formatDate = (iso?: string, locale = "fr") => {
     } catch {
         return iso;
     }
+};
+
+// Generate a unique connection ID
+const generateConnectionId = () => {
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
 };
 
 /*******************
@@ -139,12 +152,13 @@ export default function BuildLogsPage() {
     const [buildInfo, setBuildInfo] = useState<BuildInfo | null>(null);
     const [logs, setLogs] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
-    const [wsConnected, setWsConnected] = useState(false);
-    const [wsError, setWsError] = useState<string | null>(null);
+    const [isPolling, setIsPolling] = useState(false);
+    const [pollingError, setPollingError] = useState<string | null>(null);
 
-    const wsRef = useRef<WebSocket | null>(null);
     const logsContainerRef = useRef<HTMLDivElement | null>(null);
-    const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const pollingAbortRef = useRef<AbortController | null>(null);
+    const connectionIdRef = useRef<string>(generateConnectionId());
+    const lastLineRef = useRef<number>(0);
 
     // Translation helper
     const t = useCallback(
@@ -203,13 +217,15 @@ export default function BuildLogsPage() {
                 const logsData = await clientApi<{ logs: string[] }>(
                     `project/${projectId}/build/${buildId}/logs`
                 );
-                setLogs(logsData?.logs ?? []);
+                const initialLogs = logsData?.logs ?? [];
+                setLogs(initialLogs);
+                lastLineRef.current = initialLogs.length;
 
                 // We don't have a specific endpoint for build info, but we can get it from the project
                 // For now, we'll use the build ID to display basic info
                 setBuildInfo({
                     id: parseInt(buildId, 10),
-                    status: "running", // Will be updated via WebSocket or polling
+                    status: "running", // Will be updated via polling
                     platform: "android",
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
@@ -228,80 +244,76 @@ export default function BuildLogsPage() {
         fetchBuildInfo();
     }, [projectId, buildId, addToast]);
 
-    // WebSocket connection for live logs
+    // HTTP polling for live logs (replaces WebSocket)
     useEffect(() => {
-        if (!projectId || !buildId || !token) return;
+        if (!projectId || !buildId || !token || loading) return;
 
-        const connectWebSocket = () => {
-            // Clean up previous connection
-            if (wsRef.current) {
-                wsRef.current.close();
-            }
+        let isCancelled = false;
 
-            // Build WebSocket URL
-            const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-            const wsProtocol = baseUrl.startsWith("https") ? "wss" : "ws";
-            const wsHost = baseUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
-            const wsUrl = `${wsProtocol}://${wsHost}/project/${projectId}/build/${buildId}/logs/ws?token=${encodeURIComponent(token)}`;
-
-            console.log("Connecting to WebSocket:", wsUrl);
+        const pollLogs = async () => {
+            // Create new abort controller for this poll cycle
+            pollingAbortRef.current = new AbortController();
 
             try {
-                const ws = new WebSocket(wsUrl);
-                wsRef.current = ws;
+                setIsPolling(true);
+                setPollingError(null);
 
-                ws.onopen = () => {
-                    console.log("WebSocket connected");
-                    setWsConnected(true);
-                    setWsError(null);
-                };
+                const response = await clientApi<SyncResponse>(
+                    `project/${projectId}/build/${buildId}/logs/sync?connectionId=${connectionIdRef.current}&lastLine=${lastLineRef.current}`
+                );
 
-                ws.onmessage = (event) => {
-                    const logLine = event.data;
-                    setLogs((prev) => [...prev, logLine]);
+                if (isCancelled) return;
+
+                // Append new logs
+                if (response?.logs && response.logs.length > 0) {
+                    setLogs((prev) => [...prev, ...response.logs]);
+                    lastLineRef.current = response.last_line;
 
                     // Auto-scroll to bottom
                     if (logsContainerRef.current) {
                         logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
                     }
-                };
+                }
 
-                ws.onerror = (error) => {
-                    console.error("WebSocket error:", error);
-                    setWsError("WebSocket connection error");
-                    setWsConnected(false);
-                };
+                // Update build status from response
+                if (response?.status) {
+                    setBuildInfo((prev) => prev ? {
+                        ...prev,
+                        status: response.status as BuildInfo["status"]
+                    } : prev);
+                }
 
-                ws.onclose = (event) => {
-                    console.log("WebSocket closed:", event.code, event.reason);
-                    setWsConnected(false);
+                // Continue polling if build is still running
+                if (response?.has_more && !isCancelled) {
+                    // Small delay before next poll to prevent tight loops
+                    setTimeout(pollLogs, 100);
+                } else {
+                    setIsPolling(false);
+                }
+            } catch (err: any) {
+                if (isCancelled) return;
 
-                    // Check if build is still running and reconnect
-                    if (buildInfo?.status === "running" || buildInfo?.status === "pending") {
-                        // Reconnect after 3 seconds
-                        reconnectTimeoutRef.current = setTimeout(() => {
-                            console.log("Attempting to reconnect WebSocket...");
-                            connectWebSocket();
-                        }, 3000);
-                    }
-                };
-            } catch (err) {
-                console.error("Failed to create WebSocket:", err);
-                setWsError("Failed to connect to log stream");
+                console.error("Polling error:", err);
+                setPollingError(err?.message || "Connection error");
+                setIsPolling(false);
+
+                // Retry after 3 seconds on error if build is still running
+                if (buildInfo?.status === "running" || buildInfo?.status === "pending") {
+                    setTimeout(pollLogs, 3000);
+                }
             }
         };
 
-        connectWebSocket();
+        // Start polling
+        pollLogs();
 
         return () => {
-            if (reconnectTimeoutRef.current) {
-                clearTimeout(reconnectTimeoutRef.current);
-            }
-            if (wsRef.current) {
-                wsRef.current.close();
+            isCancelled = true;
+            if (pollingAbortRef.current) {
+                pollingAbortRef.current.abort();
             }
         };
-    }, [projectId, buildId, token, buildInfo?.status]);
+    }, [projectId, buildId, token, loading, buildInfo?.status]);
 
     // Auto-scroll logs when new logs arrive
     useEffect(() => {
@@ -384,7 +396,7 @@ export default function BuildLogsPage() {
                                 {t("build_details.title") || "Build"} #{buildId}
                             </Typography>
                             {buildInfo && <BuildStatusChip status={buildInfo.status} t={t} />}
-                            {wsConnected && (
+                            {isPolling && (
                                 <Chip
                                     size="small"
                                     color="success"
@@ -427,12 +439,12 @@ export default function BuildLogsPage() {
                         </Stack>
                     )}
 
-                    {wsError && (
+                    {pollingError && (
                         <Chip
                             size="small"
                             color="error"
-                            label={wsError}
-                            onDelete={() => setWsError(null)}
+                            label={pollingError}
+                            onDelete={() => setPollingError(null)}
                         />
                     )}
                 </Stack>
