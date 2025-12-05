@@ -221,7 +221,7 @@ export default function ProjectOverviewPage() {
   // état du dialog "Start build"
   const [buildDialogOpen, setBuildDialogOpen] = useState(false);
   const [envTab, setEnvTab] = useState<'default' | 'production' | 'development' | 'preview'>('default');
-  const [platform, setPlatform] = useState<'all' | 'android' | 'ios'>('all');
+  const [platform, setPlatform] = useState<'all' | 'android'>('all');
   const [autoSubmit, setAutoSubmit] = useState(false);
   const [startingBuild, setStartingBuild] = useState(false);
 
@@ -297,7 +297,7 @@ export default function ProjectOverviewPage() {
 
     setStartingBuild(true);
     try {
-      const platforms = platform === 'all' ? ['android', 'ios'] : [platform];
+      const platforms = platform === 'all' ? ['android'] : [platform];
 
       for (const p of platforms) {
         const requestBody: BuildRequest = {
@@ -790,23 +790,9 @@ export default function ProjectOverviewPage() {
               <Stack spacing={1}>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography color="text.secondary">
-                    {t('project_page.provider')}
-                  </Typography>
-                  <Typography sx={{ ml: 2 }}>
-                    {project.buildSettings.provider}
-                  </Typography>
-                </Stack>
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography color="text.secondary">
                     {t('project_page.branch')}
                   </Typography>
                   <Typography>{project.buildSettings.branch}</Typography>
-                </Stack>
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography color="text.secondary">
-                    {t('project_page.command')}
-                  </Typography>
-                  <Typography>{project.buildSettings.buildCommand}</Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography color="text.secondary">
@@ -814,12 +800,10 @@ export default function ProjectOverviewPage() {
                   </Typography>
                   <Typography>{project.buildSettings.outputDir}</Typography>
                 </Stack>
-                {project.buildSettings.nodeVersion && (
                   <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">Flutter Version</Typography>
+                    <Typography color="text.secondary">Channel</Typography>
                     <Typography>{project.buildSettings.nodeVersion}</Typography>
                   </Stack>
-                )}
               </Stack>
             </CardContent>
           </Card>
@@ -971,9 +955,6 @@ export default function ProjectOverviewPage() {
               <ToggleButton value="android">
                 {t('project_page.platform_android') ?? 'Android'}
               </ToggleButton>
-              <ToggleButton value="ios">
-                {t('project_page.platform_ios') ?? 'iOS'}
-              </ToggleButton>
             </ToggleButtonGroup>
 
             <Divider sx={{ my: 2 }} />
@@ -1038,19 +1019,6 @@ export default function ProjectOverviewPage() {
               value={gitBranch}
               onChange={(e) => setGitBranch(e.target.value)}
               sx={{ mb: 2 }}
-            />
-
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={autoSubmit}
-                  onChange={(_, checked) => setAutoSubmit(checked)}
-                />
-              }
-              label={
-                t('project_page.auto_submit') ??
-                'Automatically submit to stores after building successfully'
-              }
             />
           </DialogContent>
 
