@@ -43,7 +43,7 @@ import {
 import SettingsIcon from '@mui/icons-material/Settings';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DownloadIcon from '@mui/icons-material/Download';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteIcon from '@mui/icons-material/Delete';
 import LinkIcon from '@mui/icons-material/Link';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -93,7 +93,7 @@ interface BuildItem {
   id: string;
   createdAt: string;
   updatedAt: string;
-  status: 'success' | 'failed' | 'running' | 'pending';
+  status: 'success' | 'failed' | 'running' | 'pending' | 'cancelled' | string;
   platform: string;
   duration: number;
   apkUrl: string;
@@ -153,7 +153,7 @@ function StatusChip({
 }) {
   const map: Record<
     BuildItem['status'],
-    { label: string; icon: React.ReactNode; color: 'success' | 'error' | 'default' | 'warning' }
+    { label: string; icon: React.ReactNode; color: 'success' | 'error' | 'default' | 'warning' | 'primary' }
   > = {
     success: {
       label: t('project_page.success'),
@@ -168,12 +168,17 @@ function StatusChip({
     running: {
       label: t('project_page.running'),
       icon: <ScheduleIcon fontSize="small" />,
-      color: 'default',
+      color: 'primary',
     },
     pending: {
       label: t('project_page.pending') ?? 'Pending',
       icon: <ScheduleIcon fontSize="small" />,
       color: 'warning',
+    },
+    cancelled: {
+      label: t('project_page.cancelled') ?? 'Cancelled',
+      icon: <CancelIcon fontSize="small" />,
+      color: 'default',
     },
   };
   const config = map[status] ?? map.pending;
@@ -379,15 +384,47 @@ export default function ProjectOverviewPage() {
     return typeof cur === 'string' ? cur : key;
   };
 
-  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
-  const [menuBuildId, setMenuBuildId] = useState<string | null>(null);
-  const openBuildMenu = (e: React.MouseEvent<HTMLElement>, id: string) => {
-    setMenuAnchorEl(e.currentTarget);
-    setMenuBuildId(id);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteBuildId, setDeleteBuildId] = useState<string | null>(null);
+  const [deletingBuild, setDeletingBuild] = useState(false);
+
+  const openDeleteDialog = (id: string) => {
+    setDeleteBuildId(id);
+    setDeleteDialogOpen(true);
   };
-  const closeBuildMenu = () => {
-    setMenuAnchorEl(null);
-    setMenuBuildId(null);
+  const closeDeleteDialog = () => {
+    setDeleteBuildId(null);
+    setDeleteDialogOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    const id = deleteBuildId;
+    if (!id) return;
+
+    const projectId = projectData?.id ?? projectData?.ID;
+    if (!projectId) {
+      addToast({ message: t('project_page.no_project_id') ?? 'Project ID not found', type: 'error' });
+      return;
+    }
+
+    setDeletingBuild(true);
+    try {
+      const res = await clientApiRaw(`project/${projectId}/build/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message || `Failed to delete build (${res.status})`);
+      }
+
+      // remove build from local state
+      setBuilds((prev) => prev.filter((b) => b.id !== id));
+      addToast({ message: t('project_page.build_deleted') ?? 'Build deleted', type: 'success' });
+      closeDeleteDialog();
+    } catch (err: any) {
+      console.error('Failed to delete build', err);
+      addToast({ message: err?.message ?? t('project_page.build_delete_failed') ?? 'Failed to delete build', type: 'error' });
+    } finally {
+      setDeletingBuild(false);
+    }
   };
 
   // fetch projet
@@ -530,8 +567,8 @@ export default function ProjectOverviewPage() {
       name: pd.name,
       slug: pd.slug ?? pd.name ?? candidateSlugFromPath ?? '',
       urlPath: pd.urlPath ?? `/build/${pd.slug ?? pd.name ?? 'project'}`,
-      createdAt: (pd.CreatedAt ?? pd.createdAt ?? '') as string,
-      lastActivityAt: (pd.UpdatedAt ?? pd.lastActivityAt ?? '') as string,
+      createdAt: (pd.created_at ?? pd.CreatedAt ?? pd.createdAt ?? '') as string,
+      lastActivityAt: (pd.updated_at ?? pd.UpdatedAt ?? pd.lastActivityAt ?? '') as string,
       lastActivityDescription: pd.lastActivityDescription ?? '',
       ownership: {
         type: 'user' as const,
@@ -679,25 +716,14 @@ export default function ProjectOverviewPage() {
                 >
                   {project.name}
                 </Typography>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Chip
-                    size="small"
-                    color="default"
-                    label={
-                      project.ownership.type === 'organization'
-                        ? `${t('project_page.organization')} : ${project.ownership.name}`
-                        : `${t('project_page.user')} : ${project.ownership.name}`
-                    }
-                  />
-                  <Chip
-                    size="small"
-                    color="default"
-                    label={`${t('project_page.created_at')} ${formatDate(
-                      project.createdAt,
-                      locale,
-                    )}`}
-                  />
-                </Stack>
+                <Chip
+                  size="small"
+                  color="default"
+                  label={`${t('project_page.created_at')} ${formatDate(
+                    project.createdAt,
+                    locale,
+                  )}`}
+                />
               </div>
             </Stack>
           </Stack>
@@ -899,8 +925,8 @@ export default function ProjectOverviewPage() {
                                   </IconButton>
                                 </Tooltip>
                               )}
-                              <IconButton size="small" onClick={(e) => openBuildMenu(e, b.id)}>
-                                <MoreVertIcon />
+                              <IconButton size="small" onClick={() => openDeleteDialog(b.id)}>
+                                <DeleteIcon fontSize="small" />
                               </IconButton>
                             </Stack>
                           </TableCell>
@@ -909,20 +935,31 @@ export default function ProjectOverviewPage() {
                     </TableBody>
                   </Table>
                 </TableContainer>
-                <Menu
-                  anchorEl={menuAnchorEl}
-                  open={Boolean(menuAnchorEl)}
-                  onClose={closeBuildMenu}
+                <Dialog
+                  open={deleteDialogOpen}
+                  onClose={() => !deletingBuild && closeDeleteDialog()}
                 >
-                  <MenuItem
-                    onClick={() => {
-                      if (menuBuildId) router.push(`/projects/${slugForMenu}/builds/${menuBuildId}/logs`);
-                      closeBuildMenu();
-                    }}
-                  >
-                    {t('project_page.view_logs') ?? 'View logs'}
-                  </MenuItem>
-                </Menu>
+                  <DialogTitle>{t('project_page.delete_build') ?? 'Delete build'}</DialogTitle>
+                  <DialogContent dividers>
+                    <Typography>
+                      {t('project_page.delete_build_confirm') ?? 'Are you sure you want to delete this build? This action cannot be undone.'}
+                    </Typography>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={closeDeleteDialog} disabled={deletingBuild}>
+                      {t('project_page.cancel') ?? 'Cancel'}
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={handleConfirmDelete}
+                      disabled={deletingBuild}
+                      startIcon={deletingBuild ? <CircularProgress size={20} /> : <DeleteIcon />}
+                    >
+                      {t('project_page.delete') ?? 'Delete'}
+                    </Button>
+                  </DialogActions>
+                </Dialog>
               </>
             )}
           </Paper>

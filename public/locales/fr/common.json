@@ -76,7 +76,9 @@
     "projects": "Projets",
     "all_projects": "Tous les projets",
     "recent_activity": "Activité récente",
-    "changelog": "Journal des modifications"
+    "changelog": "Journal des modifications",
+    "loading_projects": "Chargement des projets...",
+    "no_projects": "Aucun projet trouvé. Commencez par en créer un !"
   },
   "listing_projects": {
     "projects": "Projets",
@@ -148,6 +150,8 @@
     "success": "Succès",
     "failed": "Échec",
     "running": "En cours",
+    "pending": "En attente",
+    "canceled": "Annulé",
     "builds": "Derniers builds",
     "view_all": "Voir tous",
     "no_builds_yet": "Aucun build pour le moment",
@@ -195,7 +199,7 @@
     "provider": "Provider",
     "branch": "Branche",
     "command": "Commande",
-    "output_dir": "Dossier de sortie",
+    "output_dir": "Dossier de build",
     "project_not_found": "Projet non trouvé",
     "back_to_projects": "Retour aux projets",
     "logs": "Logs des builds",
@@ -215,7 +219,18 @@
     "platform_ios": "iOS",
     "git_ref": "Référence Git",
     "git_ref_help": "Hash de commit, branche ou tag",
-    "eas_build_profile": "Profil Build"
+    "eas_build_profile": "Profil Build",
+    "view_logs": "Voir les logs",
+    "duration": "Durée",
+    "build_mode": "Mode du build",
+    "build_target": "Cible du build",
+    "flutter_channel": "Canal Flutter",
+    "git_branch": "Branche Git",
+    "build_started": "Build commencé",
+    "build_finished": "Build terminé",
+    "cancelled": "Annulé",
+    "start_building": "Démarrer le build",
+    "starting_build": "Démarrage du build..."
   },
   "build_details": {
     "title": "Build",
@@ -225,7 +240,17 @@
     "duration": "Durée",
     "steps": "Étapes",
     "no_logs": "Aucun log",
-    "logs": "Logs"
+    "logs": "Logs",
+    "live": "En direct",
+    "refresh_logs": "Rafraîchir les logs",
+    "platform": "Plateforme",
+    "started_at": "Commencé le",
+    "finished_at": "Terminé le",
+    "build_canceled": "Build annulé",
+    "logs_refreshed": "Logs rafraîchis",
+    "cancelled": "Annulé ",
+    "cancel_build": "Annuler le build",
+    "build_cancelled": "Build annulé"
   },
   "build_list": {
     "title": "Tous les builds",
@@ -276,6 +301,10 @@
       "name_required": "Le nom du projet est requis",
       "repo_required": "Veuillez sélectionner un dépôt",
       "flutter_required": "Veuillez choisir une version de Flutter"
+    },
+    "notifications":{
+      "created":"Projet créé",
+      "updated":"Projet mis à jour"
     },
     "environment_page": {
       "title": "Environnements",

@@ -75,7 +75,9 @@
     "projects": "Projects",
     "all_projects": "All Projects",
     "recent_activity": "Recent activity",
-    "changelog": "Changelog"
+    "changelog": "Changelog",
+    "loading_projects": "Loading projects...",
+    "no_projects": "No projects found. Start by creating one!"
   },
   "listing_projects": {
     "projects": "Projects",
@@ -118,6 +120,10 @@
       "name_required": "Project name is required",
       "repo_required": "Please select a repository",
       "flutter_required": "Please choose a Flutter version"
+    },
+    "notifications":{
+      "created":"Project created",
+      "updated":"Project updated"
     }
   },
   "organization": {
@@ -186,6 +192,8 @@
     "success": "Success",
     "failed": "Failed",
     "running": "Running",
+    "pending": "Pending",
+    "canceled": "Canceled",
     "builds": "Recent builds",
     "view_all": "View all",
     "no_builds_yet": "No builds yet",
@@ -233,7 +241,7 @@
     "provider": "Provider",
     "branch": "Branch",
     "command": "Command",
-    "output_dir": "Output directory",
+    "output_dir": "Build directory",
     "project_not_found": "Project not found",
     "back_to_projects": "Go back to projects",
     "logs": "Build logs",
@@ -253,7 +261,18 @@
     "platform_ios": "iOS",
     "git_ref": "Git ref",
     "git_ref_help": "Commit hash, branch, or tag",
-    "eas_build_profile": "Build profile"
+    "eas_build_profile": "Build profile",
+    "view_logs": "View logs",
+    "duration": "Duration",
+    "build_mode": "Build mode",
+    "build_target": "Build target",
+    "flutter_channel": "Flutter channel",
+    "git_branch": "Git branch",
+    "build_started": "Build started",
+    "build_finished": "Build finished",
+    "cancelled": "Cancelled ",
+    "start_building": "Start building",
+    "starting_build": "Starting build..."
   },
   "build_details": {
     "title": "Build",
@@ -263,7 +282,17 @@
     "duration": "Duration",
     "steps": "Steps",
     "no_logs": "No logs",
-    "logs": "Logs"
+    "logs": "Logs",
+    "live": "Live",
+    "refresh_logs": "Refresh logs",
+    "platform": "Platform",
+    "started_at": "Started at",
+    "finished_at": "Finished at",
+    "build_canceled": "Build canceled",
+    "logs_refreshed": "Logs refreshed",
+    "cancelled": "Cancelled",
+    "cancel_build": "Cancel build",
+    "build_cancelled": "Build cancelled"
   },
   "build_list": {
     "title": "All builds",
