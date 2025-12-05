@@ -14,7 +14,8 @@
     "username": "Nom d'utilisateur",
     "description": "Description",
     "slug": "Slug",
-    "all": "Tous"
+    "all": "Tous",
+    "saving": "Enregistrement..."
   },
   "appearance": {
     "title": "Apparence",
@@ -236,7 +237,8 @@
     "delete": "Supprimer",
     "build_deleted": "Build supprimé",
     "no_build_available": "Aucun build disponible",
-    "download_started": "Le téléchargement va commencer bientôt..."
+    "download_started": "Le téléchargement va commencer bientôt...",
+    "git_repo": "Dépôt Git"
   },
   "build_details": {
     "title": "Build",
