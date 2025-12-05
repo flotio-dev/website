@@ -1,7 +1,7 @@
-'use client';
+"use client";
 import React from 'react';
 import { useAuth } from "@/lib/hooks/useAuth";
-import clientApi from '@/lib/utils';
+import clientApi, { clientApiRaw } from '@/lib/utils';
 import { getTranslations } from '@/lib/clientTranslations';
 import { usePathname } from 'next/navigation';
 
@@ -15,6 +15,12 @@ import {
   Avatar,
   Select,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  CircularProgress,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -29,6 +35,9 @@ export default function SettingsPage() {
   const { user, token } = useAuth();
   const plan = 'Free'; // mock plan
   const [githubConnected, setGithubConnected] = React.useState(false);
+  const [isDisconnecting, setIsDisconnecting] = React.useState(false);
+  const [openDisconnectDialog, setOpenDisconnectDialog] = React.useState(false);
+  const [disconnectError, setDisconnectError] = React.useState<string | null>(null);
   const { addToast } = useToast();
   const pathname = usePathname();
   const [translations, setTranslations] = React.useState<Record<string, any> | null>(null);
@@ -203,7 +212,17 @@ export default function SettingsPage() {
               })}
             </Typography>
             {githubConnected ? (
-              <Button variant="outlined">{t('settings.disconnect')}</Button>
+              <Button
+                variant="outlined"
+                color="error"
+                disabled={isDisconnecting}
+                onClick={() => {
+                  setDisconnectError(null);
+                  setOpenDisconnectDialog(true);
+                }}
+              >
+                {t('settings.disconnect')}
+              </Button>
             ) : (
               <Button
                 component="a"
@@ -219,6 +238,58 @@ export default function SettingsPage() {
 
 
         </Paper>
+
+        {/* Disconnect confirmation dialog */}
+        <Dialog open={openDisconnectDialog} onClose={() => setOpenDisconnectDialog(false)}>
+          <DialogTitle>{t('settings.disconnect_confirm_title') || 'Déconnecter GitHub'}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {t('settings.disconnect_confirm') || 'Voulez-vous vraiment déconnecter GitHub de votre compte ?'}
+            </DialogContentText>
+            {disconnectError && (
+              <DialogContentText sx={{ color: 'error.main', mt: 2 }}>
+                {disconnectError}
+              </DialogContentText>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={() => setOpenDisconnectDialog(false)} disabled={isDisconnecting}>
+              {t('settings.cancel') || 'Annuler'}
+            </Button>
+            <Button
+              color="error"
+              variant="contained"
+              onClick={async () => {
+                setDisconnectError(null);
+                setIsDisconnecting(true);
+                try {
+                  const res = await clientApiRaw('github/disconnect', { method: 'DELETE' });
+                  const data = await res.json().catch(() => null);
+                  if (!res.ok) {
+                    const serverMessage = (data && (data.message || data.error)) || `Erreur: ${res.status}`;
+                    setDisconnectError(serverMessage);
+                    addToast({ message: serverMessage, type: 'error' });
+                    return;
+                  }
+                  const okMessage = data && (data.message || data.status) ? (data.message || data.status) : t('settings.disconnect_success') || 'Déconnecté de GitHub';
+                  addToast({ message: okMessage, type: 'success' });
+                  setGithubConnected(false);
+                  setOpenDisconnectDialog(false);
+                } catch (err: any) {
+                  const msg = err?.message || 'Erreur lors de la déconnexion';
+                  setDisconnectError(msg);
+                  addToast({ message: msg, type: 'error' });
+                } finally {
+                  setIsDisconnecting(false);
+                }
+              }}
+              disabled={isDisconnecting}
+              startIcon={isDisconnecting ? <CircularProgress color="inherit" size={18} /> : undefined}
+            >
+              {isDisconnecting ? (t('settings.disconnecting') || 'Déconnexion…') : (t('settings.disconnect') || 'Déconnecter')}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {/* Appearance / Theme */}
         <Paper
