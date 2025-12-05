@@ -3,13 +3,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Box, Paper, Grid, Typography, Avatar, Stack, Chip, Divider, Skeleton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, CircularProgress, Switch, FormControlLabel, Select, MenuItem } from '@mui/material';
+import { Box, Paper, Grid, Typography, Avatar, Stack, Chip, Divider, Skeleton, Button } from '@mui/material';
 import ProjectSubMenu from '@/app/components/ProjectSubMenu';
 import { getTranslations } from '@/lib/clientTranslations';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useToast } from '@/lib/hooks/useToast';
-import clientApi, { clientApiRaw } from '@/lib/utils';
-import { Root } from '@/lib/types/github.repos';
+import { clientApiRaw } from '@/lib/utils';
 
 interface Ownership {
   type: 'organization' | 'user';
@@ -76,17 +75,6 @@ export default function ProjectOverviewPage() {
   const { token } = useAuth();
   const { addToast } = useToast();
   const router = useRouter();
-  // edit dialog state
-  const [editOpen, setEditOpen] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editGitRepo, setEditGitRepo] = useState('');
-  const [editBuildFolder, setEditBuildFolder] = useState('');
-  const [editFlutterVersion, setEditFlutterVersion] = useState('');
-  const [editGithubConnected, setEditGithubConnected] = useState<boolean | null>(null);
-  const [editRepo, setEditRepo] = useState('');
-  const [editSaving, setEditSaving] = useState(false);
-  const [repos, setRepos] = useState<Array<any>>([]);
-  const [reposLoading, setReposLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -184,34 +172,6 @@ export default function ProjectOverviewPage() {
     };
   }, [pathname, token, addToast, params]);
 
-  // Fetch GitHub repos when edit dialog opens and GitHub is connected
-  useEffect(() => {
-    let mounted = true;
-    const fetchRepos = async () => {
-      if (!editOpen) return;
-      if (!editGithubConnected) return;
-      try {
-        setReposLoading(true);
-        const data = await clientApi<Root>('github/repos');
-        if (!mounted) return;
-        setRepos(data?.details?.repositories || []);
-      } catch (err: any) {
-        console.error('Failed to fetch GitHub repos', err);
-        if (!mounted) return;
-        setRepos([]);
-        addToast({ message: t('add_project.errors.fetch_repos') || 'Failed to fetch repositories', type: 'error' });
-      } finally {
-        if (mounted) setReposLoading(false);
-      }
-    };
-
-    fetchRepos();
-
-    return () => {
-      mounted = false;
-    };
-  }, [editOpen, editGithubConnected]);
-
   // split path early so we can build sensible defaults without using mock data
   const pathParts = pathname.split('/').filter(Boolean);
   // Prefer the route param or the last path segment as a candidate slug
@@ -295,41 +255,6 @@ export default function ProjectOverviewPage() {
     };
   }, [candidateSlugFromPath, token]);
 
-  // Save edits to project
-  const handleSaveEdit = async () => {
-    const id = project.id ?? candidateSlugFromPath ?? project.slug ?? '';
-    if (!id) {
-      addToast({ message: 'Project identifier missing', type: 'error' });
-      return;
-    }
-    setEditSaving(true);
-    try {
-      const gitRepoToSend = editGithubConnected ? (editRepo || editGitRepo) : editGitRepo;
-      const payload = {
-        name: editName,
-        git_repo: gitRepoToSend,
-        build_folder: editBuildFolder,
-        flutter_version: editFlutterVersion,
-      };
-
-      const data = await clientApi<any>(`project/${encodeURIComponent(String(id))}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const p = data?.project ?? data;
-      setProjectData(p);
-      addToast({ message: t('add_project.notifications.updated') ?? 'Project mis à jour', type: 'success' });
-      setEditOpen(false);
-    } catch (err: any) {
-      console.error('Failed to save project', err);
-      addToast({ message: err?.message || 'Erreur lors de la mise à jour', type: 'error' });
-    } finally {
-      setEditSaving(false);
-    }
-  };
-
   // determine a slug for building menu links
   const slugForMenu = project.id ? String(project.id) : candidateSlugFromPath ?? project.slug ?? 'project';
   // If loading, show skeletons
@@ -398,18 +323,8 @@ export default function ProjectOverviewPage() {
           </Stack>
 
           <Box>
-            <Button variant="outlined" onClick={() => {
-              // prepare dialog values
-              setEditName(project.name ?? '');
-              const existingGit = (projectData?.git_repo ?? projectData?.git_repository ?? '') as string;
-              setEditGitRepo(existingGit);
-              setEditRepo(existingGit);
-              setEditGithubConnected(!!existingGit);
-              setEditBuildFolder((projectData?.build_folder ?? project.buildSettings?.outputDir ?? '') as string);
-              setEditFlutterVersion((projectData?.flutter_version ?? project.flutter_version ?? '') as string);
-              setEditOpen(true);
-            }}>
-              Edit
+            <Button variant="outlined" onClick={() => router.push(`/projects/${slugForMenu}/settings`)}>
+              {t('project_page.settings') ?? 'Settings'}
             </Button>
           </Box>
         </Box>
@@ -434,7 +349,7 @@ export default function ProjectOverviewPage() {
               <Divider sx={{ mb: 2 }} />
               <Stack spacing={1}>
                 <Typography color="text.primary">
-                  <strong>Git repo: </strong>
+                  <strong>{t('project_page.git_repo')}: </strong>
                   {projectData?.git_repository ?? projectData?.git_repo ? (
                     <Link href={projectData?.git_repository ?? projectData?.git_repo ?? '#'} target="_blank" rel="noopener noreferrer">
                       {(projectData?.git_repository ?? projectData?.git_repo) as string}
@@ -449,50 +364,6 @@ export default function ProjectOverviewPage() {
             </Paper>
           </Box>
         </Grid>
-        {/* Edit Project Dialog */}
-        <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm">
-          <DialogTitle>{t('project_page.edit_project') ?? 'Edit project'}</DialogTitle>
-          <DialogContent>
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <TextField label={t('add_project.fields.project_name') ?? 'Name'} value={editName} onChange={(e) => setEditName(e.target.value)} fullWidth />
-              {/* Choisir le dépôt */}
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>{t('add_project.steps.repo') ?? 'Choisir le dépôt'}</Typography>
-              {editGithubConnected ? (
-                <Select value={editRepo} onChange={(e) => setEditRepo(String(e.target.value))} fullWidth>
-                  <MenuItem value="">{`-- ${t('add_project.fields.repo') || 'Select repo'} --`}</MenuItem>
-                  {reposLoading ? (
-                    <MenuItem value="" disabled>{t('add_project.messages.checking_github') || 'Loading...'}</MenuItem>
-                  ) : repos.length === 0 ? (
-                    <MenuItem value="" disabled>{t('add_project.messages.no_repos') || 'No repositories found'}</MenuItem>
-                  ) : (
-                    repos.map((r: any) => (
-                      <MenuItem key={r.id ?? r.full_name} value={r.full_name}>
-                        {r.full_name}{r.private ? ' (private)' : ''}
-                      </MenuItem>
-                    ))
-                  )}
-                </Select>
-              ) : (
-                <TextField label={t('project_page.git_repo') ?? 'Git repository'} value={editGitRepo} onChange={(e) => setEditGitRepo(e.target.value)} fullWidth />
-              )}
-
-              <TextField label={t('add_project.fields.build_path') ?? 'Dossier de build'} value={editBuildFolder} onChange={(e) => setEditBuildFolder(e.target.value)} fullWidth />
-
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>{t('add_project.steps.flutter') ?? 'Flutter'}</Typography>
-              <Select value={editFlutterVersion} onChange={(e) => setEditFlutterVersion(String(e.target.value))} fullWidth>
-                <MenuItem value="stable">Stable</MenuItem>
-                <MenuItem value="3.24.2">3.24.2</MenuItem>
-                <MenuItem value="3.22.0">3.22.0</MenuItem>
-              </Select>
-            </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setEditOpen(false)} disabled={editSaving}>{t('project_page.cancel') ?? 'Cancel'}</Button>
-            <Button variant="contained" onClick={handleSaveEdit} disabled={editSaving} startIcon={editSaving ? <CircularProgress size={16} /> : null}>
-              {t('project_page.save') ?? 'Save'}
-            </Button>
-          </DialogActions>
-        </Dialog>
       </Box>
     </Box>
   );

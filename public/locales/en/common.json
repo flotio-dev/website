@@ -13,8 +13,9 @@
     "username": "Username",
     "description": "Description",
     "slug": "Slug",
-    "all": "All"
-  },
+    "all": "All",
+    "saving": "Saving..."
+    },
   "appearance": {
     "title": "Appearance",
     "theme": "Theme",
@@ -278,7 +279,8 @@
     "delete": "Delete",
     "build_deleted": "Build deleted successfully",
     "no_build_available": "No build available",
-    "download_started": "Download started"
+    "download_started": "Download started",
+    "git_repo": "Git repository"
   },
   "build_details": {
     "title": "Build",
