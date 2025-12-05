@@ -188,7 +188,10 @@
     "organizations_title": "Organizations",
     "new_organization": "New organization",
     "add_organization": "Add organization",
-    "close": "Close"
+    "close": "Close",
+    "disconnect_confirm_title": "Disconnect GitHub",
+    "disconnect_confirm": "Are you sure you want to disconnect your GitHub account?",
+    "cancel": "Cancel"
   },
   "project_page": {
     "projects": "Projects",
