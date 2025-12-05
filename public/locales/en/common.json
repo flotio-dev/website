@@ -79,11 +79,11 @@
     "loading_projects": "Loading projects...",
     "no_projects": "No projects found. Start by creating one!",
     "changelog_update": "Update",
-    "changelog_update_desc": "GitHub Integration: Improved installation synchronization.",
+    "changelog_update_desc": "Real-time build duration display in the build list.",
     "changelog_improvement": "Improvement",
-    "changelog_improvement_desc": "Dashboard performance optimizations and minor fixes.",
+    "changelog_improvement_desc": "Enhanced translations and minor fixes.",
     "changelog_bugfix": "Bugfix",
-    "changelog_bugfix_desc": "Fixed an issue affecting build log display."
+    "changelog_bugfix_desc": "Fixed multi-user application handling."
   },
   "listing_projects": {
     "projects": "Projects",
