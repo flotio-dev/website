@@ -1,0 +1,33 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "home": {
+    "title": "Welcome to your application",
+    "subtitle": "Next.js 15 + React 19 + Material UI + TypeScript",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More"
+  },
+  "auth": {
+    "email": "Email address",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
+  }
+}
