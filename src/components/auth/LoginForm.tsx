@@ -24,7 +24,6 @@ export default function LoginForm() {
     <Paper
       elevation={0}
       sx={{
-        p: { xs: 5, sm: 6, md: 7 },
         borderRadius: '16px',
         border: `1px solid ${theme.palette.divider}`,
         bgcolor: isDark ? colors.background.dark.card : colors.background.light.card,
@@ -34,7 +33,7 @@ export default function LoginForm() {
       }}
     >
       <form onSubmit={handleSubmit}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, px: { xs: 2, sm: 3 } }}>
+        <Box className="login-form-content" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {/* Header */}
           <LoginHeader />
 
@@ -59,10 +58,12 @@ export default function LoginForm() {
                 },
                 '& input': {
                   padding: 0,
-                  paddingLeft: '16px',
+                  paddingLeft: '28px',
                   paddingRight: '16px',
                   color: theme.palette.text.primary,
                   fontSize: '1rem',
+                  textAlign: 'left',
+                  textIndent: '12px',
                   '&::placeholder': {
                     color: theme.palette.text.secondary,
                     opacity: 1,
@@ -93,10 +94,12 @@ export default function LoginForm() {
                 },
                 '& input': {
                   padding: 0,
-                  paddingLeft: '16px',
+                  paddingLeft: '28px',
                   paddingRight: '16px',
                   color: theme.palette.text.primary,
                   fontSize: '1rem',
+                  textAlign: 'left',
+                  textIndent: '12px',
                   '&::placeholder': {
                     color: theme.palette.text.secondary,
                     opacity: 1,
@@ -106,41 +109,11 @@ export default function LoginForm() {
             }}
           />
 
-          {/* Remember me & Forgot password */}
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              justifyContent: 'space-between',
-              alignItems: { xs: 'flex-start', sm: 'center' },
-              gap: 1,
-            }}
-          >
-            <FormControlLabel
-              control={<Checkbox />}
-              label={<Typography sx={{ fontSize: '0.9rem' }}>Se souvenir de moi</Typography>}
-            />
-            <MuiLink
-              component={Link}
-              href="/auth/forgot-password"
-              sx={{
-                fontSize: '0.9rem',
-                color: theme.palette.text.secondary,
-                fontWeight: 500,
-                '&:hover': { color: theme.palette.text.primary },
-                textDecoration: 'none',
-              }}
-            >
-              Mot de passe oublié ?
-            </MuiLink>
-          </Box>
-
           {/* Login Button */}
           <Button
             type="submit"
             variant="contained"
             size="large"
-            fullWidth
             disabled={loading}
             sx={{
               borderRadius: '12px',
@@ -151,6 +124,8 @@ export default function LoginForm() {
               color: theme.palette.text.primary,
               boxShadow: 'none',
               textTransform: 'none',
+              width: '200px',
+              alignSelf: 'center',
               '&:hover': {
                 background: colors.primary.gradientHover,
                 boxShadow: `0 6px 20px ${colors.primary.light}4d`,
@@ -171,8 +146,11 @@ export default function LoginForm() {
               href="/auth/register"
               sx={{
                 fontWeight: 600,
-                color: theme.palette.text.primary,
-                '&:hover': { color: theme.palette.primary.main },
+                color: colors.primary.light,
+                transition: 'all 0.3s ease',
+                '&:hover': { 
+                  color: colors.primary.main,
+                },
                 textDecoration: 'none',
               }}
             >
