@@ -2,10 +2,12 @@
 
 import { Box, useTheme } from '@mui/material';
 import { Navbar, LandingFooter } from '@/components/landing';
-import { RegisterForm } from '@/components/auth';
+import { useAuthForm } from '@/hooks/useAuthForm';
+import { AuthForm } from '@/components/auth';
 
 export default function RegisterPage() {
   const theme = useTheme();
+  const { formData, loading, handleChange, handleSubmit } = useAuthForm('register');
 
   return (
     <Box sx={{ bgcolor: theme.palette.background.default, minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column' }}>
@@ -42,7 +44,17 @@ export default function RegisterPage() {
       />
 
       <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1, px: 2 }}>
-        <RegisterForm />
+        <AuthForm
+          mode="register"
+          loading={loading}
+          email={formData.email}
+          password={formData.password}
+          confirmPassword={formData.confirmPassword}
+          onEmailChange={(value) => handleChange('email', value)}
+          onPasswordChange={(value) => handleChange('password', value)}
+          onConfirmPasswordChange={(value) => handleChange('confirmPassword', value)}
+          onSubmit={handleSubmit}
+        />
       </Box>
 
       <LandingFooter />
