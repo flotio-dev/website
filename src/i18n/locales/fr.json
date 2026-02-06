@@ -28,6 +28,22 @@
     "confirmPassword": "Confirmer le mot de passe",
     "forgotPassword": "Mot de passe oublié ?",
     "noAccount": "Pas encore de compte ?",
-    "hasAccount": "Déjà un compte ?"
+    "hasAccount": "Déjà un compte ?",
+    "login": {
+      "title": "Connexion",
+      "subtitle": "Accédez à votre espace Flotio",
+      "buttonText": "Se connecter",
+      "buttonLoadingText": "Connexion en cours...",
+      "linkText": "Pas encore de compte ? ",
+      "linkLabel": "Créer un compte"
+    },
+    "register": {
+      "title": "Inscription",
+      "subtitle": "Créez votre compte Flotio",
+      "buttonText": "S'inscrire",
+      "buttonLoadingText": "Création en cours...",
+      "linkText": "Vous avez déjà un compte ? ",
+      "linkLabel": "Se connecter"
+    }
   }
 }
