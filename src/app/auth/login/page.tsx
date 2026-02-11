@@ -7,7 +7,23 @@ import { AuthForm } from '@/components/auth';
 
 export default function LoginPage() {
   const theme = useTheme();
-  const { formData, loading, handleChange, handleSubmit } = useAuthForm('login');
+  const { formData, loading, handleChange, handleSubmit, error } = useAuthForm('login');
+
+  const login =  async (email: string, password: string) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    })
+
+    if (!res.ok) {
+      throw new Error("Invalid credentials")
+    }
+
+    window.location.href = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
+  }
+
 
   return (
     <Box sx={{ bgcolor: theme.palette.background.default, minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column' }}>
@@ -51,7 +67,12 @@ export default function LoginPage() {
           password={formData.password}
           onEmailChange={(value) => handleChange('email', value)}
           onPasswordChange={(value) => handleChange('password', value)}
-          onSubmit={handleSubmit}
+          onSubmit={(e) =>
+            handleSubmit(e, async (data) =>
+              login(data.email, data.password)
+            )
+          }
+          error={error}
         />
       </Box>
 

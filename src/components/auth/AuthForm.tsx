@@ -17,25 +17,31 @@ import { AuthMode } from '@/hooks/useAuthForm';
 interface AuthFormProps {
   mode: AuthMode;
   loading: boolean;
+  username?: string;
   email: string;
   password: string;
   confirmPassword?: string;
   onEmailChange: (value: string) => void;
+  onUsernameChange?: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onConfirmPasswordChange?: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
+  error: string | null;
 }
 
 export default function AuthForm({
   mode,
   loading,
   email,
+  username,
   password,
   confirmPassword,
   onEmailChange,
+  onUsernameChange,
   onPasswordChange,
   onConfirmPasswordChange,
   onSubmit,
+  error,
 }: AuthFormProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -139,6 +145,19 @@ export default function AuthForm({
             onChange={(e) => onEmailChange(e.target.value)}
           />
 
+          {/* Username Field */}
+          {mode === 'register' && onUsernameChange && (
+            <TextField
+              {...textFieldProps}
+              placeholder={t('auth.username')}
+              type="text"
+              autoComplete="username"
+              value={username || ''}
+              onChange={(e) => onUsernameChange(e.target.value)}
+            />
+          )}
+
+
           {/* Password Field */}
           <TextField
             {...textFieldProps}
@@ -159,6 +178,21 @@ export default function AuthForm({
               value={confirmPassword || ''}
               onChange={(e) => onConfirmPasswordChange?.(e.target.value)}
             />
+          )}
+
+          {error && (
+            <Typography
+              variant="body2"
+              sx={{
+                color: theme.palette.error.main,
+                fontSize: '0.9rem',
+                textAlign: 'center',
+                mt: 1,
+                mb: 1,
+              }}
+            >
+              {error}
+            </Typography>
           )}
 
           {/* Submit Button */}

@@ -7,7 +7,25 @@ import { AuthForm } from '@/components/auth';
 
 export default function RegisterPage() {
   const theme = useTheme();
-  const { formData, loading, handleChange, handleSubmit } = useAuthForm('register');
+  const { formData, loading, handleChange, handleSubmit, error } = useAuthForm('register');
+
+  const register = async (data: {
+    email: string
+    username: string
+    password: string
+  }) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    })
+
+    if (!res.ok) throw new Error("Register failed")
+
+    window.location.href = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
+  }
+
 
   return (
     <Box sx={{ bgcolor: theme.palette.background.default, minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column' }}>
@@ -48,12 +66,19 @@ export default function RegisterPage() {
           mode="register"
           loading={loading}
           email={formData.email}
+          username={formData.username}
           password={formData.password}
           confirmPassword={formData.confirmPassword}
           onEmailChange={(value) => handleChange('email', value)}
+          onUsernameChange={(value) => handleChange('username', value)}
           onPasswordChange={(value) => handleChange('password', value)}
           onConfirmPasswordChange={(value) => handleChange('confirmPassword', value)}
-          onSubmit={handleSubmit}
+           onSubmit={(e) =>
+            handleSubmit(e, async (data) =>
+              register({email: data.email, username: data.username ?? '', password: data.password})
+            )
+          }
+          error={error}
         />
       </Box>
 
