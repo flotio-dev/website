@@ -5,7 +5,6 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-
 # 2. Rebuild the source code only when needed
 FROM node:20-alpine AS builder
 WORKDIR /app
