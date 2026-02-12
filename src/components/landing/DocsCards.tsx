@@ -123,9 +123,7 @@ export default function DocsCards() {
         >
           {docCards.map((card, index) => (
             <Grid
-              item
-              xs={4}
-              md={4}
+              size={{ xs: 4, md: 4 }}
               key={index}
               sx={{
                 display: 'flex',
