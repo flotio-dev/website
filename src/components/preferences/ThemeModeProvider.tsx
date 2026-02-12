@@ -3,6 +3,7 @@
 import React, { createContext, useMemo } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import "@/i18n";
 import { darkTheme, lightTheme } from "@/theme";
 import useLocalStorage from "@/hooks/useLocalStorage";
 

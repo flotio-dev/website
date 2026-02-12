@@ -28,6 +28,22 @@
     "confirmPassword": "Confirm password",
     "forgotPassword": "Forgot password?",
     "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?"
+    "hasAccount": "Already have an account?",
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Access your Flotio space",
+      "buttonText": "Sign in",
+      "buttonLoadingText": "Signing in...",
+      "linkText": "Don't have an account? ",
+      "linkLabel": "Create an account"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Create your Flotio account",
+      "buttonText": "Sign up",
+      "buttonLoadingText": "Creating account...",
+      "linkText": "Already have an account? ",
+      "linkLabel": "Sign in"
+    }
   }
 }
