@@ -36,6 +36,9 @@ export default function Navbar() {
     disableHysteresis: true,
     threshold: 10,
   });
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
+  const loginHref = appBaseUrl ? `${appBaseUrl}/auth/login` : '/auth/login';
+  const registerHref = appBaseUrl ? `${appBaseUrl}/auth/register` : '/auth/register';
 
   // Force update du composant quand le thème change pour appliquer les couleurs dynamiques
   // Utilise useEffect pour écouter le changement de mode
@@ -138,7 +141,7 @@ export default function Navbar() {
             <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1.5, alignItems: 'center' }}>
               <Button
                 component={Link}
-                href="/auth/login"
+                href={loginHref}
                 sx={{
                   color: `${theme.palette.text.secondary}!important`,
                   fontWeight: 500,
@@ -156,7 +159,7 @@ export default function Navbar() {
               </Button>
               <Button
                 component={Link}
-                href="/auth/register"
+                href={registerHref}
                 variant="contained"
                 sx={{
                   background: `${colors.primary.gradient}!important`,
@@ -243,7 +246,7 @@ export default function Navbar() {
           <Box sx={{ display: 'flex', gap: 1.5, mt: 2 }}>
             <Button
               component={Link}
-              href="/auth/login"
+              href={loginHref}
               fullWidth
               sx={{
                 color: `${theme.palette.text.primary}!important`,
@@ -259,7 +262,7 @@ export default function Navbar() {
             </Button>
             <Button
               component={Link}
-              href="/auth/register"
+              href={registerHref}
               variant="contained"
               fullWidth
               sx={{
