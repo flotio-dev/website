@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, useTheme } from '@mui/material';
+import { Box, Toolbar, useTheme } from '@mui/material';
 import { Navbar, LandingFooter } from '@/components/landing';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { AuthForm } from '@/components/auth';
@@ -28,6 +28,7 @@ export default function LoginPage() {
   return (
     <Box sx={{ bgcolor: theme.palette.background.default, minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
+      <Toolbar sx={{ minHeight: { xs: 2, md: 2 } }} />
 
       {/* Background accents */}
       <Box
@@ -59,7 +60,19 @@ export default function LoginPage() {
         }}
       />
 
-      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1, px: 2 }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          zIndex: 1,
+          px: 2,
+          minHeight: { xs: 'calc(100vh - 56px)', md: 'calc(100vh - 64px)' },
+          pb: { xs: 4, md: 6 },
+        }}
+      >
         <AuthForm
           mode="login"
           loading={loading}
