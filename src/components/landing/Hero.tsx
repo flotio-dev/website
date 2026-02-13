@@ -11,6 +11,8 @@ const MotionTypography = motion.create(Typography);
 
 export default function Hero() {
   const theme = useTheme();
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
+  const registerHref = appBaseUrl ? `${appBaseUrl}/auth/register` : '/auth/register';
   return (
     <Box
       sx={{
@@ -157,7 +159,7 @@ export default function Hero() {
             <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ gap: 4 }}>
               <Button
                 variant="primary"
-                href="/auth/register"
+                href={registerHref}
                 endIcon={<ArrowForwardIcon sx={{ fontSize: 22 }} />}
               >
                 Start Deploying
