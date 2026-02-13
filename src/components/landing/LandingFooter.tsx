@@ -57,27 +57,27 @@ const LandingFooter = () => {
       <Container maxWidth={false} sx={{ px: { xs: '32px', md: '120px' }, display: 'flex', justifyContent: 'center' }}>
         <Grid container spacing={16} sx={{ maxWidth: 1400 }}>
           {/* Brand Section */}
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Stack spacing={4} sx={{ pr: { md: 8 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box
-                sx={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: '6px',
-                  background: theme.palette.mode === 'light' ? theme.palette.grey[900] : theme.palette.common.white,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.75rem',
-                  fontWeight: 800,
-                  color: theme.palette.mode === 'light' ? theme.palette.common.white : theme.palette.grey[900],
-                  border: `2px solid ${theme.palette.mode === 'light' ? theme.palette.grey[900] : theme.palette.common.white}`,
-                  transition: 'background 0.2s, color 0.2s',
-                }}
-              >
-                F
-              </Box>
+                <Box
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: '6px',
+                    background: theme.palette.mode === 'light' ? theme.palette.grey[900] : theme.palette.common.white,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    color: theme.palette.mode === 'light' ? theme.palette.common.white : theme.palette.grey[900],
+                    border: `2px solid ${theme.palette.mode === 'light' ? theme.palette.grey[900] : theme.palette.common.white}`,
+                    transition: 'background 0.2s, color 0.2s',
+                  }}
+                >
+                  F
+                </Box>
                 <Typography
                   sx={{
                     fontWeight: 600,
@@ -103,7 +103,7 @@ const LandingFooter = () => {
           </Grid>
           {/* Footer Sections */}
           {footerSections.map((section) => (
-            <Grid item xs={12} md={2} key={section.title}>
+            <Grid size={{ xs: 12, md: 2 }} key={section.title}>
               <Stack spacing={2}>
                 <Typography
                   sx={{
