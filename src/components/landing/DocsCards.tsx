@@ -51,7 +51,7 @@ export default function DocsCards() {
     <Box
       sx={{ 
         py: { xs: 8, md: 10 }, 
-        bgcolor: theme.palette.background.default,
+        bgcolor: 'transparent',
       }}
     >
       <Container maxWidth="lg">

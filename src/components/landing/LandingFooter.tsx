@@ -18,7 +18,6 @@ const LandingFooter = () => {
       title: 'PRODUCT',
       links: [
         { label: 'Features', href: '/#features' },
-        { label: 'Pricing & Credits', href: '/pricing' },
         { label: 'Flutter Runners', href: '/#features' },
         { label: 'Launch Console', href: `${appBaseUrl}/dashboard`, external: true },
       ],

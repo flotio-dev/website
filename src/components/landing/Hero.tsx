@@ -20,28 +20,12 @@ export default function Hero() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: theme.palette.mode === 'dark'
-          ? colors.heroBackground.dark
-          : colors.heroBackground.light,
+        background: 'transparent',
         position: 'relative',
-        overflow: 'hidden',
         pt: { xs: 16, md: 18 },
         pb: { xs: 10, md: 14 },
       }}
     >
-      {/* Subtle grid pattern */}
-      <Box
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: `
-            linear-gradient(${theme.palette.divider} 1px, transparent 1px),
-            linear-gradient(90deg, ${theme.palette.divider} 1px, transparent 1px)
-          `,
-          backgroundSize: '64px 64px',
-          maskImage: 'radial-gradient(ellipse 80% 50% at 50% 50%, black 40%, transparent 100%)',
-        }}
-      />
 
       {/* Glow effect top */}
       <Box
