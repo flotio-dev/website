@@ -50,8 +50,8 @@ const allDocsMetadata = [
     spotlight: true,
   },
   {
-    title: 'Flutter Build Configuration',
-    description: 'Master build flavors, SDK versions, Dart defines, and code signing for Android & iOS.',
+    title: 'Flutter Android Build Configuration',
+    description: 'Master build flavors, SDK versions, Dart defines, App Bundles (AAB), and code signing for Android.',
     category: 'Configuration',
     order: 3,
     badge: 'Technical',
@@ -70,8 +70,8 @@ const allDocsMetadata = [
     color: '#10b981',
   },
   {
-    title: 'Secrets & Code Signing Keys',
-    description: 'Securely manage Android Keystores, Apple Certificates, Provisioning Profiles, and encrypted tokens.',
+    title: 'Secrets, Keystores & Google Play',
+    description: 'Securely manage Android Keystores, Google Play Service Account keys, Firebase configurations, and encrypted tokens.',
     category: 'Security & Signing',
     order: 5,
     badge: 'Security',
@@ -198,7 +198,7 @@ export default function DocsHomePage() {
               </Typography>
 
               <Typography sx={{ color: theme.palette.text.secondary, fontSize: '1rem', lineHeight: 1.6 }}>
-                Everything you need to automate your Flutter mobile builds, Android Keystores, iOS Provisioning Profiles, and fast cloud distributions.
+                Everything you need to automate your Flutter mobile builds, Android Keystores, Google Play publishing, and fast cloud distributions.
               </Typography>
 
               {/* Search Bar */}
