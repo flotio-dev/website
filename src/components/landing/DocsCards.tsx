@@ -31,7 +31,7 @@ const docCards: DocCard[] = [
     icon: <SettingsSuggestIcon sx={{ fontSize: 26, color: '#38bdf8' }} />,
     title: 'Flutter Configuration',
     description:
-      'Configure Android Keystores, iOS Provisioning Profiles, Flutter SDK channels, and Dart environment defines.',
+      'Configure Android Keystores, Google Play release tracks, Flutter SDK channels, and Dart environment defines.',
     linkText: 'View configuration',
     href: '/docs/flutter-configuration',
   },
@@ -39,7 +39,7 @@ const docCards: DocCard[] = [
     icon: <TerminalIcon sx={{ fontSize: 26, color: '#10b981' }} />,
     title: 'Flotio CLI Reference',
     description:
-      'Run builds, stream live compilation logs, manage secrets, and download release APK/IPAs directly from your terminal.',
+      'Run builds, stream live compilation logs, manage secrets, and download release APK/AABs directly from your terminal.',
     linkText: 'Explore CLI',
     href: '/docs/cli',
   },

@@ -37,9 +37,8 @@ In the project settings, specify the platforms you want to compile:
 
 | Platform | Target Output | Recommended Runner |
 | :--- | :--- | :--- |
-| **Android** | APK / App Bundle (`.aab`) | Linux Standard (2 vCPU, 8GB RAM) |
-| **iOS** | Xcode Archive / IPA | macOS M2 Dedicated (4 vCPU, 16GB RAM) |
-| **Web** | Production Web Build | Linux Standard |
+| **Android** | App Bundle (`.aab`) / APK (`.apk`) | Linux Standard (High CPU, 8GB RAM) |
+| **Web** | Production Web Archive (`.tar.gz`) | Linux Standard |
 
 ---
 
@@ -48,7 +47,7 @@ In the project settings, specify the platforms you want to compile:
 You can trigger a build in two ways:
 
 ### Method A: Via Web Dashboard
-Click the **Start Build** button in the project overview. Choose your branch and target platform (e.g., Release APK).
+Click the **Start Build** button in the project overview. Choose your branch and target platform (e.g. Android Release AAB / APK).
 
 ### Method B: Via Flotio CLI
 ```bash
@@ -56,13 +55,14 @@ Click the **Start Build** button in the project overview. Choose your branch and
 flotio login
 
 # Start a build from your local repo directory
-flotio run --branch main
+flotio run --branch main --platform android
 ```
 
 ---
 
-## Step 5: Download Artifacts
+## Step 5: Download Artifacts & Deploy
 
 Once the build completes successfully:
-- Inspect the step-by-step logs.
-- Download the generated `.apk`, `.aab`, or `.ipa` directly from the **Artifacts** tab.
+- Inspect the real-time step-by-step logs and execution times.
+- Download the generated `.aab` or `.apk` directly from the **Artifacts** tab.
+- If Google Play publishing is enabled, the release will be submitted directly to your selected track (Internal, Alpha, Beta, Production).

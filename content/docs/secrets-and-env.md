@@ -1,50 +1,100 @@
 ---
-title: Secrets & Code Signing Keys
-description: Securely manage Android Keystores, Apple Certificates, Provisioning Profiles, and encrypted tokens.
+title: Secrets, Keystores & Google Play
+description: Securely manage Android Keystores, Google Play Service Account keys, Firebase configurations, and encrypted environment variables.
 category: Security & Signing
 order: 5
 badge: Security
 updatedAt: August 2026
 ---
 
-# Secrets & Code Signing Keys
+# Secrets, Keystores & Google Play Distribution
 
-Security is paramount in mobile CI/CD. Flotio stores all sensitive credentials in an AES-256 encrypted vault that is injected only inside isolated ephemeral runner environments.
-
----
-
-## Android Keystore Signing
-
-To sign release Android binaries (`.apk` and `.aab`):
-
-1. Upload your `upload-keystore.jks` or `release.keystore` in the **Secrets** section of your project.
-2. Define the required environment variables:
-   - `KEYSTORE_PASSWORD`
-   - `KEY_ALIAS`
-   - `KEY_PASSWORD`
-
-> [!TIP]
-> Flotio automatically decodes and sets the keystore path in your build environment at `$FLOTIO_KEYSTORE_PATH`.
+Security is paramount in mobile CI/CD. Flotio stores all sensitive credentials in an AES-256 encrypted vault that is decrypted and mounted only inside isolated ephemeral runner containers at build time.
 
 ---
 
-## iOS Apple Signing & Certificates
+## 1. Android Keystore Signing (.jks)
 
-For iOS compilation and IPA code signing, you need:
+To produce signed release binaries (`.apk` and `.aab` for Google Play), Flotio provides a dedicated Keystore Manager.
 
-1. **Distribution Certificate** (`.p12`): Exported from Apple Developer Portal or Keychain Access with certificate password.
-2. **Provisioning Profile** (`.mobileprovision`): App Store, Ad-Hoc, or Enterprise profile.
-
+### Generating a Keystore (if you don't have one)
 ```bash
-# Automatic code signing setup on Apple Silicon runner
-fastlane match appstore --readonly
+keytool -genkey -v -keystore release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias my-app-alias
 ```
 
+### Adding your Keystore to Flotio
+1. Navigate to **Project > Configuration > Android Keystores & Signing**.
+2. Click **+ Upload Keystore** and provide:
+   - **Name**: e.g. `Production Key`
+   - **Keystore File**: Select your `.jks` file
+   - **Store Password**: Keystore encryption password
+   - **Key Alias**: Alias name specified during generation (e.g. `my-app-alias`)
+   - **Key Password**: Alias password (if different from store password)
+3. Click **Link Keystore** to associate it with your project.
+
+> [!TIP]
+> During compilation, Flotio automatically mounts the keystore at `/keystore/keystore.jks` and sets `$KEYSTORE_PATH`, `$KEYSTORE_PASSWORD`, `$KEY_ALIAS`, and `$KEY_PASSWORD`.
+
 ---
 
-## Encrypted Project Secrets
+## 2. Google Cloud & Google Play Service Account
 
-Secrets can be scoped to:
-- **Global Organization**: Available across all projects.
-- **Project Specific**: Isolated to a single application.
-- **Branch Protected**: Only exposed when building protected release branches (e.g. `main` or `release/*`).
+Automated publishing to the Google Play Store requires a Google Cloud Service Account linked to your Google Play Developer Console.
+
+### Step 1: Create a Service Account in Google Cloud Console
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Select your project and navigate to **IAM & Admin > Service Accounts**.
+3. Click **Create Service Account**:
+   - Name: `flotio-play-publisher`
+   - Grant role: `Service Account User`.
+4. Navigate to the **Keys** tab of the created service account.
+5. Click **Add Key > Create new key > JSON** and download the `.json` key file.
+
+### Step 2: Enable Google Play Android Developer API
+1. In Google Cloud Console, navigate to **APIs & Services > Library**.
+2. Search for **Google Play Android Developer API** and click **Enable**.
+
+### Step 3: Grant Permissions in Google Play Console
+1. Open the [Google Play Console](https://play.google.com/console).
+2. Navigate to **Users & Permissions > Invite new user**.
+3. Paste the email address of the service account created in Google Cloud (e.g. `flotio-play-publisher@...iam.gserviceaccount.com`).
+4. In **App permissions**, select your app and grant the following permissions:
+   - *Edit and delete draft releases*
+   - *Release to production, exclude devices, and use Play App Signing*
+   - *Release apps to testing tracks (Internal, Closed, Open)*
+5. Click **Invite user** to confirm.
+
+### Step 4: Add the Key to Flotio
+1. In your Flotio Project, go to **Configuration > Distribution & Store Publishing**.
+2. Under **Google Play Service Account Key (JSON)**, click **+ Add Key**.
+3. Enter a name (e.g. `Play Store Console Key`) and upload your JSON file.
+4. Select the track for automated deployment:
+   - `internal` (Internal Testing track - recommended for CI/CD)
+   - `alpha` (Closed Testing)
+   - `beta` (Open Testing)
+   - `production` (Direct Production release)
+5. Set your **Rollout Fraction** (e.g. `1.0` for 100% or `0.1` for 10% staged rollout).
+
+---
+
+## 3. Firebase Integration (google-services.json)
+
+For Flutter apps using Firebase (Authentication, Firestore, Cloud Messaging, Crashlytics):
+
+1. Download your `google-services.json` from the Firebase Console.
+2. In Flotio, navigate to **Project > Configuration > Environment Variables & Files**.
+3. Upload `google-services.json` as a secure file asset.
+4. Flotio automatically mounts all uploaded environment files into `/env-files/` and copies `google-services.json` to `android/app/google-services.json` before building.
+
+---
+
+## 4. Encrypted Environment Variables
+
+You can inject environment variables into your Flutter build via Dart defines:
+
+```bash
+# Injected via Flotio Build Arguments
+--dart-define=API_URL=https://api.myapp.com --dart-define=APP_ENV=production
+```
+
+All keys and tokens are AES-256 encrypted at rest and never exposed in build logs.

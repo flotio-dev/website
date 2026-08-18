@@ -15,11 +15,11 @@ interface Feature {
 const features: Feature[] = [
   {
     title: 'Dedicated Cloud Build Runners',
-    description: 'High-speed Linux and Apple Silicon M2 runners configured specifically for Flutter & Dart workflows. No environment setup needed.',
+    description: 'High-speed Linux cloud runners configured specifically for Flutter & Android workflows. Zero environment setup needed.',
   },
   {
-    title: 'Automated Code Signing',
-    description: 'Effortlessly manage Android Keystores and Apple Provisioning Profiles. Encrypted secrets injected securely at build time.',
+    title: 'Automated Code Signing & Google Play',
+    description: 'Effortlessly manage Android Keystores and Google Play service account keys. Encrypted secrets injected securely at build time.',
   },
   {
     title: 'Flotio CLI & Git Webhooks',
@@ -27,7 +27,7 @@ const features: Feature[] = [
   },
   {
     title: 'Instant Logs & Artifacts Delivery',
-    description: 'Stream build logs in real-time. Download production-ready APK, AAB, and IPA packages instantly upon completion.',
+    description: 'Stream build logs in real-time. Download production-ready APK and AAB packages instantly upon completion.',
   },
 ];
 

@@ -12,7 +12,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'Flotio — Modern Flutter CI/CD & Cloud Build Platform',
-  description: 'Automate your Flutter mobile builds, Android Keystores, iOS Code Signing, and release deployments with dedicated cloud runners.',
+  description: 'Automate your Flutter mobile builds, Android Keystores, Google Play deployments, and Firebase integrations with dedicated cloud runners.',
 };
 
 export default function RootLayout({
