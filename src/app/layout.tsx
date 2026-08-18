@@ -1,11 +1,18 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { ThemeModeProvider } from '@/components/preferences/ThemeModeProvider';
 import './globals.css';
 
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
 export const metadata: Metadata = {
-  title: 'Mon Application',
-  description: 'Application Next.js avec MUI et i18n',
+  title: 'Flotio — Modern Flutter CI/CD & Cloud Build Platform',
+  description: 'Automate your Flutter mobile builds, Android Keystores, iOS Code Signing, and release deployments with dedicated cloud runners.',
 };
 
 export default function RootLayout({
@@ -14,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" suppressHydrationWarning>
-      <body>
+    <html lang="fr" suppressHydrationWarning className={inter.variable}>
+      <body className="antialiased" style={{ fontFamily: 'var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeModeProvider>
             {children}
@@ -25,3 +32,4 @@ export default function RootLayout({
     </html>
   );
 }
+

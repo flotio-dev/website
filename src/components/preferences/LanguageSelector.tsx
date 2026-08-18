@@ -1,196 +1,191 @@
 "use client";
 
-import { Paper, Box, Typography, Stack, Radio, useTheme, Button, Select, MenuItem } from '@mui/material';
+import { Paper, Box, Typography, Button, Select, MenuItem, useTheme } from '@mui/material';
 import { useState } from 'react';
+import LanguageIcon from '@mui/icons-material/Language';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { colors } from '@/theme';
 
 const LANGUAGES = [
-  { code: 'EN', label: 'English', description: 'Interface in English.' },
-  { code: 'FR', label: 'Français', description: 'Interface en français.' },
+  { code: 'EN', label: 'English', description: 'Interface displayed in English.' },
+  { code: 'FR', label: 'Français', description: 'Interface affichée en français.' },
 ];
 
 function LanguageSelector() {
   const theme = useTheme();
   const [language, setLanguage] = useState('EN');
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
 
   return (
-    <Box
+    <Paper
+      elevation={0}
       sx={{
-        width: '100vw',
-    }}
+        bgcolor: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: '20px',
+        p: { xs: 3, sm: 4.5 },
+        boxShadow: theme.palette.mode === 'dark'
+          ? '0 4px 20px rgba(0, 0, 0, 0.25)'
+          : '0 4px 20px rgba(0, 0, 0, 0.03)',
+      }}
     >
-      <Box sx={{ width: '80% !important', mx: 'auto !important', mt: '100px !important', mb: '20px !important' }}>
-        <Typography sx={{ color: theme.palette.text.primary, fontWeight: 600, fontSize: '1.18rem', mb: 0.5 }}>
-          Language
-        </Typography>
-        <Typography sx={{ color: theme.palette.text.secondary, fontSize: '1rem', mb: 3 }}>
-          Sélectionnez simplement la langue de l’interface.
-        </Typography>
-      </Box>
-      <Box sx={{ p: { xs: 0, md: 0 }, width: '100%', display: 'flex', justifyContent: 'center' }}>
-        <Paper
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+        <Box
           sx={{
-            bgcolor: theme.palette.background.paper,
-            border: `1.5px solid ${theme.palette.divider}`,
-            borderRadius: '14px',
-            px: { xs: 3, md: 6 },
-            py: { xs: 4, md: 5 },
-            boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)',
-            width: '80%',
+            width: 36,
+            height: 36,
+            borderRadius: '10px',
+            bgcolor: theme.palette.mode === 'dark' ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: colors.primary.main,
           }}
         >
-          <Box sx={{ mt: '40px !important', ml: '40px !important' }}>
-            <Typography sx={{ color: theme.palette.text.primary, fontWeight: 600, fontSize: '1.18rem', mb: 0.5 }}>
-              Interface language
-            </Typography>
-            <Typography sx={{ color: theme.palette.text.secondary, fontSize: '1rem', mb: 3 }}>
-              Choisissez la langue d’affichage de l’interface.
-            </Typography>
-          </Box>
-                      <Select
-              labelId="language-select-label"
-              value={language}
-              label="Langue"
-              onChange={e => setLanguage(e.target.value)}
-              sx={{
-                bgcolor: `${theme.palette.background.default}!important`,
-                borderRadius: '12px!important',
-                fontWeight: 500,
-                fontSize: '1.08rem!important',
-                py: '1.5!important',
-                px: '2!important',
-                width: 'calc(100% - 80px)!important',
-                minHeight: '56px!important',
-                boxShadow: 'none!important',
-                border: `1.5px solid ${theme.palette.divider}!important`,
-                mt: '40px!important',
-                ml: '40px!important',
-                mr: '40px!important',
-                mb: '40px!important',
-                '& .MuiSelect-select': {
-                  display: 'flex!important',
-                  alignItems: 'center!important',
-                  gap: '16px!important',
-                  py: '1.5!important',
-                  px: '8px!important',
-                },
-                '& fieldset': {
-                  border: 'none!important',
-                },
-                '&:hover': {
-                  bgcolor: `${theme.palette.background.paper}!important`,
-                  borderColor: `${theme.palette.primary.light}!important`,
-                },
-              }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    bgcolor: theme.palette.background.paper,
-                    borderRadius: '12px',
-                  },
-                },
-              }}
-              renderValue={selected => {
-                const lang = LANGUAGES.find(l => l.code === selected);
-                return (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Box
-                      sx={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: '8px',
-                        bgcolor: theme.palette.background.paper,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 700,
-                        fontSize: '1rem',
-                        color: theme.palette.text.secondary,
-                        border: `1px solid ${theme.palette.divider}`,
-                        mr: 2,
-                      }}
-                    >
-                      {lang?.code}
-                    </Box>
-                    <Typography sx={{ fontWeight: 500, color: theme.palette.text.primary }}>
-                      {lang?.label}
-                    </Typography>
-                  </Box>
-                );
-              }}
-            >
-              {LANGUAGES.map((lang, idx) => (
-                <MenuItem
-                  key={lang.code}
-                  value={lang.code}
+          <LanguageIcon sx={{ fontSize: 20 }} />
+        </Box>
+        <Typography sx={{ color: theme.palette.text.primary, fontWeight: 700, fontSize: '1.2rem' }}>
+          Langue de l'interface
+        </Typography>
+      </Box>
+
+      <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.925rem', mb: 3.5, maxWidth: 540, lineHeight: 1.6 }}>
+        Choisissez votre langue d’affichage par défaut pour la console et la documentation.
+      </Typography>
+
+      <Box sx={{ maxWidth: 460, mb: 3.5 }}>
+        <Select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          fullWidth
+          sx={{
+            bgcolor: theme.palette.background.default,
+            borderRadius: '12px',
+            fontWeight: 500,
+            fontSize: '0.95rem',
+            '& fieldset': {
+              borderColor: theme.palette.divider,
+            },
+            '&:hover fieldset': {
+              borderColor: colors.primary.main,
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: colors.primary.main,
+            },
+          }}
+          MenuProps={{
+            PaperProps: {
+              sx: {
+                bgcolor: theme.palette.background.paper,
+                borderRadius: '14px',
+                border: `1px solid ${theme.palette.divider}`,
+                mt: 1,
+                boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+              },
+            },
+          }}
+          renderValue={(selected) => {
+            const lang = LANGUAGES.find((l) => l.code === selected);
+            return (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box
                   sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '6px',
+                    bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 2,
-                    py: '14px!important',
-                    px: '18px!important',
-                    borderRadius: idx === LANGUAGES.length - 1 ? '0 0 10px 10px!important' : '0!important',
-                    mb: 0,
-                    minHeight: '48px!important',
-                    background: 'none',
-                    '&:hover': {
-                      bgcolor: theme.palette.action.hover + '!important',
-                    },
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    color: colors.primary.main,
                   }}
                 >
-                  <Box
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: '8px',
-                      bgcolor: theme.palette.background.paper,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 700,
-                      fontSize: '1rem',
-                      color: theme.palette.text.secondary,
-                      border: `1px solid ${theme.palette.divider}`,
-                      mr: 2,
-                    }}
-                  >
-                    {lang.code}
-                  </Box>
-                  <Typography sx={{ fontWeight: 500, color: theme.palette.text.primary }}>
-                    {lang.label}
-                  </Typography>
-                </MenuItem>
-              ))}
-            </Select>
-          <Box sx={{ borderTop: `1.5px solid ${theme.palette.divider}` }}>
-            <Box sx={{ my: '40px !important', ml: '40px !important', display: 'flex', justifyContent: 'flex-end' }}>
-              <Button
-                variant="contained"
+                  {lang?.code}
+                </Box>
+                <Typography sx={{ fontWeight: 600, fontSize: '0.95rem', color: theme.palette.text.primary }}>
+                  {lang?.label}
+                </Typography>
+              </Box>
+            );
+          }}
+        >
+          {LANGUAGES.map((lang) => (
+            <MenuItem
+              key={lang.code}
+              value={lang.code}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+                py: 1.5,
+                px: 2,
+                '&:hover': {
+                  bgcolor: theme.palette.action.hover,
+                },
+              }}
+            >
+              <Box
                 sx={{
-                  background: colors.primary.gradient,
-                  color: theme.palette.text.primary,
-                  fontWeight: 600,
-                  fontSize: '1rem',
-                  borderRadius: '10px',
-                  px: 3,
-                  py: 1.25,
-                  p: '7px 18px!important',
-                  boxShadow: 'none',
-                  textTransform: 'none',
-                  mr: '16px!important',
-                  '&:hover': {
-                    background: colors.primary.gradientHover,
-                    boxShadow: `0 4px 16px ${colors.primary.light}4d`,
-                  },
+                  width: 28,
+                  height: 28,
+                  borderRadius: '6px',
+                  bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  color: colors.primary.main,
                 }}
               >
-                Save language
-              </Button>
-            </Box>
-          </Box>
-        </Paper>
+                {lang.code}
+              </Box>
+              <Box>
+                <Typography sx={{ fontWeight: 600, fontSize: '0.9rem', color: theme.palette.text.primary }}>
+                  {lang.label}
+                </Typography>
+                <Typography sx={{ fontSize: '0.8rem', color: theme.palette.text.secondary }}>
+                  {lang.description}
+                </Typography>
+              </Box>
+            </MenuItem>
+          ))}
+        </Select>
       </Box>
-    </Box>
+
+      <Box sx={{ pt: 2.5, borderTop: `1px solid ${theme.palette.divider}`, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          startIcon={saved ? <CheckCircleOutlineIcon /> : undefined}
+          sx={{
+            background: saved ? '#22c55e' : colors.primary.gradient,
+            color: '#ffffff',
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            borderRadius: '10px',
+            px: 3,
+            py: 1,
+            boxShadow: 'none',
+            textTransform: 'none',
+            transition: 'all 0.2s',
+            '&:hover': {
+              background: saved ? '#16a34a' : colors.primary.gradientHover,
+              boxShadow: `0 4px 16px ${colors.primary.light}4d`,
+            },
+          }}
+        >
+          {saved ? 'Enregistré !' : 'Enregistrer la langue'}
+        </Button>
+      </Box>
+    </Paper>
   );
 }
 

@@ -2,33 +2,32 @@
 
 import { Box, Container, Typography, Grid, useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
-import PublicIcon from '@mui/icons-material/Public';
-import ShieldIcon from '@mui/icons-material/Shield';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import HistoryIcon from '@mui/icons-material/History';
+import CloudQueueIcon from '@mui/icons-material/CloudQueue';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import TerminalIcon from '@mui/icons-material/Terminal';
+import SpeedIcon from '@mui/icons-material/Speed';
 
 interface Feature {
-  icon: React.ReactNode;
   title: string;
   description: string;
 }
 
-const features: Omit<Feature, 'icon'>[] = [
+const features: Feature[] = [
   {
-    title: 'Global Edge Network',
-    description: 'Deploy your content to 35+ regions worldwide instantly. Low latency for everyone, everywhere.',
+    title: 'Dedicated Cloud Build Runners',
+    description: 'High-speed Linux and Apple Silicon M2 runners configured specifically for Flutter & Dart workflows. No environment setup needed.',
   },
   {
-    title: 'DDoS Protection',
-    description: 'Enterprise-grade security built-in. Automatic SSL, firewalls, and mitigation included.',
+    title: 'Automated Code Signing',
+    description: 'Effortlessly manage Android Keystores and Apple Provisioning Profiles. Encrypted secrets injected securely at build time.',
   },
   {
-    title: 'Git Integration',
-    description: 'Push to deploy. Automated previews for every pull request on GitHub, GitLab, and Bitbucket.',
+    title: 'Flotio CLI & Git Webhooks',
+    description: 'Trigger and monitor builds directly from your local terminal with the Flotio CLI or automatically on Git push.',
   },
   {
-    title: 'Instant Rollbacks',
-    description: 'Made a mistake? Revert to a previous deployment version in one click with zero downtime.',
+    title: 'Instant Logs & Artifacts Delivery',
+    description: 'Stream build logs in real-time. Download production-ready APK, AAB, and IPA packages instantly upon completion.',
   },
 ];
 
@@ -36,73 +35,113 @@ const Features = () => {
   const theme = useTheme();
   return (
     <Box
+      id="features"
       sx={{
-        pt: { xs: 16, md: 20 },
-        pb: { xs: 10, md: 14 },
+        py: { xs: 8, md: 12 },
         bgcolor: theme.palette.background.default,
-        px: { xs: 4, md: 12 },
+        scrollMarginTop: '80px',
       }}
     >
-      <Container maxWidth={false} sx={{ display: 'flex', justifyContent: 'center' }}>
-        <Box sx={{ width: '85%' }}>
-          <Grid container spacing={{ xs: 4, md: 6 }} justifyContent="center">
-            {features.map((feature, index) => (
-              <Grid size={{ xs: 12, sm: 6 }} key={index}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-50px' }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
+      <Container maxWidth="lg">
+        <Box sx={{ textAlign: 'center', mb: { xs: 5, md: 7 }, maxWidth: 640, mx: 'auto' }}>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
+              color: theme.palette.text.primary,
+              letterSpacing: '-0.02em',
+              mb: 1.5,
+            }}
+          >
+            Built for modern Flutter teams
+          </Typography>
+          <Typography sx={{ color: theme.palette.text.secondary, fontSize: '1rem', lineHeight: 1.6 }}>
+            Everything you need to compile, test, sign, and distribute mobile applications without maintaining local infrastructure.
+          </Typography>
+        </Box>
+
+        <Grid container spacing={3}>
+          {features.map((feature, index) => (
+            <Grid size={{ xs: 12, sm: 6 }} key={index}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+                style={{ height: '100%' }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    gap: 2.5,
+                    alignItems: 'flex-start',
+                    p: { xs: 3, sm: 3.5 },
+                    height: '100%',
+                    borderRadius: '16px',
+                    bgcolor: theme.palette.background.paper,
+                    border: `1px solid ${theme.palette.divider}`,
+                    boxShadow: theme.palette.mode === 'light'
+                      ? '0 2px 12px 0 rgba(124,58,237,0.04), 0 1.5px 4px 0 rgba(0,0,0,0.02)'
+                      : '0 2px 12px 0 rgba(0,0,0,0.1)',
+                    transition: 'all 0.25s ease',
+                    '&:hover': {
+                      borderColor: theme.palette.primary.main,
+                      transform: 'translateY(-2px)',
+                      boxShadow: theme.palette.mode === 'light'
+                        ? '0 8px 24px rgba(139,92,246,0.1)'
+                        : '0 8px 24px rgba(0,0,0,0.25)',
+                    },
+                  }}
                 >
-                  <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
-                    <Box
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: '12px',
+                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.08)',
+                      border: `1px solid rgba(139, 92, 246, 0.25)`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {index === 0 && <CloudQueueIcon sx={{ fontSize: 22, color: theme.palette.primary.main }} />}
+                    {index === 1 && <VpnKeyIcon sx={{ fontSize: 22, color: theme.palette.primary.main }} />}
+                    {index === 2 && <TerminalIcon sx={{ fontSize: 22, color: theme.palette.primary.main }} />}
+                    {index === 3 && <SpeedIcon sx={{ fontSize: 22, color: theme.palette.primary.main }} />}
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
                       sx={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: '10px',
-                        bgcolor: theme.palette.mode === 'dark' ? theme.palette.primary.dark + '22' : theme.palette.primary.light + '22',
-                        border: `1px solid ${theme.palette.primary.main}33`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
+                        fontWeight: 600,
+                        color: theme.palette.text.primary,
+                        fontSize: '1.05rem',
+                        mb: 0.75,
+                        letterSpacing: '-0.01em',
                       }}
                     >
-                      {index === 0 && <PublicIcon sx={{ fontSize: 20, color: theme.palette.primary.main }} />}
-                      {index === 1 && <ShieldIcon sx={{ fontSize: 20, color: theme.palette.primary.main }} />}
-                      {index === 2 && <GitHubIcon sx={{ fontSize: 20, color: theme.palette.primary.main }} />}
-                      {index === 3 && <HistoryIcon sx={{ fontSize: 20, color: theme.palette.primary.main }} />}
-                    </Box>
-                    <Box>
-                      <Typography
-                        sx={{
-                          fontWeight: 600,
-                          color: theme.palette.text.primary,
-                          fontSize: '1rem',
-                          mb: 1,
-                        }}
-                      >
-                        {feature.title}
-                      </Typography>
-                      <Typography
-                        sx={{
-                          color: theme.palette.text.secondary,
-                          fontSize: '0.875rem',
-                          lineHeight: 1.7,
-                        }}
-                      >
-                        {feature.description}
-                      </Typography>
-                    </Box>
+                      {feature.title}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        fontSize: '0.9rem',
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {feature.description}
+                    </Typography>
                   </Box>
-                </motion.div>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
+                </Box>
+              </motion.div>
+            </Grid>
+          ))}
+        </Grid>
       </Container>
     </Box>
   );
 };
 
 export default Features;
+

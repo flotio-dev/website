@@ -16,7 +16,7 @@ export default function Hero() {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
+        minHeight: { xs: 'auto', md: '90vh' },
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -25,7 +25,8 @@ export default function Hero() {
           : colors.heroBackground.light,
         position: 'relative',
         overflow: 'hidden',
-        pt: { xs: 8, md: 0 },
+        pt: { xs: 16, md: 18 },
+        pb: { xs: 10, md: 14 },
       }}
     >
       {/* Subtle grid pattern */}
@@ -57,7 +58,7 @@ export default function Hero() {
       />
 
       <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
-        <Stack spacing={10} alignItems="center" textAlign="center">
+        <Stack spacing={{ xs: 3, md: 4 }} alignItems="center" textAlign="center">
           {/* Badge */}
           <MotionBox
             initial={{ opacity: 0, y: -10 }}
@@ -97,6 +98,7 @@ export default function Hero() {
               </Typography>
             </Box>
           </MotionBox>
+
           {/* Main Title */}
           <MotionBox
             initial={{ opacity: 0, y: 20 }}
@@ -106,10 +108,10 @@ export default function Hero() {
             <Typography
               variant="h1"
               sx={{
-                fontWeight: 600,
-                fontSize: { xs: '2.75rem', sm: '3.5rem', md: '4.5rem', lg: '5rem' },
+                fontWeight: 700,
+                fontSize: { xs: '2.25rem', sm: '3.25rem', md: '4.25rem' },
                 color: theme.palette.text.primary,
-                lineHeight: 1.1,
+                lineHeight: 1.15,
                 letterSpacing: '-0.03em',
               }}
             >
@@ -119,9 +121,9 @@ export default function Hero() {
               variant="h1"
               component="span"
               sx={{
-                fontWeight: 600,
-                fontSize: { xs: '2.75rem', sm: '3.5rem', md: '4.5rem', lg: '5rem' },
-                lineHeight: 1.1,
+                fontWeight: 700,
+                fontSize: { xs: '2.25rem', sm: '3.25rem', md: '4.25rem' },
+                lineHeight: 1.15,
                 letterSpacing: '-0.03em',
                 background: `linear-gradient(90deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 80%, ${theme.palette.secondary.light} 100%)`,
                 backgroundSize: '200% auto',
@@ -134,6 +136,7 @@ export default function Hero() {
               modern deployments
             </Typography>
           </MotionBox>
+
           {/* Subtitle */}
           <MotionTypography
             initial={{ opacity: 0, y: 20 }}
@@ -141,26 +144,27 @@ export default function Hero() {
             transition={{ duration: 0.7, delay: 0.2 }}
             sx={{
               color: theme.palette.text.secondary,
-              maxWidth: '560px',
+              maxWidth: '580px',
               fontWeight: 400,
               fontSize: { xs: '1rem', md: '1.125rem' },
-              lineHeight: 1.7,
+              lineHeight: 1.6,
             }}
           >
             Flotio provides the infrastructure, workflows, and tools you need to deploy Flutter mobile apps simply, quickly, and with easy access.
           </MotionTypography>
+
           {/* CTA Buttons */}
           <MotionBox
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            style={{ paddingTop: '60px' }}
+            sx={{ pt: { xs: 1, sm: 2 } }}
           >
-            <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ gap: 4 }}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ gap: 2 }} alignItems="center">
               <Button
                 variant="primary"
                 href={registerHref}
-                endIcon={<ArrowForwardIcon sx={{ fontSize: 22 }} />}
+                endIcon={<ArrowForwardIcon sx={{ fontSize: 18 }} />}
               >
                 Start Deploying
               </Button>

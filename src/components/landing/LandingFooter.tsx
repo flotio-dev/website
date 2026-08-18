@@ -1,88 +1,86 @@
 'use client';
 
-import { Box, Container, Typography, Stack, Link as MuiLink, useTheme } from '@mui/material';
-import { Grid } from '@mui/material';
+import { Box, Container, Typography, Stack, Link as MuiLink, useTheme, Grid } from '@mui/material';
 import Link from 'next/link';
-import BoltIcon from '@mui/icons-material/Bolt';
 import { colors } from '@/theme';
 
 interface FooterSection {
   title: string;
-  links: { label: string; href: string }[];
+  links: { label: string; href: string; external?: boolean }[];
 }
-
-const footerSections: FooterSection[] = [
-  {
-    title: 'PRODUCT',
-    links: [
-      { label: 'Infrastructure', href: '#' },
-      { label: 'Previews', href: '#' },
-      { label: 'Edge Functions', href: '#' },
-      { label: 'Analytics', href: '#' },
-    ],
-  },
-  {
-    title: 'RESOURCES',
-    links: [
-      { label: 'Documentation', href: '#' },
-      { label: 'Guides', href: '#' },
-      { label: 'Help Center', href: '#' },
-      { label: 'API Reference', href: '#' },
-    ],
-  },
-  {
-    title: 'COMPANY',
-    links: [
-      { label: 'About', href: '/about' },
-      { label: 'Blog', href: '#' },
-      { label: 'Careers', href: '#' },
-      { label: 'Contact', href: '/contact' },
-    ],
-  },
-];
 
 const LandingFooter = () => {
   const theme = useTheme();
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'http://localhost:3001';
+
+  const footerSections: FooterSection[] = [
+    {
+      title: 'PRODUCT',
+      links: [
+        { label: 'Features', href: '/#features' },
+        { label: 'Pricing & Credits', href: '/pricing' },
+        { label: 'Flutter Runners', href: '/#features' },
+        { label: 'Launch Console', href: `${appBaseUrl}/dashboard`, external: true },
+      ],
+    },
+    {
+      title: 'DOCUMENTATION',
+      links: [
+        { label: 'Introduction', href: '/docs/introduction' },
+        { label: 'Quickstart Guide', href: '/docs/quickstart' },
+        { label: 'Build Configuration', href: '/docs/flutter-configuration' },
+        { label: 'Flotio CLI', href: '/docs/cli' },
+      ],
+    },
+    {
+      title: 'RESOURCES',
+      links: [
+        { label: 'Documentation Hub', href: '/docs' },
+        { label: 'Secrets & Keystores', href: '/docs/secrets-and-env' },
+        { label: 'Theme & Preferences', href: '/preferences' },
+        { label: 'GitHub Repository', href: 'https://github.com', external: true },
+      ],
+    },
+  ];
+
   return (
     <Box
       component="footer"
       sx={{
-        mt: { xs: 10, md: 16 },
-        mb: { xs: 10, md: 16 },
+        mt: 'auto',
+        py: { xs: 8, md: 10 },
         bgcolor: theme.palette.background.default,
         borderTop: `1px solid ${theme.palette.divider}`,
       }}
     >
-      <Box sx={{ height: { xs: 40, md: 80 } }} />
-      <Container maxWidth={false} sx={{ px: { xs: '32px', md: '120px' }, display: 'flex', justifyContent: 'center' }}>
-        <Grid container spacing={16} sx={{ maxWidth: 1400 }}>
+      <Container maxWidth="lg">
+        <Grid container spacing={{ xs: 5, md: 4 }} justifyContent="space-between">
           {/* Brand Section */}
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Stack spacing={4} sx={{ pr: { md: 8 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Grid size={{ xs: 12, md: 5 }}>
+            <Stack spacing={2.5} sx={{ pr: { md: 6 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Box
                   sx={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: '6px',
-                    background: theme.palette.mode === 'light' ? theme.palette.grey[900] : theme.palette.common.white,
+                    width: 28,
+                    height: 28,
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #38bdf8 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '0.75rem',
+                    fontSize: '0.85rem',
                     fontWeight: 800,
-                    color: theme.palette.mode === 'light' ? theme.palette.common.white : theme.palette.grey[900],
-                    border: `2px solid ${theme.palette.mode === 'light' ? theme.palette.grey[900] : theme.palette.common.white}`,
-                    transition: 'background 0.2s, color 0.2s',
+                    color: '#ffffff',
+                    boxShadow: '0 2px 8px rgba(139, 92, 246, 0.3)',
                   }}
                 >
                   F
                 </Box>
                 <Typography
                   sx={{
-                    fontWeight: 600,
+                    fontWeight: 700,
                     color: theme.palette.text.primary,
-                    fontSize: '1.25rem',
+                    fontSize: '1.2rem',
                     letterSpacing: '-0.01em',
                   }}
                 >
@@ -92,26 +90,31 @@ const LandingFooter = () => {
               <Typography
                 sx={{
                   color: theme.palette.text.secondary,
-                  fontSize: '0.95rem',
-                  maxWidth: 340,
-                  lineHeight: 1.5,
+                  fontSize: '0.9rem',
+                  maxWidth: 380,
+                  lineHeight: 1.6,
                 }}
               >
-                Empowering developers to launch better mobile apps. Scalable, secure, and effortless deployment infrastructure for every mobile team.
+                Empowering mobile developers to build, test, and release Flutter applications effortlessly with high-speed cloud infrastructure.
+              </Typography>
+              <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.8rem', pt: 1 }}>
+                © {new Date().getFullYear()} Flotio. All rights reserved.
               </Typography>
             </Stack>
           </Grid>
-          {/* Footer Sections */}
+
+          {/* Footer Navigation Columns */}
           {footerSections.map((section) => (
-            <Grid size={{ xs: 12, md: 2 }} key={section.title}>
-              <Stack spacing={2}>
+            <Grid size={{ xs: 6, sm: 4, md: 2.3 }} key={section.title}>
+              <Stack spacing={1.75}>
                 <Typography
                   sx={{
                     fontWeight: 700,
                     color: theme.palette.text.primary,
-                    fontSize: '1.1rem',
-                    letterSpacing: '0.01em',
-                    mb: 1,
+                    fontSize: '0.8rem',
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    mb: 0.5,
                   }}
                 >
                   {section.title}
@@ -121,14 +124,16 @@ const LandingFooter = () => {
                     key={link.label}
                     component={Link}
                     href={link.href}
+                    target={link.external ? '_blank' : undefined}
+                    rel={link.external ? 'noopener noreferrer' : undefined}
                     sx={{
-                      color: `${theme.palette.text.secondary} !important`,
-                      fontSize: '1.05rem',
+                      color: theme.palette.text.secondary,
+                      fontSize: '0.9rem',
                       textDecoration: 'none',
-                      fontWeight: 500,
+                      fontWeight: 400,
                       transition: 'color 0.15s',
                       '&:hover': {
-                        color: `${theme.palette.text.primary} !important`,
+                        color: theme.palette.primary.main,
                       },
                     }}
                   >
@@ -140,9 +145,9 @@ const LandingFooter = () => {
           ))}
         </Grid>
       </Container>
-      <Box sx={{ height: { xs: 40, md: 80 } }} />
     </Box>
   );
 };
 
 export default LandingFooter;
+
