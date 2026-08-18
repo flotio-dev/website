@@ -29,7 +29,6 @@ import { ThemeModeContext } from '@/components/preferences/ThemeModeProvider';
 const navItems = [
   { label: 'Features', href: '/#features' },
   { label: 'Documentation', href: '/docs' },
-  { label: 'Pricing', href: '/pricing' },
   { label: 'Preferences', href: '/preferences' },
 ];
 

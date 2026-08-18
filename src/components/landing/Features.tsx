@@ -38,7 +38,7 @@ const Features = () => {
       id="features"
       sx={{
         py: { xs: 8, md: 12 },
-        bgcolor: theme.palette.background.default,
+        bgcolor: 'transparent',
         scrollMarginTop: '80px',
       }}
     >
