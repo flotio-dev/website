@@ -3,149 +3,184 @@
 import { Paper, Box, Typography, Stack, Radio, useTheme } from '@mui/material';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
+import PaletteIcon from '@mui/icons-material/Palette';
 import { useContext } from 'react';
 import { ThemeModeContext } from './ThemeModeProvider';
+import { colors } from '@/theme';
 
 function ThemeSwitcher() {
   const { mode, setMode } = useContext(ThemeModeContext);
   const theme = useTheme();
 
   return (
-    <>
-      <Box sx={{ width: '80% !important', mx: 'auto !important', mt: '100px !important', mb: '20px !important' }}>
-        <Typography sx={{ color: theme.palette.text.primary, fontWeight: 600, fontSize: '1.18rem', mb: 0.5 }}>
-          Theme & appearance
-        </Typography>
-        <Typography sx={{ color: theme.palette.text.secondary, fontSize: '1rem', mb: 3 }}>
-          Choisissez entre le thème clair et sombre pour l’interface de Flotio.
-        </Typography>
-      </Box>
-      <Box sx={{ p: { xs: 0, md: 0 }, width: '100%', display: 'flex', justifyContent: 'center' }}>
-        <Paper
+    <Paper
+      elevation={0}
+      sx={{
+        bgcolor: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: '20px',
+        p: { xs: 3, sm: 4.5 },
+        boxShadow: theme.palette.mode === 'dark'
+          ? '0 4px 20px rgba(0, 0, 0, 0.25)'
+          : '0 4px 20px rgba(0, 0, 0, 0.03)',
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+        <Box
           sx={{
-            bgcolor: theme.palette.background.paper,
-            border: `1.5px solid ${theme.palette.divider}`,
-            borderRadius: '14px',
-            px: { xs: 3, md: 6 },
-            py: { xs: 4, md: 5 },
-            boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)',
-            width: '80%',
+            width: 36,
+            height: 36,
+            borderRadius: '10px',
+            bgcolor: theme.palette.mode === 'dark' ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: colors.primary.main,
           }}
         >
-          <Box sx={{ mt: '40px !important', ml: '40px !important' }}>
-            <Typography sx={{ color: theme.palette.text.primary, fontWeight: 600, fontSize: '1.18rem', mb: 0.5 }}>
-              Mode d’affichage
-            </Typography>
-            <Typography sx={{ color: theme.palette.text.secondary, fontSize: '1rem', mb: 3 }}>
-              Le thème s'applique à toute l'interface.
-            </Typography>
-          </Box>
-          <Stack direction="row" sx={{ gap: '24px !important', px: '40px !important', my: '40px !important' }}>
-            {/* Light mode card */}
-            <Box
-              onClick={() => setMode('light')}
-              sx={{
-                flex: 1,
-                py: 4,
-                px: 5,
-                minHeight: 120,
-                borderRadius: '14px',
-                border: mode === 'light' ? `1px solid ${theme.palette.primary.light}` : '2px solid transparent',
-                bgcolor: mode === 'light' ? theme.palette.background.default : theme.palette.background.paper,
-                boxShadow: mode === 'light' ? `0 0 0 2px ${theme.palette.divider}` : 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 2,
-                outline: mode === 'light' ? `2px solid ${theme.palette.primary.main}` : 'none',
-                outlineOffset: mode === 'light' ? '0px' : '0px',
-                transition: 'all 0.2s',
-                position: 'relative',
-              }}
-            >
-              <LightModeIcon sx={{ color: '#b3b3c6', mr: 1.5, fontSize: 28 }} />
-              <Box>
-                <Typography sx={{ color: theme.palette.text.primary, fontWeight: 600, fontSize: '1.05rem' }}>Light</Typography>
-                <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.97rem' }}>
-                  Interface claire, adaptée aux environnements lumineux.
-                </Typography>
-              </Box>
-              <Radio
-                checked={mode === 'light'}
-                value="light"
-                sx={{
-                  ml: 'auto',
-                  color: theme.palette.primary.main,
-                  '&.Mui-checked': {
-                    color: theme.palette.primary.main,
-                  },
-                }}
-                onChange={() => setMode('light')}
-              />
-            </Box>
-            {/* Dark mode card */}
-            <Box
-              onClick={() => setMode('dark')}
-              sx={{
-                flex: 1,
-                py: 4,
-                px: 5,
-                minHeight: 120,
-                borderRadius: '14px',
-                border: mode === 'dark' ? `1px solid ${theme.palette.primary.light}` : '2px solid transparent',
-                bgcolor: mode === 'dark' ? theme.palette.background.default : theme.palette.background.paper,
-                boxShadow: mode === 'dark' ? `0 0 0 2px ${theme.palette.primary.main}` : 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 2,
-                outline: mode === 'dark' ? `2px solid ${theme.palette.primary.main}` : 'none',
-                outlineOffset: mode === 'dark' ? '0px' : '0px',
-                transition: 'all 0.2s',
-                position: 'relative',
-              }}
-            >
-              <DarkModeIcon sx={{ color: '#a78bfa', mr: 1.5, fontSize: 28 }} />
-              <Box>
-                <Typography sx={{ color: theme.palette.text.primary, fontWeight: 600, fontSize: '1.05rem' }}>Dark</Typography>
-                <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.97rem' }}>
-                  Interface sombre avec accents violets (recommandé).
-                </Typography>
-              </Box>
-              <Radio
-                checked={mode === 'dark'}
-                value="dark"
-                sx={{
-                  ml: 'auto',
-                  color: theme.palette.primary.main,
-                  '&.Mui-checked': {
-                    color: theme.palette.primary.main,
-                  },
-                }}
-                onChange={() => setMode('dark')}
-              />
-            </Box>
-          </Stack>
-          <Box sx={{ borderTop: `1.5px solid ${theme.palette.divider}` }}>
-            <Box sx={{ my: '40px !important', ml: '40px !important' }}>
-              <Typography sx={{ color: theme.palette.text.primary, fontWeight: 600, fontSize: '1.18rem', mb: 0.5 }}>
-                Descriptif du thème
-              </Typography>
-              <Typography sx={{ color: theme.palette.text.secondary, fontSize: '1rem', mb: 3 }}>
-                {mode === 'dark'
-                  ? "Le thème sombre est conçu pour réduire la fatigue oculaire dans les environnements à faible luminosité."
-                  : "Le thème clair est idéal pour une utilisation dans des environnements lumineux."}
-              </Typography>
-            </Box>
-          </Box>
-        </Paper>
+          <PaletteIcon sx={{ fontSize: 20 }} />
+        </Box>
+        <Typography sx={{ color: theme.palette.text.primary, fontWeight: 700, fontSize: '1.2rem' }}>
+          Thème & Apparence
+        </Typography>
       </Box>
-      <Box sx={{ height: '100px' }} />
-    </>
+
+      <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.925rem', mb: 3.5, maxWidth: 540, lineHeight: 1.6 }}>
+        Choisissez entre le thème clair et sombre. Votre choix s’applique immédiatement à toute l’interface.
+      </Typography>
+
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2.5} sx={{ mb: 3.5 }}>
+        {/* Light mode card */}
+        <Box
+          onClick={() => setMode('light')}
+          sx={{
+            flex: 1,
+            p: 3,
+            borderRadius: '16px',
+            border: mode === 'light'
+              ? `2px solid ${colors.primary.main}`
+              : `1px solid ${theme.palette.divider}`,
+            bgcolor: mode === 'light'
+              ? (theme.palette.mode === 'dark' ? 'rgba(139, 92, 246, 0.08)' : 'rgba(139, 92, 246, 0.04)')
+              : theme.palette.background.default,
+            boxShadow: mode === 'light' ? `0 4px 16px rgba(139, 92, 246, 0.15)` : 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              borderColor: colors.primary.main,
+              transform: 'translateY(-2px)',
+            },
+          }}
+        >
+          <Box
+            sx={{
+              width: 42,
+              height: 42,
+              borderRadius: '10px',
+              bgcolor: 'rgba(245, 158, 11, 0.12)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#f59e0b',
+              flexShrink: 0,
+            }}
+          >
+            <LightModeIcon sx={{ fontSize: 24 }} />
+          </Box>
+          <Box sx={{ flex: 1 }}>
+            <Typography sx={{ color: theme.palette.text.primary, fontWeight: 700, fontSize: '1rem', mb: 0.25 }}>
+              Light
+            </Typography>
+            <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.825rem', lineHeight: 1.4 }}>
+              Interface claire et épurée.
+            </Typography>
+          </Box>
+          <Radio
+            checked={mode === 'light'}
+            value="light"
+            sx={{
+              color: theme.palette.divider,
+              '&.Mui-checked': {
+                color: colors.primary.main,
+              },
+            }}
+            onChange={() => setMode('light')}
+          />
+        </Box>
+
+        {/* Dark mode card */}
+        <Box
+          onClick={() => setMode('dark')}
+          sx={{
+            flex: 1,
+            p: 3,
+            borderRadius: '16px',
+            border: mode === 'dark'
+              ? `2px solid ${colors.primary.main}`
+              : `1px solid ${theme.palette.divider}`,
+            bgcolor: mode === 'dark'
+              ? (theme.palette.mode === 'dark' ? 'rgba(139, 92, 246, 0.12)' : 'rgba(139, 92, 246, 0.04)')
+              : theme.palette.background.default,
+            boxShadow: mode === 'dark' ? `0 4px 16px rgba(139, 92, 246, 0.2)` : 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              borderColor: colors.primary.main,
+              transform: 'translateY(-2px)',
+            },
+          }}
+        >
+          <Box
+            sx={{
+              width: 42,
+              height: 42,
+              borderRadius: '10px',
+              bgcolor: 'rgba(139, 92, 246, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: colors.primary.main,
+              flexShrink: 0,
+            }}
+          >
+            <DarkModeIcon sx={{ fontSize: 24 }} />
+          </Box>
+          <Box sx={{ flex: 1 }}>
+            <Typography sx={{ color: theme.palette.text.primary, fontWeight: 700, fontSize: '1rem', mb: 0.25 }}>
+              Dark
+            </Typography>
+            <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.825rem', lineHeight: 1.4 }}>
+              Interface sombre avec accents violets.
+            </Typography>
+          </Box>
+          <Radio
+            checked={mode === 'dark'}
+            value="dark"
+            sx={{
+              color: theme.palette.divider,
+              '&.Mui-checked': {
+                color: colors.primary.main,
+              },
+            }}
+            onChange={() => setMode('dark')}
+          />
+        </Box>
+      </Stack>
+
+      <Box sx={{ pt: 2.5, borderTop: `1px solid ${theme.palette.divider}` }}>
+        <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.85rem', lineHeight: 1.5 }}>
+          {mode === 'dark'
+            ? "🌙 Le thème sombre réduit la fatigue oculaire lors des sessions de développement prolongées."
+            : "☀️ Le thème clair offre une clarté maximale dans les environnements lumineux."}
+        </Typography>
+      </Box>
+    </Paper>
   );
 }
 

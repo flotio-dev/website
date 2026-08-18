@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useTheme } from '@mui/material';
 import {
   AppBar,
@@ -15,23 +15,28 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Tooltip,
   useScrollTrigger,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 import Link from 'next/link';
 import { colors } from '@/theme';
+import { ThemeModeContext } from '@/components/preferences/ThemeModeProvider';
 
 const navItems = [
-  { label: 'Product', href: '#' },
-  { label: 'Documentation', href: '#' },
-  { label: 'Pricing', href: '#' },
+  { label: 'Features', href: '/#features' },
+  { label: 'Documentation', href: '/docs' },
+  { label: 'Pricing', href: '/pricing' },
   { label: 'Preferences', href: '/preferences' },
 ];
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
+  const { mode, toggleMode } = useContext(ThemeModeContext);
   const trigger = useScrollTrigger({
     disableHysteresis: true,
     threshold: 10,
@@ -39,13 +44,6 @@ export default function Navbar() {
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
   const loginHref = appBaseUrl ? `${appBaseUrl}/auth/login` : '/auth/login';
   const registerHref = appBaseUrl ? `${appBaseUrl}/auth/register` : '/auth/register';
-
-  // Force update du composant quand le thème change pour appliquer les couleurs dynamiques
-  // Utilise useEffect pour écouter le changement de mode
-  const [, setThemeMode] = useState(theme.palette.mode);
-  useEffect(() => {
-    setThemeMode(theme.palette.mode);
-  }, [theme.palette.mode]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -57,15 +55,18 @@ export default function Navbar() {
         position="fixed"
         elevation={0}
         sx={{
-          bgcolor: trigger ? `${theme.palette.background.default}b3` : 'transparent',
+          bgcolor: trigger
+            ? theme.palette.mode === 'dark'
+              ? 'rgba(13, 14, 18, 0.85)'
+              : 'rgba(248, 250, 252, 0.85)'
+            : 'transparent',
           backdropFilter: trigger ? 'blur(16px) saturate(180%)' : 'none',
           borderBottom: trigger ? `1px solid ${theme.palette.divider}` : 'none',
-          transition: 'all 0.2s ease',
-          pr: { xs: '0!important', md: '20px!important' },
-          pl: { xs: '0!important', md: '20px!important' },
+          transition: 'all 0.25s ease',
+          zIndex: 1100,
         }}
       >
-        <Container maxWidth={false} sx={{ px: { xs: 2, md: 4 } }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
           <Toolbar disableGutters sx={{ minHeight: { xs: 56, md: 64 }, justifyContent: 'space-between' }}>
             {/* Logo */}
             <Box
@@ -73,29 +74,30 @@ export default function Navbar() {
               href="/"
               sx={{
                 fontWeight: 700,
-                color: `${theme.palette.text.primary}!important`,
+                color: theme.palette.text.primary,
                 textDecoration: 'none',
-                fontSize: '1.1rem',
+                fontSize: '1.15rem',
                 letterSpacing: '-0.02em',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1,
-                transition: 'color 0.2s',
+                gap: 1.25,
+                transition: 'opacity 0.2s',
+                '&:hover': { opacity: 0.9 },
               }}
             >
               <Box
                 sx={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: '6px',
-                  background: `${colors.primary.gradient}!important`,
+                  width: 28,
+                  height: 28,
+                  borderRadius: '8px',
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #38bdf8 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '0.75rem',
+                  fontSize: '0.85rem',
                   fontWeight: 800,
-                  color: `${theme.palette.background.default}!important`,
-                  transition: 'color 0.2s, background 0.2s',
+                  color: '#ffffff',
+                  boxShadow: '0 2px 10px rgba(139, 92, 246, 0.35)',
                 }}
               >
                 F
@@ -118,17 +120,17 @@ export default function Navbar() {
                   component={Link}
                   href={item.href}
                   sx={{
-                    color: `${theme.palette.text.secondary}!important`,
+                    color: theme.palette.text.secondary,
                     fontWeight: 500,
                     fontSize: '0.875rem',
                     textTransform: 'none',
                     px: 2,
-                    py: 1,
+                    py: 0.8,
                     borderRadius: '8px',
-                    transition: 'color 0.2s, background 0.2s',
+                    transition: 'all 0.2s',
                     '&:hover': {
-                      color: `${theme.palette.text.primary}!important`,
-                      bgcolor: `${theme.palette.action.hover}!important`,
+                      color: theme.palette.text.primary,
+                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
                     },
                   }}
                 >
@@ -137,21 +139,46 @@ export default function Navbar() {
               ))}
             </Box>
 
-            {/* Desktop Auth Buttons */}
+            {/* Desktop Auth & Theme Buttons */}
             <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1.5, alignItems: 'center' }}>
+              {/* Quick Theme Switcher */}
+              <Tooltip title={mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
+                <IconButton
+                  onClick={toggleMode}
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    border: `1px solid ${theme.palette.divider}`,
+                    borderRadius: '8px',
+                    p: 0.8,
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      color: theme.palette.text.primary,
+                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
+                    },
+                  }}
+                  aria-label="Toggle theme mode"
+                >
+                  {mode === 'dark' ? (
+                    <LightModeIcon sx={{ fontSize: 19, color: '#f59e0b' }} />
+                  ) : (
+                    <DarkModeIcon sx={{ fontSize: 19, color: '#8b5cf6' }} />
+                  )}
+                </IconButton>
+              </Tooltip>
+
               <Button
                 component={Link}
                 href={loginHref}
                 sx={{
-                  color: `${theme.palette.text.secondary}!important`,
+                  color: theme.palette.text.secondary,
                   fontWeight: 500,
                   fontSize: '0.875rem',
                   textTransform: 'none',
                   px: 2,
-                  transition: 'color 0.2s, background 0.2s',
+                  transition: 'color 0.2s',
                   '&:hover': {
-                    color: `${theme.palette.text.primary}!important`,
-                    bgcolor: 'transparent!important',
+                    color: theme.palette.text.primary,
+                    bgcolor: 'transparent',
                   },
                 }}
               >
@@ -162,38 +189,53 @@ export default function Navbar() {
                 href={registerHref}
                 variant="contained"
                 sx={{
-                  background: `${colors.primary.gradient}!important`,
-                  color: `${theme.palette.text.primary}!important`,
+                  background: colors.primary.gradient,
+                  color: '#ffffff',
                   fontWeight: 600,
                   fontSize: '0.875rem',
                   textTransform: 'none',
                   borderRadius: '8px',
                   px: 2.5,
-                  py: 0.875,
-                  boxShadow: 'none',
-                  transition: 'color 0.2s, background 0.2s',
+                  py: 0.85,
+                  boxShadow: '0 2px 12px rgba(139, 92, 246, 0.3)',
+                  transition: 'all 0.2s',
                   '&:hover': {
-                    background: `${colors.primary.gradientHover}!important`,
-                    boxShadow: `0 4px 16px ${colors.primary.light}4d`,
+                    background: colors.primary.gradientHover,
+                    boxShadow: `0 4px 16px ${colors.primary.light}66`,
+                    transform: 'translateY(-1px)',
                   },
                 }}
               >
-                Sign up
+                Get Started
               </Button>
             </Box>
 
-            {/* Mobile Menu Button */}
-            <IconButton
-              sx={{
-                display: { md: 'none' },
-                ml: 'auto',
-                color: `${theme.palette.text.primary}!important`,
-                transition: 'color 0.2s',
-              }}
-              onClick={handleDrawerToggle}
-            >
-              <MenuIcon />
-            </IconButton>
+            {/* Mobile Actions */}
+            <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1 }}>
+              <IconButton
+                onClick={toggleMode}
+                sx={{
+                  color: theme.palette.text.secondary,
+                  border: `1px solid ${theme.palette.divider}`,
+                  borderRadius: '8px',
+                  p: 0.8,
+                }}
+              >
+                {mode === 'dark' ? (
+                  <LightModeIcon sx={{ fontSize: 18, color: '#f59e0b' }} />
+                ) : (
+                  <DarkModeIcon sx={{ fontSize: 18, color: '#8b5cf6' }} />
+                )}
+              </IconButton>
+              <IconButton
+                sx={{
+                  color: `${theme.palette.text.primary}!important`,
+                }}
+                onClick={handleDrawerToggle}
+              >
+                <MenuIcon />
+              </IconButton>
+            </Box>
           </Toolbar>
         </Container>
       </AppBar>
@@ -207,17 +249,38 @@ export default function Navbar() {
           sx: {
             bgcolor: theme.palette.background.default,
             borderBottom: `1px solid ${theme.palette.divider}`,
-            transition: 'background 0.2s, border-color 0.2s',
+            backgroundImage: 'none',
           },
         }}
       >
-        <Box sx={{ p: 3, px: { xs: 4, md: 6 } }}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
-            <IconButton onClick={handleDrawerToggle} sx={{ color: `${theme.palette.text.primary}!important` }}>
+        <Box sx={{ p: 3, px: { xs: 3, sm: 4 } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: '6px',
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.75rem',
+                  fontWeight: 800,
+                  color: '#ffffff',
+                }}
+              >
+                F
+              </Box>
+              <Typography sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '1rem' }}>
+                Flotio
+              </Typography>
+            </Box>
+            <IconButton onClick={handleDrawerToggle} sx={{ color: theme.palette.text.primary }}>
               <CloseIcon />
             </IconButton>
           </Box>
-          <List sx={{ px: 1 }}>
+          <List sx={{ px: 0 }}>
             {navItems.map((item) => (
               <ListItem key={item.label} disablePadding>
                 <ListItemButton
@@ -226,36 +289,34 @@ export default function Navbar() {
                   onClick={handleDrawerToggle}
                   sx={{
                     borderRadius: '8px',
-                    py: 1.5,
-                    transition: 'background 0.2s, color 0.2s',
+                    py: 1.25,
                     '&:hover': {
-                      bgcolor: `${theme.palette.action.hover}!important`,
+                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
                     },
                   }}
                 >
                   <ListItemText
                     primary={item.label}
                     primaryTypographyProps={{
-                      sx: { color: `${theme.palette.text.secondary}!important`, fontWeight: 500, transition: 'color 0.2s' },
+                      sx: { color: theme.palette.text.primary, fontWeight: 500 },
                     }}
                   />
                 </ListItemButton>
               </ListItem>
             ))}
           </List>
-          <Box sx={{ display: 'flex', gap: 1.5, mt: 2 }}>
+          <Box sx={{ display: 'flex', gap: 1.5, mt: 3 }}>
             <Button
               component={Link}
               href={loginHref}
               fullWidth
               sx={{
-                color: `${theme.palette.text.primary}!important`,
-                border: `1px solid ${theme.palette.divider}!important`,
+                color: theme.palette.text.primary,
+                border: `1px solid ${theme.palette.divider}`,
                 borderRadius: '8px',
                 py: 1.25,
                 textTransform: 'none',
                 fontWeight: 500,
-                transition: 'color 0.2s, border-color 0.2s',
               }}
             >
               Log in
@@ -266,14 +327,13 @@ export default function Navbar() {
               variant="contained"
               fullWidth
               sx={{
-                bgcolor: `${theme.palette.text.primary}!important`,
-                color: `${theme.palette.background.default}!important`,
+                background: colors.primary.gradient,
+                color: '#ffffff',
                 borderRadius: '8px',
                 py: 1.25,
                 textTransform: 'none',
                 fontWeight: 600,
                 boxShadow: 'none',
-                transition: 'color 0.2s, background 0.2s',
               }}
             >
               Sign up
@@ -284,3 +344,4 @@ export default function Navbar() {
     </>
   );
 }
+

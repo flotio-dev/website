@@ -3,9 +3,10 @@
 import { Box, Container, Typography, Grid, Paper, Stack } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
+import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import TerminalIcon from '@mui/icons-material/Terminal';
-import WidgetsIcon from '@mui/icons-material/Widgets';
-import TuneIcon from '@mui/icons-material/Tune';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { colors } from '@/theme';
 
@@ -14,35 +15,33 @@ interface DocCard {
   title: string;
   description: string;
   linkText: string;
-}
-
-interface Feature {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
+  href: string;
 }
 
 const docCards: DocCard[] = [
   {
-    icon: <TerminalIcon sx={{ fontSize: 26 }} />,
+    icon: <PlayCircleOutlineIcon sx={{ fontSize: 26, color: '#8b5cf6' }} />,
     title: 'Quickstart Guide',
     description:
-      'Learn how to deploy your first application with the Veloce CLI or directly from your Git repository in under 5 minutes.',
+      'Connect your Flutter repository and trigger your first automated cloud build in under 5 minutes.',
     linkText: 'Read guide',
+    href: '/docs/quickstart',
   },
   {
-    icon: <WidgetsIcon sx={{ fontSize: 26 }} />,
-    title: 'Frameworks',
+    icon: <SettingsSuggestIcon sx={{ fontSize: 26, color: '#38bdf8' }} />,
+    title: 'Flutter Configuration',
     description:
-      'Optimized builds for Next.js, React, Vue, Svelte, and more. Zero configuration required for most popular frameworks.',
-    linkText: 'View frameworks',
+      'Configure Android Keystores, iOS Provisioning Profiles, Flutter SDK channels, and Dart environment defines.',
+    linkText: 'View configuration',
+    href: '/docs/flutter-configuration',
   },
   {
-    icon: <TuneIcon sx={{ fontSize: 26 }} />,
-    title: 'Configuration',
+    icon: <TerminalIcon sx={{ fontSize: 26, color: '#10b981' }} />,
+    title: 'Flotio CLI Reference',
     description:
-      'Deep dive into environment variables, build settings, custom domains, and edge network configuration.',
-    linkText: 'Configure now',
+      'Run builds, stream live compilation logs, manage secrets, and download release APK/IPAs directly from your terminal.',
+    linkText: 'Explore CLI',
+    href: '/docs/cli',
   },
 ];
 
@@ -51,84 +50,71 @@ export default function DocsCards() {
   return (
     <Box
       sx={{ 
-        py: { xs: 8, md: 12 }, 
+        py: { xs: 8, md: 10 }, 
         bgcolor: theme.palette.background.default,
       }}
     >
-      <Container maxWidth={false} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Container maxWidth="lg">
         {/* Section Header */}
-        <Box sx={{ mb: { xs: 6, md: 8 }, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 3, width: '85%' }}>
-          <Box sx={{ maxWidth: 500 }}>
+        <Box sx={{ mb: { xs: 5, md: 6 }, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ maxWidth: 540 }}>
             <Typography
               variant="h2"
               sx={{
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: { xs: '1.75rem', md: '2.25rem' },
                 color: theme.palette.text.primary,
                 letterSpacing: '-0.02em',
-                mb: '12px!important',
+                mb: 1.5,
               }}
             >
               Everything you need to ship
             </Typography>
-            <Box sx={{ mb: '4px!important' }} /> {}
             <Typography
               sx={{
                 color: theme.palette.text.secondary,
                 fontSize: '1rem',
-                lineHeight: 1.7,
-                mb: '20px!important',
+                lineHeight: 1.6,
               }}
             >
-              Explore our documentation to get up and running in minutes, not days.
+              Explore our technical documentation and step-by-step guides to master your Flutter mobile delivery pipeline.
             </Typography>
-            {/* Ajoute un espace supplémentaire sous le texte de description */}
-            <Box sx={{ mb: { xs: '4!important', md: '6!important' } }} />
           </Box>
           <Box
-            component="a"
+            component={Link}
             href="/docs"
             sx={{
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               gap: 0.75,
               color: colors.primary.main,
-              fontWeight: 500,
+              fontWeight: 600,
               fontSize: '0.9rem',
               textDecoration: 'none',
               transition: 'color 0.2s',
-              mt: { xs: 0, md: 1 },
+              pb: 0.5,
               '&:hover': {
                 color: colors.primary.light,
               },
             }}
           >
-            <span style={{ color: colors.primary.main }}>View all docs</span>
-            <ArrowForwardIcon sx={{ fontSize: 16, color: colors.primary.main }} />
+            <span>View all docs</span>
+            <ArrowForwardIcon sx={{ fontSize: 16 }} />
           </Box>
         </Box>
 
         {/* Cards Grid */}
         <Grid
           container
-          spacing={4}
-          justifyContent="center"
-          sx={{
-            width: '85%',
-            flexWrap: 'nowrap',
-            overflowX: 'auto',
-            minWidth: 0,
-          }}
-          columns={12}
+          spacing={3}
         >
           {docCards.map((card, index) => (
             <Grid
-              size={{ xs: 4, md: 4 }}
+              size={{ xs: 12, md: 4 }}
               key={index}
               sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                minWidth: 0,
               }}
             >
               <motion.div
@@ -139,61 +125,59 @@ export default function DocsCards() {
                 style={{ flex: 1, display: 'flex' }}
               >
                 <Paper
+                  component={Link}
+                  href={card.href}
                   sx={{
-                    p: { xs: '40px!important', md: '48px!important' },
-                    mb: { xs: '16px!important', md: '24px!important' },
-                    minHeight: { xs: '260px!important', md: '270px!important' },
+                    p: { xs: 3.5, md: 4 },
+                    minHeight: { xs: 220, md: 240 },
                     height: '100%',
                     bgcolor: theme.palette.background.paper,
-                    border: `1px solid ${theme.palette.mode === 'light' ? colors.border.light.default : theme.palette.divider}`,
+                    border: `1px solid ${theme.palette.divider}`,
                     borderRadius: '16px',
+                    textDecoration: 'none',
                     cursor: 'pointer',
                     transition: 'all 0.25s ease',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
                     flex: 1,
-                    minWidth: 0,
                     boxShadow: theme.palette.mode === 'light'
                       ? '0 2px 12px 0 rgba(124,58,237,0.06), 0 1.5px 4px 0 rgba(0,0,0,0.03)'
                       : '0 2px 12px 0 rgba(0,0,0,0.12)',
                     '&:hover': {
-                      bgcolor: theme.palette.action.hover,
-                      borderColor: theme.palette.mode === 'light'
-                        ? colors.border.light.hover
-                        : theme.palette.divider,
+                      borderColor: theme.palette.primary.main,
+                      transform: 'translateY(-2px)',
+                      boxShadow: theme.palette.mode === 'light'
+                        ? '0 8px 24px rgba(139,92,246,0.12)'
+                        : '0 8px 24px rgba(0,0,0,0.3)',
                     },
                   }}
                 >
-                  <Stack spacing={'16px!important'} height="100%">
+                  <Stack spacing={2} height="100%">
                     {/* Icon */}
                     <Box
                       sx={{
-                        width: '48px!important',
-                        height: '48px!important',
-                        borderRadius: '12px!important',
-                        bgcolor: theme.palette.background.paper,
+                        width: 44,
+                        height: 44,
+                        borderRadius: '12px',
+                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
                         border: `1px solid ${theme.palette.divider}`,
-                        color: theme.palette.text.secondary,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        mt: '-18px!important',
-                        mb: '0!important',
-                        p: 0,
                       }}
                     >
                       {card.icon}
                     </Box>
                     {/* Content */}
-                    <Box sx={{ flex: 1, mb: '0!important' }}>
+                    <Box sx={{ flex: 1 }}>
                       <Typography
                         variant="h6"
                         sx={{
                           fontWeight: 600,
                           color: theme.palette.text.primary,
-                          fontSize: '1.1rem',
-                          mb: '2px!important',
+                          fontSize: '1.05rem',
+                          mb: 1,
                           letterSpacing: '-0.01em',
                         }}
                       >
@@ -202,8 +186,8 @@ export default function DocsCards() {
                       <Typography
                         sx={{
                           color: theme.palette.text.secondary,
-                          fontSize: '0.95rem',
-                          lineHeight: 1.7,
+                          fontSize: '0.9rem',
+                          lineHeight: 1.6,
                         }}
                       >
                         {card.description}
@@ -215,18 +199,15 @@ export default function DocsCards() {
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px!important',
+                        gap: 0.75,
                         color: colors.primary.main,
-                        fontWeight: 500,
-                        fontSize: '0.95rem',
-                        transition: 'color 0.2s',
-                        '&:hover': {
-                          color: colors.primary.light,
-                        },
+                        fontWeight: 600,
+                        fontSize: '0.875rem',
                         mt: 'auto',
+                        pt: 1,
                       }}
                     >
-                      {card.linkText}
+                      <span>{card.linkText}</span>
                       <ArrowForwardIcon sx={{ fontSize: 16 }} />
                     </Box>
                   </Stack>
@@ -239,3 +220,4 @@ export default function DocsCards() {
     </Box>
   );
 }
+
