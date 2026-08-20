@@ -23,6 +23,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Link from 'next/link';
 import { colors } from '@/theme';
 import FlotioLogo from '@/components/common/FlotioLogo';
+import { useAuthStatus } from '@/hooks/useAuthStatus';
 
 const navItems = [
   { label: 'Features', href: '/#features' },
@@ -33,6 +34,7 @@ const navItems = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isLoggedIn } = useAuthStatus();
   const theme = useTheme();
   const trigger = useScrollTrigger({
     disableHysteresis: true,
@@ -41,6 +43,7 @@ export default function Navbar() {
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
   const loginHref = appBaseUrl ? `${appBaseUrl}/auth/login` : '/auth/login';
   const registerHref = appBaseUrl ? `${appBaseUrl}/auth/register` : '/auth/register';
+  const dashboardHref = appBaseUrl ? `${appBaseUrl}/dashboard` : '/dashboard';
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -130,48 +133,77 @@ export default function Navbar() {
 
             {/* Desktop Auth Buttons */}
             <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1.5, alignItems: 'center' }}>
-              <Button
-                component={Link}
-                href={loginHref}
-                sx={{
-                  color: theme.palette.text.secondary,
-                  fontWeight: 500,
-                  fontSize: '0.875rem',
-                  textTransform: 'none',
-                  px: 2,
-                  transition: 'color 0.2s',
-                  '&:hover': {
-                    color: theme.palette.text.primary,
-                    bgcolor: 'transparent',
-                  },
-                }}
-              >
-                Sign in
-              </Button>
-              <Button
-                component={Link}
-                href={registerHref}
-                variant="contained"
-                sx={{
-                  background: colors.primary.gradient,
-                  color: '#ffffff',
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  textTransform: 'none',
-                  borderRadius: '8px',
-                  px: 2.5,
-                  py: 0.85,
-                  boxShadow: '0 2px 12px rgba(255, 87, 34, 0.35)',
-                  transition: 'all 0.2s',
-                  '&:hover': {
-                    background: colors.primary.gradientHover,
-                    boxShadow: `0 4px 16px ${colors.primary.light}66`,
-                    transform: 'translateY(-1px)',
-                  },
-                }}
-              >
-                Get Started
-              </Button>
+              {isLoggedIn ? (
+                <Button
+                  component={Link}
+                  href={dashboardHref}
+                  variant="contained"
+                  sx={{
+                    background: colors.primary.gradient,
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                    px: 2.5,
+                    py: 0.85,
+                    boxShadow: '0 2px 12px rgba(255, 87, 34, 0.35)',
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      background: colors.primary.gradientHover,
+                      boxShadow: `0 4px 16px ${colors.primary.light}66`,
+                      transform: 'translateY(-1px)',
+                    },
+                  }}
+                >
+                  Go to Dashboard
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    component={Link}
+                    href={loginHref}
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      fontWeight: 500,
+                      fontSize: '0.875rem',
+                      textTransform: 'none',
+                      px: 2,
+                      transition: 'color 0.2s',
+                      '&:hover': {
+                        color: theme.palette.text.primary,
+                        bgcolor: 'transparent',
+                      },
+                    }}
+                  >
+                    Sign in
+                  </Button>
+                  <Button
+                    component={Link}
+                    href={registerHref}
+                    variant="contained"
+                    sx={{
+                      background: colors.primary.gradient,
+                      color: '#ffffff',
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      textTransform: 'none',
+                      borderRadius: '8px',
+                      px: 2.5,
+                      py: 0.85,
+                      boxShadow: '0 2px 12px rgba(255, 87, 34, 0.35)',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        background: colors.primary.gradientHover,
+                        boxShadow: `0 4px 16px ${colors.primary.light}66`,
+                        transform: 'translateY(-1px)',
+                      },
+                    }}
+                  >
+                    Get Started
+                  </Button>
+                </>
+              )}
             </Box>
 
             {/* Mobile Actions */}
@@ -240,38 +272,60 @@ export default function Navbar() {
             ))}
           </List>
           <Box sx={{ display: 'flex', gap: 1.5, mt: 3 }}>
-            <Button
-              component={Link}
-              href={loginHref}
-              fullWidth
-              sx={{
-                color: theme.palette.text.primary,
-                border: `1px solid ${theme.palette.divider}`,
-                borderRadius: '8px',
-                py: 1.25,
-                textTransform: 'none',
-                fontWeight: 500,
-              }}
-            >
-              Log in
-            </Button>
-            <Button
-              component={Link}
-              href={registerHref}
-              variant="contained"
-              fullWidth
-              sx={{
-                background: colors.primary.gradient,
-                color: '#ffffff',
-                borderRadius: '8px',
-                py: 1.25,
-                textTransform: 'none',
-                fontWeight: 600,
-                boxShadow: 'none',
-              }}
-            >
-              Sign up
-            </Button>
+            {isLoggedIn ? (
+              <Button
+                component={Link}
+                href={dashboardHref}
+                variant="contained"
+                fullWidth
+                sx={{
+                  background: colors.primary.gradient,
+                  color: '#ffffff',
+                  borderRadius: '8px',
+                  py: 1.25,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: 'none',
+                }}
+              >
+                Go to Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button
+                  component={Link}
+                  href={loginHref}
+                  fullWidth
+                  sx={{
+                    color: theme.palette.text.primary,
+                    border: `1px solid ${theme.palette.divider}`,
+                    borderRadius: '8px',
+                    py: 1.25,
+                    textTransform: 'none',
+                    fontWeight: 500,
+                  }}
+                >
+                  Log in
+                </Button>
+                <Button
+                  component={Link}
+                  href={registerHref}
+                  variant="contained"
+                  fullWidth
+                  sx={{
+                    background: colors.primary.gradient,
+                    color: '#ffffff',
+                    borderRadius: '8px',
+                    py: 1.25,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    boxShadow: 'none',
+                  }}
+                >
+                  Sign up
+                </Button>
+              </>
+            )}
           </Box>
         </Box>
       </Drawer>
