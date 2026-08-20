@@ -1,0 +1,5 @@
+# No active exceptions. Every future entry requires an owner, justification,
+# exact finding ID and finite expiry date in its statement.
+vulnerabilities: []
+misconfigurations: []
+secrets: []
