@@ -27,7 +27,7 @@ const navItems = [
   { label: 'Features', href: '/#features' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'Documentation', href: '/docs' },
-  { label: 'Preferences', href: '/preferences' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 export default function Navbar() {
