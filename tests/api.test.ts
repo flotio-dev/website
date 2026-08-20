@@ -17,7 +17,7 @@ describe("API client", () => {
 
     await expect(api.get<{ ok: boolean }>("/health", { search: "a b" })).resolves.toEqual({ ok: true });
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/health?search=a+b",
+      `${process.env.NEXT_PUBLIC_API_URL || "/api"}/health?search=a+b`,
       expect.objectContaining({
         method: "GET",
         headers: { "Content-Type": "application/json" },
