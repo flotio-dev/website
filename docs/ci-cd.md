@@ -1,7 +1,7 @@
 # CI and GitOps
 
 The `CI` workflow validates the website, builds and scans one image, publishes
-that exact artifact, attests its provenance and SPDX SBOM, then updates the
+that exact artifact, optionally attests its provenance and SPDX SBOM, then updates the
 existing GitOps repository. It never connects to Kubernetes; Argo CD remains
 the only deployment and rollback controller.
 
@@ -10,7 +10,7 @@ dependency review, CodeQL, Trivy, the container build and image scan. They do
 not publish and cannot access GitOps. Pushes to `dev` update
 `manifest/dev/website/deploy-front.yaml`; pushes to `main` wait for approval in
 the protected `production` environment before updating the production file.
-A strict `vX.Y.Z` tag aliases the existing attested SHA image without rebuilding.
+A strict `vX.Y.Z` tag aliases the existing SHA image without rebuilding.
 
 Published images use `ghcr.io/flotio-dev/website-next:sha-<full-git-sha>`.
 GitOps receives only `ghcr.io/flotio-dev/website-next@sha256:<digest>`.
@@ -18,6 +18,8 @@ GitOps receives only `ghcr.io/flotio-dev/website-next@sha256:<digest>`.
 Required configuration:
 
 - secrets `GH_APP_ID` and `GH_APP_PRIVATE_KEY`;
+- optional `ATTESTATIONS_ENABLED=true` after private-repository attestations become
+  available on the organization plan;
 - optional public `DEV_NEXT_PUBLIC_API_URL`, `DEV_NEXT_PUBLIC_APP_URL`,
   `PROD_NEXT_PUBLIC_API_URL` and `PROD_NEXT_PUBLIC_APP_URL` variables;
 - a GitHub App installed only on `flotio-dev/k8s_config`, with Contents write,
