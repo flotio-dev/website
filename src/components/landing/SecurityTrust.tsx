@@ -16,13 +16,13 @@ interface SecurityItem {
 
 const securityItems: SecurityItem[] = [
   {
-    icon: <LockIcon sx={{ fontSize: 26, color: '#a855f7' }} />,
+    icon: <LockIcon sx={{ fontSize: 26, color: '#ff7a50' }} />,
     title: 'AES-256 Secrets Encryption',
     description:
       'All uploaded Android Keystores, Play Store service account JSONs, and environment variables are strictly encrypted at rest and in transit.',
   },
   {
-    icon: <ShieldIcon sx={{ fontSize: 26, color: '#38bdf8' }} />,
+    icon: <ShieldIcon sx={{ fontSize: 26, color: '#ff5722' }} />,
     title: 'Single-Use Ephemeral Sandboxes',
     description:
       'Every compilation job runs inside a brand new, isolated Kubernetes container that is completely destroyed immediately upon build completion.',
@@ -62,7 +62,7 @@ export default function SecurityTrust() {
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
-              color: '#a855f7',
+              color: '#ff5722',
               mb: 1,
             }}
           >

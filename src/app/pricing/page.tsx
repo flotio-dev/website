@@ -135,9 +135,9 @@ export default function PricingPage() {
               px: 2,
               py: 0.6,
               borderRadius: '100px',
-              bgcolor: theme.palette.mode === 'dark' ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)',
-              border: '1px solid rgba(139, 92, 246, 0.3)',
-              color: '#8b5cf6',
+              bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 87, 34, 0.15)' : 'rgba(255, 87, 34, 0.1)',
+              border: '1px solid rgba(255, 87, 34, 0.3)',
+              color: '#ff5722',
               fontSize: '0.8rem',
               fontWeight: 600,
               mb: 3,
@@ -162,7 +162,7 @@ export default function PricingPage() {
             <Box
               component="span"
               sx={{
-                background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #38bdf8 100%)',
+                background: 'linear-gradient(90deg, #ff6b4a 0%, #ff5722 40%, #e11d48 80%, #be123c 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
@@ -287,9 +287,9 @@ export default function PricingPage() {
                     fontSize: '0.85rem',
                     fontWeight: 700,
                     cursor: 'pointer',
-                    bgcolor: machineType === 'linux' ? '#8b5cf6' : 'transparent',
+                    bgcolor: machineType === 'linux' ? '#ff5722' : 'transparent',
                     color: machineType === 'linux' ? '#ffffff' : theme.palette.text.secondary,
-                    boxShadow: machineType === 'linux' ? '0 2px 10px rgba(139, 92, 246, 0.3)' : 'none',
+                    boxShadow: machineType === 'linux' ? '0 2px 10px rgba(255, 87, 34, 0.35)' : 'none',
                     transition: 'all 0.2s',
                   }}
                 >
@@ -309,9 +309,9 @@ export default function PricingPage() {
                     fontSize: '0.85rem',
                     fontWeight: 700,
                     cursor: 'pointer',
-                    bgcolor: machineType === 'macos' ? '#8b5cf6' : 'transparent',
+                    bgcolor: machineType === 'macos' ? '#ff5722' : 'transparent',
                     color: machineType === 'macos' ? '#ffffff' : theme.palette.text.secondary,
-                    boxShadow: machineType === 'macos' ? '0 2px 10px rgba(139, 92, 246, 0.3)' : 'none',
+                    boxShadow: machineType === 'macos' ? '0 2px 10px rgba(255, 87, 34, 0.35)' : 'none',
                     transition: 'all 0.2s',
                   }}
                 >
@@ -327,7 +327,7 @@ export default function PricingPage() {
                 <Typography sx={{ fontWeight: 600, fontSize: '0.9rem', color: theme.palette.text.secondary }}>
                   Build Minutes Per Month:
                 </Typography>
-                <Typography sx={{ fontWeight: 800, fontSize: '1.5rem', color: '#8b5cf6', fontFamily: 'monospace' }}>
+                <Typography sx={{ fontWeight: 800, fontSize: '1.5rem', color: '#ff5722', fontFamily: 'monospace' }}>
                   {estimatedMinutes} min
                 </Typography>
               </Box>
@@ -339,14 +339,14 @@ export default function PricingPage() {
                 step={50}
                 onChange={(_, val) => setEstimatedMinutes(val as number)}
                 sx={{
-                  color: '#8b5cf6',
+                  color: '#ff5722',
                   height: 8,
                   '& .MuiSlider-thumb': {
                     width: 24,
                     height: 24,
                     bgcolor: '#ffffff',
-                    border: '3px solid #8b5cf6',
-                    boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)',
+                    border: '3px solid #ff5722',
+                    boxShadow: '0 2px 8px rgba(255, 87, 34, 0.4)',
                   },
                 }}
               />
@@ -364,8 +364,8 @@ export default function PricingPage() {
               sx={{
                 p: 3.5,
                 borderRadius: '16px',
-                bgcolor: theme.palette.mode === 'dark' ? 'rgba(139, 92, 246, 0.08)' : 'rgba(139, 92, 246, 0.04)',
-                border: '1.5px solid rgba(139, 92, 246, 0.25)',
+                bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 87, 34, 0.08)' : 'rgba(255, 87, 34, 0.04)',
+                border: '1.5px solid rgba(255, 87, 34, 0.25)',
                 display: 'flex',
                 flexDirection: { xs: 'column', sm: 'row' },
                 alignItems: 'center',
@@ -375,7 +375,7 @@ export default function PricingPage() {
               }}
             >
               <Stack spacing={0.5}>
-                <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#8b5cf6' }}>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#ff5722' }}>
                   Estimated Monthly Total (After 100 free minutes)
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, justifyContent: { xs: 'center', sm: 'flex-start' } }}>
@@ -395,16 +395,16 @@ export default function PricingPage() {
                   px: 3.5,
                   py: 1.5,
                   borderRadius: '12px',
-                  bgcolor: '#8b5cf6',
+                  background: 'linear-gradient(135deg, #ff6b4a 0%, #ff5722 50%, #e11d48 100%)',
                   color: '#ffffff',
                   fontWeight: 700,
                   fontSize: '0.875rem',
                   textDecoration: 'none',
-                  boxShadow: '0 4px 14px rgba(139, 92, 246, 0.35)',
+                  boxShadow: '0 4px 14px rgba(255, 87, 34, 0.35)',
                   transition: 'all 0.2s',
                   '&:hover': {
-                    bgcolor: '#7c3aed',
                     transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 18px rgba(255, 87, 34, 0.45)',
                   },
                 }}
               >
@@ -435,18 +435,18 @@ export default function PricingPage() {
                     height: '100%',
                     borderRadius: '24px',
                     bgcolor: theme.palette.background.paper,
-                    border: pack.popular ? '2px solid #8b5cf6' : `1px solid ${theme.palette.divider}`,
+                    border: pack.popular ? '2px solid #ff5722' : `1px solid ${theme.palette.divider}`,
                     position: 'relative',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
                     boxShadow: pack.popular
-                      ? '0 12px 40px rgba(139, 92, 246, 0.18)'
+                      ? '0 12px 40px rgba(255, 87, 34, 0.18)'
                       : (theme.palette.mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.2)' : '0 4px 20px rgba(0,0,0,0.03)'),
                     transition: 'all 0.25s ease',
                     '&:hover': {
                       transform: 'translateY(-4px)',
-                      boxShadow: '0 16px 40px rgba(139, 92, 246, 0.22)',
+                      boxShadow: '0 16px 40px rgba(255, 87, 34, 0.22)',
                     },
                   }}
                 >
@@ -460,13 +460,13 @@ export default function PricingPage() {
                         px: 2.5,
                         py: 0.5,
                         borderRadius: '100px',
-                        bgcolor: '#8b5cf6',
+                        bgcolor: '#ff5722',
                         color: '#ffffff',
                         fontSize: '0.75rem',
                         fontWeight: 800,
                         textTransform: 'uppercase',
                         letterSpacing: '0.06em',
-                        boxShadow: '0 4px 12px rgba(139, 92, 246, 0.4)',
+                        boxShadow: '0 4px 12px rgba(255, 87, 34, 0.4)',
                       }}
                     >
                       Most Popular
@@ -478,7 +478,7 @@ export default function PricingPage() {
                       <Typography sx={{ fontWeight: 800, fontSize: '1.25rem', color: theme.palette.text.primary }}>
                         {pack.name}
                       </Typography>
-                      <Chip label={pack.bonus} size="small" sx={{ bgcolor: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6', fontWeight: 700, fontSize: '0.7rem' }} />
+                      <Chip label={pack.bonus} size="small" sx={{ bgcolor: 'rgba(255, 87, 34, 0.12)', color: '#ff5722', fontWeight: 700, fontSize: '0.7rem' }} />
                     </Box>
 
                     <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.85rem', minHeight: 40, mb: 3 }}>
@@ -511,7 +511,11 @@ export default function PricingPage() {
                       width: '100%',
                       py: 1.5,
                       borderRadius: '12px',
-                      bgcolor: pack.popular ? '#8b5cf6' : theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                      background: pack.popular
+                        ? 'linear-gradient(135deg, #ff6b4a 0%, #ff5722 50%, #e11d48 100%)'
+                        : theme.palette.mode === 'dark'
+                          ? 'rgba(255, 255, 255, 0.06)'
+                          : 'rgba(0, 0, 0, 0.04)',
                       color: pack.popular ? '#ffffff' : theme.palette.text.primary,
                       border: pack.popular ? 'none' : `1px solid ${theme.palette.divider}`,
                       fontWeight: 700,
@@ -519,10 +523,11 @@ export default function PricingPage() {
                       textAlign: 'center',
                       textDecoration: 'none',
                       display: 'block',
-                      boxShadow: pack.popular ? '0 4px 14px rgba(139, 92, 246, 0.35)' : 'none',
+                      boxShadow: pack.popular ? '0 4px 14px rgba(255, 87, 34, 0.35)' : 'none',
                       transition: 'all 0.2s',
                       '&:hover': {
-                        bgcolor: pack.popular ? '#7c3aed' : (theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)'),
+                        transform: 'translateY(-2px)',
+                        boxShadow: pack.popular ? '0 6px 18px rgba(255, 87, 34, 0.45)' : 'none',
                       },
                     }}
                   >
@@ -557,7 +562,7 @@ export default function PricingPage() {
                   '&:before': { display: 'none' },
                 }}
               >
-                <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#8b5cf6' }} />}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#ff5722' }} />}>
                   <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: theme.palette.text.primary }}>
                     {faq.q}
                   </Typography>

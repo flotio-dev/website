@@ -81,15 +81,15 @@ const Features = () => {
                     bgcolor: theme.palette.background.paper,
                     border: `1px solid ${theme.palette.divider}`,
                     boxShadow: theme.palette.mode === 'light'
-                      ? '0 2px 12px 0 rgba(124,58,237,0.04), 0 1.5px 4px 0 rgba(0,0,0,0.02)'
+                      ? '0 2px 12px 0 rgba(255,87,34,0.04), 0 1.5px 4px 0 rgba(0,0,0,0.02)'
                       : '0 2px 12px 0 rgba(0,0,0,0.1)',
                     transition: 'all 0.25s ease',
                     '&:hover': {
                       borderColor: theme.palette.primary.main,
                       transform: 'translateY(-2px)',
                       boxShadow: theme.palette.mode === 'light'
-                        ? '0 8px 24px rgba(139,92,246,0.1)'
-                        : '0 8px 24px rgba(0,0,0,0.25)',
+                        ? '0 8px 24px rgba(255,87,34,0.12)'
+                        : '0 8px 24px rgba(255,87,34,0.2)',
                     },
                   }}
                 >
@@ -98,8 +98,8 @@ const Features = () => {
                       width: 44,
                       height: 44,
                       borderRadius: '12px',
-                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.08)',
-                      border: `1px solid rgba(139, 92, 246, 0.25)`,
+                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 87, 34, 0.15)' : 'rgba(255, 87, 34, 0.08)',
+                      border: `1px solid rgba(255, 87, 34, 0.25)`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',

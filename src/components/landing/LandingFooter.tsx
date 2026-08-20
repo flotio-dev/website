@@ -3,6 +3,7 @@
 import { Box, Container, Typography, Stack, Link as MuiLink, useTheme, Grid } from '@mui/material';
 import Link from 'next/link';
 import { colors } from '@/theme';
+import FlotioLogo from '@/components/common/FlotioLogo';
 
 interface FooterSection {
   title: string;
@@ -59,23 +60,7 @@ const LandingFooter = () => {
           <Grid size={{ xs: 12, md: 5 }}>
             <Stack spacing={2.5} sx={{ pr: { md: 6 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box
-                  sx={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: '8px',
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #38bdf8 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.85rem',
-                    fontWeight: 800,
-                    color: '#ffffff',
-                    boxShadow: '0 2px 8px rgba(139, 92, 246, 0.3)',
-                  }}
-                >
-                  F
-                </Box>
+                <FlotioLogo size={28} />
                 <Typography
                   sx={{
                     fontWeight: 700,

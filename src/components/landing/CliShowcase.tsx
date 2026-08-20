@@ -111,7 +111,7 @@ export default function CliShowcase() {
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
-              color: '#38bdf8',
+              color: '#ff7a50',
               mb: 1,
             }}
           >
@@ -146,12 +146,12 @@ export default function CliShowcase() {
               mx: 'auto',
               borderRadius: '20px',
               border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)'}`,
-              bgcolor: '#0a0b0e',
+              bgcolor: '#080a0f',
               overflow: 'hidden',
               boxShadow:
                 theme.palette.mode === 'dark'
-                  ? '0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(139, 92, 246, 0.15)'
-                  : '0 20px 50px rgba(0, 0, 0, 0.15), 0 0 30px rgba(139, 92, 246, 0.1)',
+                  ? '0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 87, 34, 0.15)'
+                  : '0 20px 50px rgba(0, 0, 0, 0.15), 0 0 30px rgba(255, 87, 34, 0.1)',
             }}
           >
             {/* Terminal Window Top Bar */}
@@ -159,7 +159,7 @@ export default function CliShowcase() {
               sx={{
                 px: { xs: 2, sm: 3 },
                 py: 1.75,
-                bgcolor: '#12141a',
+                bgcolor: '#0f1219',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                 display: 'flex',
                 alignItems: 'center',
@@ -199,12 +199,12 @@ export default function CliShowcase() {
                         fontSize: '0.75rem',
                         fontFamily: 'monospace',
                         transition: 'all 0.2s',
-                        bgcolor: isActive ? 'rgba(139, 92, 246, 0.25)' : 'transparent',
-                        border: `1px solid ${isActive ? 'rgba(139, 92, 246, 0.5)' : 'transparent'}`,
-                        color: isActive ? '#c4b5fd' : '#64748b',
+                        bgcolor: isActive ? 'rgba(255, 87, 34, 0.25)' : 'transparent',
+                        border: `1px solid ${isActive ? 'rgba(255, 87, 34, 0.5)' : 'transparent'}`,
+                        color: isActive ? '#ffab91' : '#64748b',
                         '&:hover': {
                           color: '#e2e8f0',
-                          bgcolor: isActive ? 'rgba(139, 92, 246, 0.3)' : 'rgba(255, 255, 255, 0.04)',
+                          bgcolor: isActive ? 'rgba(255, 87, 34, 0.3)' : 'rgba(255, 255, 255, 0.04)',
                         },
                       }}
                     >

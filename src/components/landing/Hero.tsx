@@ -124,7 +124,7 @@ export default function Hero() {
                 fontSize: { xs: '2.25rem', sm: '3.25rem', md: '4.25rem' },
                 lineHeight: 1.15,
                 letterSpacing: '-0.03em',
-                background: `linear-gradient(90deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 80%, ${theme.palette.secondary.light} 100%)`,
+                background: 'linear-gradient(90deg, #ff6b4a 0%, #ff5722 40%, #e11d48 80%, #be123c 100%)',
                 backgroundSize: '200% auto',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -195,11 +195,11 @@ export default function Hero() {
                   theme.palette.mode === 'dark'
                     ? 'rgba(13, 16, 23, 0.9)'
                     : 'rgba(241, 245, 249, 0.9)',
-                border: '1px solid rgba(139, 92, 246, 0.25)',
+                border: '1px solid rgba(255, 87, 34, 0.3)',
                 boxShadow:
                   theme.palette.mode === 'dark'
-                    ? '0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(139, 92, 246, 0.12)'
-                    : '0 4px 15px rgba(139, 92, 246, 0.08)',
+                    ? '0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 87, 34, 0.15)'
+                    : '0 4px 15px rgba(255, 87, 34, 0.1)',
                 maxWidth: '100%',
               }}
             >

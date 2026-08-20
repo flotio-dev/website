@@ -139,12 +139,12 @@ export default function PricingPreview() {
                     justifyContent: 'space-between',
                     position: 'relative',
                     boxShadow: plan.highlighted
-                      ? '0 12px 35px rgba(139, 92, 246, 0.2)'
+                      ? '0 12px 35px rgba(255, 87, 34, 0.2)'
                       : '0 2px 12px rgba(0, 0, 0, 0.05)',
                     transition: 'all 0.3s ease',
                     '&:hover': {
                       transform: 'translateY(-4px)',
-                      boxShadow: '0 16px 40px rgba(139, 92, 246, 0.25)',
+                      boxShadow: '0 16px 40px rgba(255, 87, 34, 0.25)',
                     },
                   }}
                 >
@@ -158,12 +158,12 @@ export default function PricingPreview() {
                         px: 2,
                         py: 0.5,
                         borderRadius: '100px',
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #38bdf8 100%)',
+                        background: 'linear-gradient(135deg, #ff6b4a 0%, #e11d48 100%)',
                         color: '#ffffff',
                         fontSize: '0.7rem',
                         fontWeight: 800,
                         letterSpacing: '0.05em',
-                        boxShadow: '0 4px 12px rgba(139, 92, 246, 0.4)',
+                        boxShadow: '0 4px 12px rgba(255, 87, 34, 0.4)',
                       }}
                     >
                       {plan.badge}
