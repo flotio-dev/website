@@ -47,20 +47,24 @@ export default async function DocArticlePage({ params }: DocPageProps) {
       <Navbar />
 
       <Container
-        maxWidth="lg"
+        maxWidth={false}
         sx={{
+          maxWidth: '1520px',
+          mx: 'auto',
+          px: { xs: 2, sm: 3, md: 4, lg: 6 },
           pt: { xs: 12, md: 14 },
           pb: 12,
           flex: 1,
           display: 'flex',
-          gap: { xs: 0, lg: 5 },
+          gap: { xs: 0, lg: 5, xl: 6 },
+          alignItems: 'flex-start',
         }}
       >
         {/* Left Sticky Navigation */}
         <DocsSidebar docs={allDocs} />
 
         {/* Center Article Content */}
-        <Box sx={{ flex: 1, minWidth: 0, maxWidth: 840 }}>
+        <Box sx={{ flex: 1, minWidth: 0, maxWidth: { xs: '100%', lg: '960px', xl: '1040px' } }}>
           {/* Breadcrumb Bar */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 4, fontSize: '0.85rem' }}>
             <Link

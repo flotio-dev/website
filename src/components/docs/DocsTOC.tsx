@@ -43,15 +43,16 @@ export default function DocsTOC({ toc }: DocsTOCProps) {
     <Box
       component="aside"
       sx={{
-        width: 240,
+        width: 250,
         flexShrink: 0,
-        display: { xs: 'none', xl: 'block' },
+        display: { xs: 'none', lg: 'block' },
         borderLeft: `1px solid ${theme.palette.divider}`,
         pl: 3,
         position: 'sticky',
-        top: 84,
-        maxHeight: 'calc(100vh - 100px)',
+        top: 96,
+        maxHeight: 'calc(100vh - 120px)',
         overflowY: 'auto',
+        pb: 4,
       }}
     >
       <Stack spacing={2}>

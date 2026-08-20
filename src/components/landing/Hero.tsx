@@ -1,8 +1,12 @@
 'use client';
 
-import { Box, Container, Typography, Stack, useTheme } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Container, Typography, Stack, useTheme, IconButton, Tooltip } from '@mui/material';
 import { motion } from 'framer-motion';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import TerminalIcon from '@mui/icons-material/Terminal';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckIcon from '@mui/icons-material/Check';
 import Button from '@/components/ui/Button';
 import { colors } from '@/theme';
 
@@ -11,8 +15,20 @@ const MotionTypography = motion.create(Typography);
 
 export default function Hero() {
   const theme = useTheme();
+  const [copiedCli, setCopiedCli] = useState(false);
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
   const registerHref = appBaseUrl ? `${appBaseUrl}/auth/register` : '/auth/register';
+
+  const handleCopyCli = async () => {
+    try {
+      await navigator.clipboard.writeText('flotio build start --watch');
+      setCopiedCli(true);
+      setTimeout(() => setCopiedCli(false), 2000);
+    } catch {
+      // ignore
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -26,7 +42,6 @@ export default function Hero() {
         pb: { xs: 10, md: 14 },
       }}
     >
-
       {/* Glow effect top */}
       <Box
         sx={{
@@ -159,6 +174,98 @@ export default function Hero() {
                 Read Documentation
               </Button>
             </Stack>
+          </MotionBox>
+
+          {/* Mini CLI Preview Bar */}
+          <MotionBox
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+            sx={{ pt: 1 }}
+          >
+            <Box
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 1.5,
+                px: { xs: 2, sm: 2.5 },
+                py: 1,
+                borderRadius: '12px',
+                bgcolor:
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(13, 16, 23, 0.9)'
+                    : 'rgba(241, 245, 249, 0.9)',
+                border: '1px solid rgba(139, 92, 246, 0.25)',
+                boxShadow:
+                  theme.palette.mode === 'dark'
+                    ? '0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(139, 92, 246, 0.12)'
+                    : '0 4px 15px rgba(139, 92, 246, 0.08)',
+                maxWidth: '100%',
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  fontFamily: 'monospace',
+                  fontSize: { xs: '0.78rem', sm: '0.85rem' },
+                }}
+              >
+                <TerminalIcon sx={{ fontSize: 17, color: '#38bdf8' }} />
+                <Typography
+                  component="span"
+                  sx={{
+                    fontFamily: 'monospace',
+                    fontSize: 'inherit',
+                    color: theme.palette.mode === 'dark' ? '#cbd5e1' : '#334155',
+                    fontWeight: 500,
+                  }}
+                >
+                  <strong style={{ color: '#10b981' }}>$</strong> flotio build start --watch
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  width: '1px',
+                  height: 14,
+                  bgcolor: theme.palette.divider,
+                  mx: 0.25,
+                  display: { xs: 'none', sm: 'block' },
+                }}
+              />
+
+              <Tooltip title={copiedCli ? 'Copied!' : 'Copy command'}>
+                <IconButton
+                  onClick={handleCopyCli}
+                  size="small"
+                  sx={{
+                    p: 0.5,
+                    borderRadius: '6px',
+                    color: copiedCli ? '#10b981' : theme.palette.text.secondary,
+                    bgcolor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.05)'
+                        : 'rgba(0, 0, 0, 0.04)',
+                    '&:hover': {
+                      color: theme.palette.text.primary,
+                      bgcolor:
+                        theme.palette.mode === 'dark'
+                          ? 'rgba(255, 255, 255, 0.1)'
+                          : 'rgba(0, 0, 0, 0.08)',
+                    },
+                  }}
+                  aria-label="Copy CLI command"
+                >
+                  {copiedCli ? (
+                    <CheckIcon sx={{ fontSize: 14 }} />
+                  ) : (
+                    <ContentCopyIcon sx={{ fontSize: 14 }} />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </Box>
           </MotionBox>
         </Stack>
       </Container>

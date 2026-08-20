@@ -37,8 +37,8 @@ const LandingFooter = () => {
       links: [
         { label: 'Documentation Hub', href: '/docs' },
         { label: 'Secrets & Keystores', href: '/docs/secrets-and-env' },
-        { label: 'Theme & Preferences', href: '/preferences' },
-        { label: 'GitHub Repository', href: 'https://github.com', external: true },
+        { label: 'Contact Support', href: '/contact' },
+        { label: 'GitHub Repository', href: 'https://github.com/flotio-dev', external: true },
       ],
     },
   ];
