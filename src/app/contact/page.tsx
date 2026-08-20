@@ -179,7 +179,7 @@ export default function ContactPage() {
                     </Typography>
                     <Typography
                       component="a"
-                      href="mailto:contact@flotio.ovh"
+                      href="mailto:clain_b@etna-alternance.net"
                       sx={{
                         color: '#38bdf8',
                         fontWeight: 600,
@@ -188,7 +188,7 @@ export default function ContactPage() {
                         '&:hover': { textDecoration: 'underline' },
                       }}
                     >
-                      contact@flotio.ovh
+                      clain_b@etna-alternance.net
                     </Typography>
                   </div>
                 </Box>
