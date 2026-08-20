@@ -2,7 +2,7 @@
 
 import { Box, Container, Typography, Stack, useTheme } from '@mui/material';
 import { Navbar, LandingFooter } from '@/components/landing';
-import { LanguageSelector, ThemeSwitcher } from '@/components/preferences';
+import { LanguageSelector } from '@/components/preferences';
 import TuneIcon from '@mui/icons-material/Tune';
 
 export default function PreferencesPage() {
@@ -46,13 +46,12 @@ export default function PreferencesPage() {
             Préférences
           </Typography>
           <Typography sx={{ color: theme.palette.text.secondary, fontSize: '1rem', lineHeight: 1.6 }}>
-            Personnalisez votre environnement de travail, la langue et le thème d'affichage.
+            Personnalisez votre environnement de travail et la langue.
           </Typography>
         </Box>
 
         <Stack spacing={4}>
           <LanguageSelector />
-          <ThemeSwitcher />
         </Stack>
       </Container>
 
