@@ -105,9 +105,9 @@ export default async function DocArticlePage({ params }: DocPageProps) {
                     letterSpacing: '0.05em',
                     padding: '4px 10px',
                     borderRadius: '100px',
-                    backgroundColor: 'rgba(139, 92, 246, 0.12)',
-                    color: '#8b5cf6',
-                    border: '1px solid rgba(139, 92, 246, 0.25)',
+                    backgroundColor: 'rgba(255, 87, 34, 0.12)',
+                    color: '#ff5722',
+                    border: '1px solid rgba(255, 87, 34, 0.25)',
                   }}
                 >
                   {doc.category}
@@ -201,9 +201,9 @@ export default async function DocArticlePage({ params }: DocPageProps) {
                       flexDirection: 'column',
                       transition: 'all 0.2s',
                       '&:hover': {
-                        borderColor: '#8b5cf6',
+                        borderColor: '#ff5722',
                         transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 20px rgba(139, 92, 246, 0.15)',
+                        boxShadow: '0 8px 20px rgba(255, 87, 34, 0.15)',
                       },
                     }}
                   >
@@ -238,9 +238,9 @@ export default async function DocArticlePage({ params }: DocPageProps) {
                       textAlign: 'right',
                       transition: 'all 0.2s',
                       '&:hover': {
-                        borderColor: '#8b5cf6',
+                        borderColor: '#ff5722',
                         transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 20px rgba(139, 92, 246, 0.15)',
+                        boxShadow: '0 8px 20px rgba(255, 87, 34, 0.15)',
                       },
                     }}
                   >

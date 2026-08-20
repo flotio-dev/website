@@ -20,7 +20,7 @@ interface DocCard {
 
 const docCards: DocCard[] = [
   {
-    icon: <PlayCircleOutlineIcon sx={{ fontSize: 26, color: '#8b5cf6' }} />,
+    icon: <PlayCircleOutlineIcon sx={{ fontSize: 26, color: '#ff7a50' }} />,
     title: 'Quickstart Guide',
     description:
       'Connect your Flutter repository and trigger your first automated cloud build in under 5 minutes.',
@@ -28,7 +28,7 @@ const docCards: DocCard[] = [
     href: '/docs/quickstart',
   },
   {
-    icon: <SettingsSuggestIcon sx={{ fontSize: 26, color: '#38bdf8' }} />,
+    icon: <SettingsSuggestIcon sx={{ fontSize: 26, color: '#ff5722' }} />,
     title: 'Flutter Configuration',
     description:
       'Configure Android Keystores, Google Play release tracks, Flutter SDK channels, and Dart environment defines.',

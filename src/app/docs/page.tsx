@@ -35,8 +35,8 @@ const allDocsMetadata = [
     order: 1,
     badge: 'Overview',
     slug: 'introduction',
-    icon: <DescriptionIcon sx={{ fontSize: 26, color: '#8b5cf6' }} />,
-    color: '#8b5cf6',
+    icon: <DescriptionIcon sx={{ fontSize: 26, color: '#ff5722' }} />,
+    color: '#ff5722',
   },
   {
     title: 'Quickstart Guide',
@@ -161,9 +161,9 @@ export default function DocsHomePage() {
                     px: 2,
                     py: 0.6,
                     borderRadius: '100px',
-                    bgcolor: theme.palette.mode === 'dark' ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)',
-                    border: '1px solid rgba(139, 92, 246, 0.3)',
-                    color: '#8b5cf6',
+                    bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 87, 34, 0.15)' : 'rgba(255, 87, 34, 0.1)',
+                    border: '1px solid rgba(255, 87, 34, 0.3)',
+                    color: '#ff5722',
                     fontSize: '0.8rem',
                     fontWeight: 600,
                   }}
@@ -188,7 +188,7 @@ export default function DocsHomePage() {
                 <Box
                   component="span"
                   sx={{
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #38bdf8 100%)',
+                    background: 'linear-gradient(90deg, #ff6b4a 0%, #ff5722 40%, #e11d48 80%, #be123c 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                   }}
@@ -198,45 +198,26 @@ export default function DocsHomePage() {
               </Typography>
 
               <Typography sx={{ color: theme.palette.text.secondary, fontSize: '1rem', lineHeight: 1.6 }}>
-                Everything you need to automate your Flutter mobile builds, Android Keystores, Google Play publishing, and fast cloud distributions.
+                Step-by-step documentation, architecture guides, and CLI reference to accelerate your Flutter deployment pipeline.
               </Typography>
 
               {/* Search Bar */}
               <TextField
                 fullWidth
-                placeholder="Search guides, CLI commands, signing keys, flavors..."
+                placeholder="Search articles, SDK configurations, commands, or secrets..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon sx={{ color: theme.palette.text.secondary, fontSize: 22 }} />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Box
-                          sx={{
-                            fontSize: '0.7rem',
-                            fontFamily: 'monospace',
-                            px: 1,
-                            py: 0.3,
-                            borderRadius: '4px',
-                            bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-                            color: theme.palette.text.secondary,
-                            border: `1px solid ${theme.palette.divider}`,
-                          }}
-                        >
-                          CTRL + K
-                        </Box>
-                      </InputAdornment>
-                    ),
-                  },
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: '#94a3b8', fontSize: 22 }} />
+                    </InputAdornment>
+                  ),
                 }}
                 sx={{
+                  maxWidth: 620,
                   '& .MuiOutlinedInput-root': {
-                    bgcolor: theme.palette.background.default,
+                    bgcolor: theme.palette.background.paper,
                     borderRadius: '14px',
                     fontSize: '0.95rem',
                     '& fieldset': {
@@ -244,11 +225,11 @@ export default function DocsHomePage() {
                       borderWidth: '1.5px',
                     },
                     '&:hover fieldset': {
-                      borderColor: '#8b5cf6',
+                      borderColor: '#ff5722',
                     },
                     '&.Mui-focused fieldset': {
-                      borderColor: '#8b5cf6',
-                      boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.15)',
+                      borderColor: '#ff5722',
+                      boxShadow: '0 0 0 3px rgba(255, 87, 34, 0.15)',
                     },
                   },
                 }}
@@ -269,13 +250,13 @@ export default function DocsHomePage() {
                   fontSize: '0.8rem',
                   px: 0.5,
                   py: 2,
-                  bgcolor: selectedCategory === cat ? '#8b5cf6' : theme.palette.background.paper,
+                  bgcolor: selectedCategory === cat ? '#ff5722' : theme.palette.background.paper,
                   color: selectedCategory === cat ? '#ffffff' : theme.palette.text.secondary,
-                  border: selectedCategory === cat ? '1px solid #8b5cf6' : `1px solid ${theme.palette.divider}`,
+                  border: selectedCategory === cat ? '1px solid #ff5722' : `1px solid ${theme.palette.divider}`,
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                   '&:hover': {
-                    bgcolor: selectedCategory === cat ? '#7c3aed' : (theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)'),
+                    bgcolor: selectedCategory === cat ? '#e64a19' : (theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)'),
                     color: selectedCategory === cat ? '#ffffff' : theme.palette.text.primary,
                   },
                 }}
@@ -294,9 +275,9 @@ export default function DocsHomePage() {
                 mb: 5,
                 borderRadius: '20px',
                 background: theme.palette.mode === 'dark'
-                  ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(56, 189, 248, 0.08) 100%)'
-                  : 'linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(56, 189, 248, 0.04) 100%)',
-                border: '1.5px solid rgba(139, 92, 246, 0.3)',
+                  ? 'linear-gradient(135deg, rgba(255, 87, 34, 0.12) 0%, rgba(225, 29, 72, 0.08) 100%)'
+                  : 'linear-gradient(135deg, rgba(255, 87, 34, 0.06) 0%, rgba(225, 29, 72, 0.04) 100%)',
+                border: '1.5px solid rgba(255, 87, 34, 0.3)',
                 display: 'flex',
                 flexDirection: { xs: 'column', md: 'row' },
                 alignItems: { md: 'center' },
@@ -305,9 +286,9 @@ export default function DocsHomePage() {
                 textDecoration: 'none',
                 transition: 'all 0.25s ease',
                 '&:hover': {
-                  borderColor: '#8b5cf6',
+                  borderColor: '#ff5722',
                   transform: 'translateY(-3px)',
-                  boxShadow: '0 12px 32px rgba(139, 92, 246, 0.2)',
+                  boxShadow: '0 12px 32px rgba(255, 87, 34, 0.2)',
                 },
               }}
             >
@@ -318,7 +299,7 @@ export default function DocsHomePage() {
                       width: 40,
                       height: 40,
                       borderRadius: '10px',
-                      bgcolor: '#8b5cf6',
+                      bgcolor: '#ff5722',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -330,7 +311,7 @@ export default function DocsHomePage() {
                   <Typography sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '1.25rem' }}>
                     Quickstart Guide: Build in 5 Minutes
                   </Typography>
-                  <Chip label="Recommended" size="small" sx={{ bgcolor: '#8b5cf6', color: '#fff', fontWeight: 700, fontSize: '0.7rem' }} />
+                  <Chip label="Recommended" size="small" sx={{ bgcolor: '#ff5722', color: '#fff', fontWeight: 700, fontSize: '0.7rem' }} />
                 </Box>
                 <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.925rem', maxWidth: 580 }}>
                   Connect your GitHub repo, configure Android/iOS runner settings, and trigger your very first automated compilation run.
@@ -345,12 +326,12 @@ export default function DocsHomePage() {
                   px: 3,
                   py: 1.5,
                   borderRadius: '12px',
-                  bgcolor: '#8b5cf6',
+                  bgcolor: '#ff5722',
                   color: '#ffffff',
                   fontWeight: 600,
                   fontSize: '0.875rem',
                   shrink: 0,
-                  boxShadow: '0 4px 14px rgba(139, 92, 246, 0.4)',
+                  boxShadow: '0 4px 14px rgba(255, 87, 34, 0.4)',
                 }}
               >
                 <span>Start Tutorial</span>

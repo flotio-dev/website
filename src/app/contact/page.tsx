@@ -77,6 +77,7 @@ export default function ContactPage() {
       <Navbar />
 
       {/* Ambient background glow */}
+      {/* Ambient Top Glow */}
       <Box
         sx={{
           position: 'absolute',
@@ -85,7 +86,7 @@ export default function ContactPage() {
           transform: 'translateX(-50%)',
           width: '80%',
           height: '500px',
-          background: 'radial-gradient(ellipse at center, rgba(139, 92, 246, 0.12) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse at center, rgba(255, 87, 34, 0.15) 0%, transparent 70%)',
           pointerEvents: 'none',
           filter: 'blur(70px)',
           zIndex: 0,
@@ -105,10 +106,10 @@ export default function ContactPage() {
               borderRadius: '100px',
               bgcolor:
                 theme.palette.mode === 'dark'
-                  ? 'rgba(139, 92, 246, 0.15)'
-                  : 'rgba(139, 92, 246, 0.08)',
-              border: '1px solid rgba(139, 92, 246, 0.3)',
-              color: '#8b5cf6',
+                  ? 'rgba(255, 87, 34, 0.15)'
+                  : 'rgba(255, 87, 34, 0.08)',
+              border: '1px solid rgba(255, 87, 34, 0.3)',
+              color: '#ff5722',
               fontSize: '0.8rem',
               fontWeight: 600,
               mb: 2,
@@ -215,12 +216,12 @@ export default function ContactPage() {
                       width: 46,
                       height: 46,
                       borderRadius: '12px',
-                      bgcolor: 'rgba(139, 92, 246, 0.12)',
-                      border: '1px solid rgba(139, 92, 246, 0.25)',
+                      bgcolor: 'rgba(255, 87, 34, 0.12)',
+                      border: '1px solid rgba(255, 87, 34, 0.25)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#8b5cf6',
+                      color: '#ff5722',
                       flexShrink: 0,
                     }}
                   >
@@ -239,7 +240,7 @@ export default function ContactPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
-                        color: '#8b5cf6',
+                        color: '#ff5722',
                         fontWeight: 600,
                         fontSize: '0.92rem',
                         textDecoration: 'none',
@@ -368,8 +369,8 @@ export default function ContactPage() {
                             border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.12)'}`,
                             transition: 'all 0.2s',
                             '&:focus-within': {
-                              borderColor: '#8b5cf6',
-                              boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.2)',
+                              borderColor: '#ff5722',
+                              boxShadow: '0 0 0 3px rgba(255, 87, 34, 0.2)',
                             },
                           }}
                         >
@@ -405,8 +406,8 @@ export default function ContactPage() {
                             border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.12)'}`,
                             transition: 'all 0.2s',
                             '&:focus-within': {
-                              borderColor: '#8b5cf6',
-                              boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.2)',
+                              borderColor: '#ff5722',
+                              boxShadow: '0 0 0 3px rgba(255, 87, 34, 0.2)',
                             },
                           }}
                         >
@@ -452,23 +453,23 @@ export default function ContactPage() {
                                 fontWeight: isSelected ? 600 : 500,
                                 transition: 'all 0.2s',
                                 bgcolor: isSelected
-                                  ? 'rgba(139, 92, 246, 0.2)'
+                                  ? 'rgba(255, 87, 34, 0.2)'
                                   : theme.palette.mode === 'dark'
                                     ? '#090a0f'
                                     : '#f8fafc',
                                 border: isSelected
-                                  ? '1px solid #8b5cf6'
+                                  ? '1px solid #ff5722'
                                   : `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.1)'}`,
                                 color: isSelected
-                                  ? '#c4b5fd'
+                                  ? '#ffab91'
                                   : theme.palette.text.secondary,
                                 '&:hover': {
-                                  borderColor: isSelected ? '#8b5cf6' : 'rgba(139, 92, 246, 0.5)',
+                                  borderColor: isSelected ? '#ff5722' : 'rgba(255, 87, 34, 0.5)',
                                   color: theme.palette.text.primary,
                                 },
                               }}
                             >
-                              <Box sx={{ color: isSelected ? '#8b5cf6' : '#94a3b8', display: 'flex' }}>
+                              <Box sx={{ color: isSelected ? '#ff5722' : '#94a3b8', display: 'flex' }}>
                                 {topic.icon}
                               </Box>
                               <span>{topic.label}</span>
@@ -494,8 +495,8 @@ export default function ContactPage() {
                           border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.12)'}`,
                           transition: 'all 0.2s',
                           '&:focus-within': {
-                            borderColor: '#8b5cf6',
-                            boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.2)',
+                            borderColor: '#ff5722',
+                            boxShadow: '0 0 0 3px rgba(255, 87, 34, 0.2)',
                           },
                         }}
                       >
@@ -539,7 +540,7 @@ export default function ContactPage() {
                           borderRadius: '12px',
                           fontSize: '0.9rem',
                           fontWeight: 700,
-                          boxShadow: '0 4px 20px rgba(139, 92, 246, 0.35)',
+                          boxShadow: '0 4px 20px rgba(255, 87, 34, 0.35)',
                         }}
                       >
                         {loading ? 'Sending...' : 'Send Message'}

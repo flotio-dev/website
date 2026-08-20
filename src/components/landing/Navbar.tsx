@@ -22,6 +22,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import Link from 'next/link';
 import { colors } from '@/theme';
+import FlotioLogo from '@/components/common/FlotioLogo';
 
 const navItems = [
   { label: 'Features', href: '/#features' },
@@ -53,25 +54,33 @@ export default function Navbar() {
         sx={{
           bgcolor: trigger
             ? theme.palette.mode === 'dark'
-              ? 'rgba(13, 14, 18, 0.85)'
-              : 'rgba(248, 250, 252, 0.85)'
+              ? 'rgba(8, 10, 15, 0.88)'
+              : 'rgba(250, 250, 249, 0.88)'
             : 'transparent',
-          backdropFilter: trigger ? 'blur(16px) saturate(180%)' : 'none',
+          backdropFilter: trigger ? 'blur(16px)' : 'none',
           borderBottom: trigger ? `1px solid ${theme.palette.divider}` : 'none',
-          transition: 'all 0.25s ease',
-          zIndex: 1100,
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          zIndex: theme.zIndex.appBar,
         }}
       >
-        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
-          <Toolbar disableGutters sx={{ minHeight: { xs: 56, md: 64 }, justifyContent: 'space-between' }}>
+        <Container maxWidth="lg">
+          <Toolbar
+            disableGutters
+            sx={{
+              height: { xs: 64, md: 72 },
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
             {/* Logo */}
             <Box
               component={Link}
               href="/"
               sx={{
-                fontWeight: 700,
-                color: theme.palette.text.primary,
                 textDecoration: 'none',
+                color: theme.palette.text.primary,
+                fontWeight: 700,
                 fontSize: '1.15rem',
                 letterSpacing: '-0.02em',
                 display: 'flex',
@@ -81,24 +90,8 @@ export default function Navbar() {
                 '&:hover': { opacity: 0.9 },
               }}
             >
-              <Box
-                sx={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: '8px',
-                  background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #38bdf8 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.85rem',
-                  fontWeight: 800,
-                  color: '#ffffff',
-                  boxShadow: '0 2px 10px rgba(139, 92, 246, 0.35)',
-                }}
-              >
-                F
-              </Box>
-              Flotio
+              <FlotioLogo size={28} />
+              <span>Flotio</span>
             </Box>
 
             {/* Desktop Nav - Centered with flex */}
@@ -168,7 +161,7 @@ export default function Navbar() {
                   borderRadius: '8px',
                   px: 2.5,
                   py: 0.85,
-                  boxShadow: '0 2px 12px rgba(139, 92, 246, 0.3)',
+                  boxShadow: '0 2px 12px rgba(255, 87, 34, 0.35)',
                   transition: 'all 0.2s',
                   '&:hover': {
                     background: colors.primary.gradientHover,
@@ -211,23 +204,8 @@ export default function Navbar() {
       >
         <Box sx={{ p: 3, px: { xs: 3, sm: 4 } }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box
-                sx={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: '6px',
-                  background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.75rem',
-                  fontWeight: 800,
-                  color: '#ffffff',
-                }}
-              >
-                F
-              </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+              <FlotioLogo size={24} />
               <Typography sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '1rem' }}>
                 Flotio
               </Typography>

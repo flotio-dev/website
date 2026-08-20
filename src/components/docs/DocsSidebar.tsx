@@ -31,15 +31,15 @@ export default function DocsSidebar({ docs }: DocsSidebarProps) {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'Getting Started':
-        return <PlayCircleOutlineIcon sx={{ fontSize: 16, color: '#8b5cf6' }} />;
+        return <PlayCircleOutlineIcon sx={{ fontSize: 16, color: '#ff7a50' }} />;
       case 'Configuration':
-        return <SettingsSuggestIcon sx={{ fontSize: 16, color: '#38bdf8' }} />;
+        return <SettingsSuggestIcon sx={{ fontSize: 16, color: '#ff5722' }} />;
       case 'Tooling':
         return <TerminalIcon sx={{ fontSize: 16, color: '#10b981' }} />;
       case 'Security & Signing':
-        return <VpnKeyIcon sx={{ fontSize: 16, color: '#ec4899' }} />;
+        return <VpnKeyIcon sx={{ fontSize: 16, color: '#e11d48' }} />;
       default:
-        return <AutoStoriesIcon sx={{ fontSize: 16, color: '#8b5cf6' }} />;
+        return <AutoStoriesIcon sx={{ fontSize: 16, color: '#ff5722' }} />;
     }
   };
 
@@ -74,16 +74,16 @@ export default function DocsSidebar({ docs }: DocsSidebarProps) {
             textDecoration: 'none',
             fontSize: '0.9rem',
             fontWeight: pathname === '/docs' ? 700 : 500,
-            bgcolor: pathname === '/docs' ? (theme.palette.mode === 'dark' ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)') : 'transparent',
-            color: pathname === '/docs' ? '#8b5cf6' : theme.palette.text.primary,
-            border: pathname === '/docs' ? '1px solid rgba(139, 92, 246, 0.3)' : '1px solid transparent',
+            bgcolor: pathname === '/docs' ? (theme.palette.mode === 'dark' ? 'rgba(255, 87, 34, 0.15)' : 'rgba(255, 87, 34, 0.1)') : 'transparent',
+            color: pathname === '/docs' ? '#ff5722' : theme.palette.text.primary,
+            border: pathname === '/docs' ? '1px solid rgba(255, 87, 34, 0.3)' : '1px solid transparent',
             transition: 'all 0.2s',
             '&:hover': {
               bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.03)',
             },
           }}
         >
-          <AutoStoriesIcon sx={{ fontSize: 18, color: '#8b5cf6' }} />
+          <AutoStoriesIcon sx={{ fontSize: 18, color: '#ff5722' }} />
           <span>Documentation Hub</span>
         </Box>
 
@@ -125,9 +125,9 @@ export default function DocsSidebar({ docs }: DocsSidebarProps) {
                       textDecoration: 'none',
                       fontSize: '0.85rem',
                       fontWeight: isActive ? 600 : 400,
-                      bgcolor: isActive ? (theme.palette.mode === 'dark' ? 'rgba(139, 92, 246, 0.12)' : 'rgba(139, 92, 246, 0.08)') : 'transparent',
-                      color: isActive ? '#8b5cf6' : theme.palette.text.secondary,
-                      borderLeft: isActive ? '3px solid #8b5cf6' : '3px solid transparent',
+                      bgcolor: isActive ? (theme.palette.mode === 'dark' ? 'rgba(255, 87, 34, 0.12)' : 'rgba(255, 87, 34, 0.08)') : 'transparent',
+                      color: isActive ? '#ff5722' : theme.palette.text.secondary,
+                      borderLeft: isActive ? '3px solid #ff5722' : '3px solid transparent',
                       transition: 'all 0.15s ease',
                       '&:hover': {
                         color: theme.palette.text.primary,

@@ -24,7 +24,7 @@ const steps: Step[] = [
     subtitle: 'Zero complex setup',
     description:
       'Link your GitHub repository in 1 click. Flotio automatically detects your Flutter SDK version, Gradle wrapper, and build targets.',
-    icon: <GitHubIcon sx={{ fontSize: 28, color: '#38bdf8' }} />,
+    icon: <GitHubIcon sx={{ fontSize: 28, color: '#ff7a50' }} />,
     tags: ['GitHub Webhooks', 'Auto SDK Detection', 'Flutter 3.19 - 3.29'],
   },
   {
@@ -33,7 +33,7 @@ const steps: Step[] = [
     subtitle: 'High-speed cloud runners',
     description:
       'Every commit triggers an isolated, ephemeral build container. Watch real-time logs with ANSI color formatting and stage breakdown.',
-    icon: <MemoryIcon sx={{ fontSize: 28, color: '#8b5cf6' }} />,
+    icon: <MemoryIcon sx={{ fontSize: 28, color: '#ff5722' }} />,
     tags: ['Ephemeral Pods', 'Pre-warmed Cache', 'Live ANSI Streaming'],
   },
   {
@@ -42,7 +42,7 @@ const steps: Step[] = [
     subtitle: 'Production-ready binaries',
     description:
       'Inject AES-256 encrypted Android Keystores and Google Play service keys to produce signed APKs/AABs ready for direct release.',
-    icon: <SendIcon sx={{ fontSize: 28, color: '#10b981' }} />,
+    icon: <SendIcon sx={{ fontSize: 28, color: '#e11d48' }} />,
     tags: ['Automated Signing', 'Google Play Track', 'Instant Artifacts'],
   },
 ];
@@ -119,8 +119,8 @@ export default function WorkflowSteps() {
                       transform: 'translateY(-4px)',
                       boxShadow:
                         theme.palette.mode === 'light'
-                          ? '0 12px 30px rgba(139,92,246,0.12)'
-                          : '0 12px 30px rgba(0,0,0,0.35)',
+                          ? '0 12px 30px rgba(255,87,34,0.15)'
+                          : '0 12px 30px rgba(255,87,34,0.2)',
                     },
                   }}
                 >
@@ -154,9 +154,9 @@ export default function WorkflowSteps() {
                           borderRadius: '14px',
                           bgcolor:
                             theme.palette.mode === 'dark'
-                              ? 'rgba(139, 92, 246, 0.12)'
-                              : 'rgba(139, 92, 246, 0.06)',
-                          border: `1px solid rgba(139, 92, 246, 0.25)`,
+                              ? 'rgba(255, 87, 34, 0.12)'
+                              : 'rgba(255, 87, 34, 0.06)',
+                          border: '1px solid rgba(255, 87, 34, 0.25)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',

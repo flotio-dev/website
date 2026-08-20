@@ -101,8 +101,8 @@ function parseMarkdownToHtml(markdown: string): { html: string; toc: TOCItem[] }
     res = res.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
     res = res.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--text-primary); font-weight: 600;">$1</strong>');
     res = res.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    res = res.replace(/`([^`]+)`/g, '<code style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; padding: 2px 6px; border-radius: 6px; font-size: 0.85em; font-family: ui-monospace, monospace; border: 1px solid rgba(139, 92, 246, 0.25);">$1</code>');
-    res = res.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color: #8b5cf6; font-weight: 500; text-decoration: underline; text-underline-offset: 3px;">$1</a>');
+    res = res.replace(/`([^`]+)`/g, '<code style="background: rgba(255, 87, 34, 0.12); color: #ff5722; padding: 2px 6px; border-radius: 6px; font-size: 0.85em; font-family: ui-monospace, monospace; border: 1px solid rgba(255, 87, 34, 0.25);">$1</code>');
+    res = res.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color: #ff5722; font-weight: 500; text-decoration: underline; text-underline-offset: 3px;">$1</a>');
     return res;
   };
 
@@ -126,7 +126,7 @@ function parseMarkdownToHtml(markdown: string): { html: string; toc: TOCItem[] }
                 <span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
                 <span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
                 <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
-                <span style="margin-left: 10px; font-size: 11px; font-weight: 700; color: #8b5cf6; text-transform: uppercase; font-family: ui-monospace, monospace; letter-spacing: 0.05em;">${codeLang}</span>
+                <span style="margin-left: 10px; font-size: 11px; font-weight: 700; color: #ff5722; text-transform: uppercase; font-family: ui-monospace, monospace; letter-spacing: 0.05em;">${codeLang}</span>
               </div>
               <button onclick="navigator.clipboard.writeText(this.closest('div').nextElementSibling.querySelector('code').innerText); this.innerText='Copied!'; setTimeout(() => this.innerText='Copy', 2000)" style="padding: 3px 10px; border-radius: 6px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s;">Copy</button>
             </div>
@@ -160,7 +160,7 @@ function parseMarkdownToHtml(markdown: string): { html: string; toc: TOCItem[] }
         NOTE: { border: 'rgba(56, 189, 248, 0.4)', bg: 'rgba(56, 189, 248, 0.08)', text: '#38bdf8', icon: 'ℹ️', label: 'Note' },
         TIP: { border: 'rgba(34, 197, 94, 0.4)', bg: 'rgba(34, 197, 94, 0.08)', text: '#22c55e', icon: '💡', label: 'Pro Tip' },
         WARNING: { border: 'rgba(245, 158, 11, 0.4)', bg: 'rgba(245, 158, 11, 0.08)', text: '#f59e0b', icon: '⚠️', label: 'Warning' },
-        IMPORTANT: { border: 'rgba(139, 92, 246, 0.4)', bg: 'rgba(139, 92, 246, 0.08)', text: '#8b5cf6', icon: '📌', label: 'Important' },
+        IMPORTANT: { border: 'rgba(255, 87, 34, 0.4)', bg: 'rgba(255, 87, 34, 0.08)', text: '#ff5722', icon: '📌', label: 'Important' },
       };
 
       const themeChoice = colorsMap[alertType] || colorsMap.NOTE;
@@ -178,7 +178,7 @@ function parseMarkdownToHtml(markdown: string): { html: string; toc: TOCItem[] }
 
     if (line.trim().startsWith('>')) {
       const quoteText = formatInline(line.trim().replace(/^>\s?/, ''));
-      processedLines.push(`<blockquote style="border-left: 3px solid #8b5cf6; padding-left: 16px; margin: 16px 0; font-style: italic; color: var(--text-secondary);">${quoteText}</blockquote>`);
+      processedLines.push(`<blockquote style="border-left: 3px solid #ff5722; padding-left: 16px; margin: 16px 0; font-style: italic; color: var(--text-secondary);">${quoteText}</blockquote>`);
       continue;
     }
 
