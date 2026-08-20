@@ -4,9 +4,7 @@ import Link from 'next/link';
 import {
   Box,
   Container,
-  Typography,
   Stack,
-  Chip,
   Paper,
   Grid,
 } from '@mui/material';
@@ -183,69 +181,73 @@ export default async function DocArticlePage({ params }: DocPageProps) {
           <Grid container spacing={2.5} sx={{ mt: 8, pt: 4, borderTop: '1px solid var(--border-subtle)' }}>
             <Grid size={{ xs: 12, sm: 6 }}>
               {doc.prevDoc ? (
-                <Paper
-                  component={Link}
+                <Link
                   href={`/docs/${doc.prevDoc.slug}`}
-                  elevation={0}
-                  sx={{
-                    p: 2.5,
-                    height: '100%',
-                    borderRadius: '14px',
-                    bgcolor: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    textDecoration: 'none',
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      borderColor: '#8b5cf6',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 8px 20px rgba(139, 92, 246, 0.15)',
-                    },
-                  }}
+                  style={{ textDecoration: 'none', display: 'block', height: '100%' }}
                 >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
-                    <ArrowBackIcon sx={{ fontSize: 14 }} /> PREVIOUS
-                  </span>
-                  <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {doc.prevDoc.title}
-                  </span>
-                </Paper>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2.5,
+                      height: '100%',
+                      borderRadius: '14px',
+                      bgcolor: 'var(--bg-surface)',
+                      border: '1px solid var(--border-subtle)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        borderColor: '#8b5cf6',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 8px 20px rgba(139, 92, 246, 0.15)',
+                      },
+                    }}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
+                      <ArrowBackIcon sx={{ fontSize: 14 }} /> PREVIOUS
+                    </span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      {doc.prevDoc.title}
+                    </span>
+                  </Paper>
+                </Link>
               ) : <div />}
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
               {doc.nextDoc && (
-                <Paper
-                  component={Link}
+                <Link
                   href={`/docs/${doc.nextDoc.slug}`}
-                  elevation={0}
-                  sx={{
-                    p: 2.5,
-                    height: '100%',
-                    borderRadius: '14px',
-                    bgcolor: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-end',
-                    textAlign: 'right',
-                    textDecoration: 'none',
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      borderColor: '#8b5cf6',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 8px 20px rgba(139, 92, 246, 0.15)',
-                    },
-                  }}
+                  style={{ textDecoration: 'none', display: 'block', height: '100%' }}
                 >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
-                    NEXT <ArrowForwardIcon sx={{ fontSize: 14 }} />
-                  </span>
-                  <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {doc.nextDoc.title}
-                  </span>
-                </Paper>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2.5,
+                      height: '100%',
+                      borderRadius: '14px',
+                      bgcolor: 'var(--bg-surface)',
+                      border: '1px solid var(--border-subtle)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-end',
+                      textAlign: 'right',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        borderColor: '#8b5cf6',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 8px 20px rgba(139, 92, 246, 0.15)',
+                      },
+                    }}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
+                      NEXT <ArrowForwardIcon sx={{ fontSize: 14 }} />
+                    </span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      {doc.nextDoc.title}
+                    </span>
+                  </Paper>
+                </Link>
               )}
             </Grid>
           </Grid>
