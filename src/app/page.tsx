@@ -1,7 +1,17 @@
 'use client';
 
 import { Box, useTheme } from '@mui/material';
-import { Navbar, Hero, Features, DocsCards, LandingFooter } from '@/components/landing';
+import {
+  Navbar,
+  Hero,
+  WorkflowSteps,
+  Features,
+  CliShowcase,
+  SecurityTrust,
+  PricingPreview,
+  DocsCards,
+  LandingFooter,
+} from '@/components/landing';
 import { colors } from '@/theme';
 
 export default function Page() {
@@ -58,11 +68,11 @@ export default function Page() {
         }}
       />
 
-      {/* Ambient Mid-page Glow (DocsCards & Features) */}
+      {/* Ambient Mid-page Glow */}
       <Box
         sx={{
           position: 'absolute',
-          top: '40%',
+          top: '35%',
           right: '-10%',
           width: '650px',
           height: '650px',
@@ -79,7 +89,7 @@ export default function Page() {
       <Box
         sx={{
           position: 'absolute',
-          bottom: '10%',
+          bottom: '20%',
           left: '-10%',
           width: '600px',
           height: '600px',
@@ -95,8 +105,12 @@ export default function Page() {
       <Box sx={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1 }}>
         <Navbar />
         <Hero />
-        <DocsCards />
+        <WorkflowSteps />
         <Features />
+        <CliShowcase />
+        <SecurityTrust />
+        <PricingPreview />
+        <DocsCards />
         <LandingFooter />
       </Box>
     </Box>

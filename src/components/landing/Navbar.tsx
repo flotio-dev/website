@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material';
 import {
   AppBar,
@@ -20,14 +20,12 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
 import Link from 'next/link';
 import { colors } from '@/theme';
-import { ThemeModeContext } from '@/components/preferences/ThemeModeProvider';
 
 const navItems = [
   { label: 'Features', href: '/#features' },
+  { label: 'Pricing', href: '/pricing' },
   { label: 'Documentation', href: '/docs' },
   { label: 'Preferences', href: '/preferences' },
 ];
@@ -35,7 +33,6 @@ const navItems = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
-  const { mode, toggleMode } = useContext(ThemeModeContext);
   const trigger = useScrollTrigger({
     disableHysteresis: true,
     threshold: 10,
@@ -138,33 +135,8 @@ export default function Navbar() {
               ))}
             </Box>
 
-            {/* Desktop Auth & Theme Buttons */}
+            {/* Desktop Auth Buttons */}
             <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1.5, alignItems: 'center' }}>
-              {/* Quick Theme Switcher */}
-              <Tooltip title={mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
-                <IconButton
-                  onClick={toggleMode}
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    border: `1px solid ${theme.palette.divider}`,
-                    borderRadius: '8px',
-                    p: 0.8,
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      color: theme.palette.text.primary,
-                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
-                    },
-                  }}
-                  aria-label="Toggle theme mode"
-                >
-                  {mode === 'dark' ? (
-                    <LightModeIcon sx={{ fontSize: 19, color: '#f59e0b' }} />
-                  ) : (
-                    <DarkModeIcon sx={{ fontSize: 19, color: '#8b5cf6' }} />
-                  )}
-                </IconButton>
-              </Tooltip>
-
               <Button
                 component={Link}
                 href={loginHref}
@@ -211,21 +183,6 @@ export default function Navbar() {
 
             {/* Mobile Actions */}
             <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1 }}>
-              <IconButton
-                onClick={toggleMode}
-                sx={{
-                  color: theme.palette.text.secondary,
-                  border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: '8px',
-                  p: 0.8,
-                }}
-              >
-                {mode === 'dark' ? (
-                  <LightModeIcon sx={{ fontSize: 18, color: '#f59e0b' }} />
-                ) : (
-                  <DarkModeIcon sx={{ fontSize: 18, color: '#8b5cf6' }} />
-                )}
-              </IconButton>
               <IconButton
                 sx={{
                   color: `${theme.palette.text.primary}!important`,
