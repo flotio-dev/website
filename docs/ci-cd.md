@@ -17,7 +17,7 @@ GitOps receives only `ghcr.io/flotio-dev/website-next@sha256:<digest>`.
 
 Required configuration:
 
-- variable `GH_APP_CLIENT_ID` and secret `GH_APP_PRIVATE_KEY`;
+- secrets `GH_APP_CLIENT_ID` and `GH_APP_PRIVATE_KEY`;
 - optional public `DEV_NEXT_PUBLIC_API_URL`, `DEV_NEXT_PUBLIC_APP_URL`,
   `PROD_NEXT_PUBLIC_API_URL` and `PROD_NEXT_PUBLIC_APP_URL` variables;
 - a GitHub App installed only on `flotio-dev/k8s_config`, with Contents write,
