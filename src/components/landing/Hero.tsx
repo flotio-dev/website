@@ -9,15 +9,18 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import Button from '@/components/ui/Button';
 import { colors } from '@/theme';
+import { useAuthStatus } from '@/hooks/useAuthStatus';
 
 const MotionBox = motion.create(Box);
 const MotionTypography = motion.create(Typography);
 
 export default function Hero() {
   const theme = useTheme();
+  const { isLoggedIn } = useAuthStatus();
   const [copiedCli, setCopiedCli] = useState(false);
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
   const registerHref = appBaseUrl ? `${appBaseUrl}/auth/register` : '/auth/register';
+  const dashboardHref = appBaseUrl ? `${appBaseUrl}/dashboard` : '/dashboard';
 
   const handleCopyCli = async () => {
     try {
@@ -162,10 +165,10 @@ export default function Hero() {
             <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ gap: 2 }} alignItems="center">
               <Button
                 variant="primary"
-                href={registerHref}
+                href={isLoggedIn ? dashboardHref : registerHref}
                 endIcon={<ArrowForwardIcon sx={{ fontSize: 18 }} />}
               >
-                Start Deploying
+                {isLoggedIn ? 'Go to Dashboard' : 'Start Deploying'}
               </Button>
               <Button
                 variant="secondary"
