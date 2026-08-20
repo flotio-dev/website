@@ -13,6 +13,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Flotio — Modern Flutter CI/CD & Cloud Build Platform',
   description: 'Automate your Flutter mobile builds, Android Keystores, Google Play deployments, and Firebase integrations with dedicated cloud runners.',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
