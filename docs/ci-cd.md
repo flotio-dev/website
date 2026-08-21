@@ -10,7 +10,8 @@ dependency review, CodeQL, Trivy, the container build and image scan. They do
 not publish and cannot access GitOps. Pushes to `dev` update
 `manifest/dev/website/deploy-front.yaml`; pushes to `main` wait for approval in
 the protected `production` environment before updating the production file.
-A strict `vX.Y.Z` tag aliases the existing SHA image without rebuilding.
+Pushes to `main` automatically compute the next SemVer version, create a GitHub release,
+publish the SemVer alias, and update production GitOps.
 
 Published images use `ghcr.io/flotio-dev/website-next:sha-<full-git-sha>`.
 GitOps receives only `ghcr.io/flotio-dev/website-next@sha256:<digest>`.
@@ -24,7 +25,7 @@ Required configuration:
   `PROD_NEXT_PUBLIC_API_URL` and `PROD_NEXT_PUBLIC_APP_URL` variables;
 - a GitHub App installed only on `flotio-dev/k8s_config`, with Contents write,
   and allowed to bypass its main-branch ruleset for this direct handoff;
-- protected `main`, `dev`, `v*` and `production`, with `ci-success` required;
+- protected `main`, `dev` and `production`, with `ci-success` required;
 - Secret Scanning, Push Protection, Dependabot security updates and the
   versioned CodeQL workflow enabled. Do not also enable CodeQL default setup.
 
@@ -45,6 +46,4 @@ docker build --pull -t website:local .
 actionlint .github/workflows/ci.yaml
 ```
 
-Release procedure: merge the commit to `main`, wait for `ci-success`, then
-create and push an explicit signed or annotated `vX.Y.Z` tag. The tag adds an
-alias only; it creates neither another image nor a GitOps change.
+Release procedure: merge the commit to `main` and let the `auto-release` workflow tag the release, generate notes, and publish the SemVer image alias.
