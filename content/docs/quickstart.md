@@ -51,11 +51,11 @@ Click the **Start Build** button in the project overview. Choose your branch and
 
 ### Method B: Via Flotio CLI
 ```bash
-# Authenticate CLI
-flotio login
+# Authenticate CLI with email & password
+flotio login --email me@example.com --password "s3cret"
 
 # Start a build from your local repo directory
-flotio run --branch main --platform android
+flotio build start --branch main --platform android --mode release --target apk
 ```
 
 ---
